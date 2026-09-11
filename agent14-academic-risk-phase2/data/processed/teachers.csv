@@ -1,0 +1,10 @@
+teacher_id,teacher_name,role,department,email
+T001,Aryan Maharaj,mentor,DEPT_CSE,mentor1.cse@vignan.ac.in
+T002,Udant Dewan,mentor,DEPT_CSE,mentor2.cse@vignan.ac.in
+T003,Gagan Sami,mentor,DEPT_CSE,mentor3.cse@vignan.ac.in
+T004,Ayushman Chander,hod,DEPT_CSE,hod.cse@vignan.ac.in
+T005,Viraj Tiwari,mentor,DEPT_ECE,mentor1.ece@vignan.ac.in
+T006,Rushil Saini,mentor,DEPT_ECE,mentor2.ece@vignan.ac.in
+T007,Saumya Mall,mentor,DEPT_ECE,mentor3.ece@vignan.ac.in
+T008,Nathaniel Sami,hod,DEPT_ECE,hod.ece@vignan.ac.in
+T009,Arunima Dugal,dean,,dean@vignan.ac.in

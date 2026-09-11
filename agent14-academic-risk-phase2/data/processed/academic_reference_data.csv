@@ -1,0 +1,11 @@
+department_id,department_name,course_id,course_name,semester,course_credits,passing_marks,attendance_threshold,gpa_threshold
+DEPT_CSE,Computer Science and Engineering,CSE501,Operating Systems,5,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE502,Database Management Systems,5,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE503,Design and Analysis of Algorithms,5,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE504,Computer Networks,5,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE505,Software Engineering,5,3,40,75.0,7.0
+DEPT_ECE,Electronics and Communication Engineering,ECE501,Digital Signal Processing,5,4,40,75.0,7.0
+DEPT_ECE,Electronics and Communication Engineering,ECE502,VLSI Design,5,4,40,75.0,7.0
+DEPT_ECE,Electronics and Communication Engineering,ECE503,Microprocessors,5,3,40,75.0,7.0
+DEPT_ECE,Electronics and Communication Engineering,ECE504,Control Systems,5,3,40,75.0,7.0
+DEPT_ECE,Electronics and Communication Engineering,ECE505,Communication Systems,5,3,40,75.0,7.0

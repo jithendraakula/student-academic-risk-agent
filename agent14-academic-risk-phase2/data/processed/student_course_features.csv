@@ -1,0 +1,301 @@
+student_id,academic_year,semester,checkpoint_week,course_id,course_name,course_credits,internal_marks,midterm_marks,quiz_average,assignment_average,practical_marks,course_attendance_percentage,course_attendance_trend,previous_course_attempts,previous_course_grade,assessment_trend,assignment_completion_rate,course_failed
+S0001,2025-26,5,10,CSE501,Operating Systems,4,49.3,50.6,52.8,45.3,44.3,55.5,declining,0,,declining,0.43,False
+S0001,2025-26,5,10,CSE502,Database Management Systems,4,47.1,54.9,46.5,49.2,56.1,53.7,improving,0,,declining,0.43,False
+S0001,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,47.4,51.0,41.7,43.9,45.5,58.1,improving,0,,declining,0.43,False
+S0001,2025-26,5,10,CSE504,Computer Networks,3,58.1,54.5,55.3,53.9,58.5,56.2,stable,0,,declining,0.43,False
+S0001,2025-26,5,10,CSE505,Software Engineering,3,58.5,67.1,50.5,55.1,55.2,60.4,improving,0,,declining,0.43,False
+S0002,2025-26,5,10,CSE501,Operating Systems,4,44.3,50.7,44.8,54.3,40.0,56.5,stable,0,,declining,0.41,False
+S0002,2025-26,5,10,CSE502,Database Management Systems,4,41.4,47.5,34.8,51.1,43.9,57.6,declining,0,,declining,0.41,False
+S0002,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,38.6,40.3,31.2,38.4,36.5,52.9,declining,0,,declining,0.41,True
+S0002,2025-26,5,10,CSE504,Computer Networks,3,37.9,36.1,36.5,42.4,46.8,62.9,stable,0,,declining,0.41,True
+S0002,2025-26,5,10,CSE505,Software Engineering,3,39.4,40.8,38.6,44.3,42.7,55.5,stable,0,,declining,0.41,True
+S0003,2025-26,5,10,CSE501,Operating Systems,4,38.1,31.4,42.6,38.9,36.3,59.8,declining,0,,improving,0.44,True
+S0003,2025-26,5,10,CSE502,Database Management Systems,4,49.8,58.4,51.7,54.8,45.6,64.3,stable,0,,improving,0.44,False
+S0003,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,45.9,36.0,36.7,51.1,49.3,53.3,declining,0,,improving,0.44,False
+S0003,2025-26,5,10,CSE504,Computer Networks,3,44.5,43.8,34.6,51.3,44.5,63.5,stable,0,,improving,0.44,False
+S0003,2025-26,5,10,CSE505,Software Engineering,3,40.9,34.1,46.4,43.3,43.9,64.6,declining,0,,improving,0.44,False
+S0004,2025-26,5,10,CSE501,Operating Systems,4,56.5,58.4,64.1,57.1,53.0,63.7,stable,0,,improving,0.62,False
+S0004,2025-26,5,10,CSE502,Database Management Systems,4,69.2,71.3,67.7,69.7,70.5,55.4,declining,0,,improving,0.62,False
+S0004,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,58.1,54.2,65.6,53.5,60.9,59.6,stable,0,,improving,0.62,False
+S0004,2025-26,5,10,CSE504,Computer Networks,3,64.2,61.7,66.6,59.8,66.1,60.3,improving,0,,improving,0.62,False
+S0004,2025-26,5,10,CSE505,Software Engineering,3,56.5,53.4,48.4,65.7,57.6,63.7,declining,0,,improving,0.62,False
+S0005,2025-26,5,10,CSE501,Operating Systems,4,61.1,68.5,63.8,62.5,62.6,56.5,stable,1,D,stable,0.61,False
+S0005,2025-26,5,10,CSE502,Database Management Systems,4,66.0,56.8,70.1,65.5,74.5,56.6,declining,0,,stable,0.61,False
+S0005,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,52.6,43.8,59.3,49.9,55.6,67.1,stable,0,,stable,0.61,False
+S0005,2025-26,5,10,CSE504,Computer Networks,3,57.8,49.1,67.2,57.5,55.6,59.5,declining,0,,stable,0.61,False
+S0005,2025-26,5,10,CSE505,Software Engineering,3,64.6,68.8,71.2,74.2,72.2,67.4,improving,0,,stable,0.61,False
+S0006,2025-26,5,10,CSE501,Operating Systems,4,68.5,69.4,76.5,78.1,74.1,49.9,stable,0,,improving,0.82,False
+S0006,2025-26,5,10,CSE502,Database Management Systems,4,65.6,63.4,57.4,61.8,72.3,49.5,declining,0,,improving,0.82,False
+S0006,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,60.4,53.6,54.5,70.0,58.7,50.3,declining,1,D,improving,0.82,False
+S0006,2025-26,5,10,CSE504,Computer Networks,3,60.6,53.7,51.9,58.5,64.1,55.0,stable,0,,improving,0.82,False
+S0006,2025-26,5,10,CSE505,Software Engineering,3,63.0,69.0,65.4,71.0,72.2,48.3,improving,0,,improving,0.82,False
+S0007,2025-26,5,10,CSE501,Operating Systems,4,58.0,66.9,55.6,64.6,61.1,82.8,stable,0,,improving,0.23,False
+S0007,2025-26,5,10,CSE502,Database Management Systems,4,61.8,60.5,56.4,67.6,59.3,91.8,improving,0,,improving,0.23,False
+S0007,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,59.0,59.4,59.2,60.6,68.9,86.4,stable,0,,improving,0.23,False
+S0007,2025-26,5,10,CSE504,Computer Networks,3,52.1,54.0,46.7,56.7,47.9,92.4,stable,0,,improving,0.23,False
+S0007,2025-26,5,10,CSE505,Software Engineering,3,58.6,49.8,65.0,63.3,65.3,85.7,stable,0,,improving,0.23,False
+S0008,2025-26,5,10,CSE501,Operating Systems,4,58.3,55.3,61.6,63.4,67.7,88.0,stable,0,,stable,0.32,False
+S0008,2025-26,5,10,CSE502,Database Management Systems,4,56.3,61.0,55.5,54.5,62.5,85.1,improving,0,,stable,0.32,False
+S0008,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,60.2,68.1,55.7,56.9,69.5,85.4,improving,0,,stable,0.32,False
+S0008,2025-26,5,10,CSE504,Computer Networks,3,56.7,64.4,61.9,62.3,54.3,87.8,stable,0,,stable,0.32,False
+S0008,2025-26,5,10,CSE505,Software Engineering,3,52.6,48.8,45.1,55.9,58.2,84.3,stable,0,,stable,0.32,False
+S0009,2025-26,5,10,CSE501,Operating Systems,4,55.1,61.4,54.1,62.4,53.7,84.4,improving,0,,stable,0.36,False
+S0009,2025-26,5,10,CSE502,Database Management Systems,4,49.4,44.2,54.4,49.1,48.5,81.7,stable,0,,stable,0.36,False
+S0009,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,49.0,43.7,54.3,58.0,51.5,87.8,declining,1,D,stable,0.36,False
+S0009,2025-26,5,10,CSE504,Computer Networks,3,52.9,60.7,61.1,59.8,54.8,81.1,improving,0,,stable,0.36,False
+S0009,2025-26,5,10,CSE505,Software Engineering,3,51.0,49.1,52.4,54.3,58.5,81.4,improving,0,,stable,0.36,False
+S0010,2025-26,5,10,CSE501,Operating Systems,4,78.3,88.2,85.8,86.6,78.0,78.3,stable,0,,improving,0.78,False
+S0010,2025-26,5,10,CSE502,Database Management Systems,4,79.7,76.6,80.8,79.1,77.2,75.8,improving,0,,improving,0.78,False
+S0010,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,71.1,77.8,74.7,69.0,68.7,83.2,stable,0,,improving,0.78,False
+S0010,2025-26,5,10,CSE504,Computer Networks,3,66.9,70.5,73.2,65.4,66.0,85.1,stable,0,,improving,0.78,False
+S0010,2025-26,5,10,CSE505,Software Engineering,3,71.6,66.7,77.1,78.2,72.3,83.5,improving,0,,improving,0.78,False
+S0011,2025-26,5,10,CSE501,Operating Systems,4,58.5,68.4,49.3,56.6,61.3,83.5,improving,0,,stable,0.78,False
+S0011,2025-26,5,10,CSE502,Database Management Systems,4,61.4,58.8,55.2,59.3,62.6,79.6,declining,0,,stable,0.78,False
+S0011,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,60.4,70.1,58.6,61.5,69.3,76.8,declining,0,,stable,0.78,False
+S0011,2025-26,5,10,CSE504,Computer Networks,3,51.0,50.4,45.0,48.8,53.0,77.3,declining,0,,stable,0.78,False
+S0011,2025-26,5,10,CSE505,Software Engineering,3,62.2,57.5,57.7,61.0,59.2,85.1,stable,0,,stable,0.78,False
+S0012,2025-26,5,10,CSE501,Operating Systems,4,81.3,79.3,72.0,78.7,85.9,82.2,improving,0,,stable,0.8,False
+S0012,2025-26,5,10,CSE502,Database Management Systems,4,81.4,88.4,76.0,77.2,89.4,76.5,stable,0,,stable,0.8,False
+S0012,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,69.9,75.5,78.7,75.8,71.5,83.3,stable,0,,stable,0.8,False
+S0012,2025-26,5,10,CSE504,Computer Networks,3,80.9,85.9,76.7,77.7,79.5,78.8,stable,0,,stable,0.8,False
+S0012,2025-26,5,10,CSE505,Software Engineering,3,74.1,79.8,82.4,72.8,80.1,80.9,stable,0,,stable,0.8,False
+S0013,2025-26,5,10,CSE501,Operating Systems,4,75.0,84.2,79.4,83.8,84.8,84.0,stable,0,,stable,0.6,False
+S0013,2025-26,5,10,CSE502,Database Management Systems,4,78.1,70.0,76.3,86.2,77.4,89.3,stable,1,D,stable,0.6,False
+S0013,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,67.1,72.5,63.8,71.2,72.0,89.8,improving,0,,stable,0.6,False
+S0013,2025-26,5,10,CSE504,Computer Networks,3,73.7,75.0,73.6,69.5,73.9,90.2,improving,0,,stable,0.6,False
+S0013,2025-26,5,10,CSE505,Software Engineering,3,77.4,68.4,82.4,76.3,85.4,88.8,declining,0,,stable,0.6,False
+S0014,2025-26,5,10,CSE501,Operating Systems,4,77.3,82.9,72.2,75.8,72.7,83.7,declining,0,,improving,0.69,False
+S0014,2025-26,5,10,CSE502,Database Management Systems,4,80.7,81.3,80.2,82.4,85.3,74.6,declining,0,,improving,0.69,False
+S0014,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,74.4,76.0,67.2,84.0,82.9,83.3,stable,0,,improving,0.69,False
+S0014,2025-26,5,10,CSE504,Computer Networks,3,72.2,64.0,64.6,68.3,82.0,73.1,improving,0,,improving,0.69,False
+S0014,2025-26,5,10,CSE505,Software Engineering,3,78.1,83.6,80.7,86.3,82.7,78.5,declining,0,,improving,0.69,False
+S0015,2025-26,5,10,CSE501,Operating Systems,4,60.2,59.6,53.6,67.1,59.1,90.2,improving,0,,declining,0.52,False
+S0015,2025-26,5,10,CSE502,Database Management Systems,4,60.0,63.7,67.1,56.2,66.5,92.1,improving,0,,declining,0.52,False
+S0015,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,69.3,65.2,70.7,68.6,72.6,95.9,stable,0,,declining,0.52,False
+S0015,2025-26,5,10,CSE504,Computer Networks,3,56.9,60.8,60.4,62.1,53.0,93.8,stable,0,,declining,0.52,False
+S0015,2025-26,5,10,CSE505,Software Engineering,3,58.3,57.1,63.2,56.9,65.7,94.9,declining,0,,declining,0.52,False
+S0016,2025-26,5,10,CSE501,Operating Systems,4,67.5,69.9,76.1,69.9,70.4,90.7,declining,0,,stable,0.59,False
+S0016,2025-26,5,10,CSE502,Database Management Systems,4,67.8,67.4,76.2,70.2,69.8,95.0,stable,0,,stable,0.59,False
+S0016,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,63.0,54.9,53.0,64.5,69.5,92.3,improving,0,,stable,0.59,False
+S0016,2025-26,5,10,CSE504,Computer Networks,3,62.0,70.8,55.3,66.4,61.9,91.2,stable,0,,stable,0.59,False
+S0016,2025-26,5,10,CSE505,Software Engineering,3,63.2,71.3,63.2,69.5,70.9,95.5,improving,0,,stable,0.59,False
+S0017,2025-26,5,10,CSE501,Operating Systems,4,61.0,56.3,62.6,70.9,70.9,96.2,stable,0,,improving,0.78,False
+S0017,2025-26,5,10,CSE502,Database Management Systems,4,71.9,66.0,72.5,79.4,71.4,95.2,declining,1,F,improving,0.78,False
+S0017,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,71.5,77.5,66.9,71.3,74.7,96.6,stable,0,,improving,0.78,False
+S0017,2025-26,5,10,CSE504,Computer Networks,3,63.5,68.5,60.2,63.5,60.4,92.2,declining,0,,improving,0.78,False
+S0017,2025-26,5,10,CSE505,Software Engineering,3,60.6,65.8,61.7,55.9,60.3,92.0,stable,0,,improving,0.78,False
+S0018,2025-26,5,10,CSE501,Operating Systems,4,61.5,52.6,63.1,56.8,69.2,74.8,stable,0,,stable,0.85,False
+S0018,2025-26,5,10,CSE502,Database Management Systems,4,67.6,59.0,73.7,76.0,62.8,75.0,declining,0,,stable,0.85,False
+S0018,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,62.9,57.0,66.1,68.8,66.9,84.3,stable,0,,stable,0.85,False
+S0018,2025-26,5,10,CSE504,Computer Networks,3,68.1,65.3,62.6,63.8,68.4,81.4,improving,0,,stable,0.85,False
+S0018,2025-26,5,10,CSE505,Software Engineering,3,70.8,73.0,76.3,78.0,76.5,74.1,stable,0,,stable,0.85,False
+S0019,2025-26,5,10,CSE501,Operating Systems,4,65.5,56.4,60.0,67.3,66.7,74.6,declining,0,,stable,0.56,False
+S0019,2025-26,5,10,CSE502,Database Management Systems,4,64.8,73.4,55.2,73.7,74.1,72.6,declining,1,D,stable,0.56,False
+S0019,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,77.1,78.1,68.7,84.8,81.3,79.9,stable,0,,stable,0.56,False
+S0019,2025-26,5,10,CSE504,Computer Networks,3,64.1,68.9,55.6,70.0,71.8,78.2,stable,0,,stable,0.56,False
+S0019,2025-26,5,10,CSE505,Software Engineering,3,77.1,81.8,74.5,74.7,75.4,78.1,declining,0,,stable,0.56,False
+S0020,2025-26,5,10,CSE501,Operating Systems,4,54.3,61.5,51.9,62.1,52.9,97.1,declining,0,,stable,0.64,False
+S0020,2025-26,5,10,CSE502,Database Management Systems,4,62.0,71.7,55.0,58.3,67.1,93.8,improving,0,,stable,0.64,False
+S0020,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,63.0,58.7,59.7,70.7,65.8,99.8,stable,1,F,stable,0.64,False
+S0020,2025-26,5,10,CSE504,Computer Networks,3,61.3,53.6,69.0,63.6,58.4,91.5,stable,0,,stable,0.64,False
+S0020,2025-26,5,10,CSE505,Software Engineering,3,55.5,48.3,54.3,56.7,58.3,93.1,improving,0,,stable,0.64,False
+S0021,2025-26,5,10,CSE501,Operating Systems,4,78.0,81.0,70.2,73.2,76.7,91.9,stable,0,,improving,0.85,False
+S0021,2025-26,5,10,CSE502,Database Management Systems,4,78.0,78.6,79.9,73.3,80.7,90.5,stable,0,,improving,0.85,False
+S0021,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,84.5,93.3,74.9,88.5,91.0,89.8,declining,0,,improving,0.85,False
+S0021,2025-26,5,10,CSE504,Computer Networks,3,86.9,96.5,77.7,88.6,90.1,88.2,stable,1,D,improving,0.85,False
+S0021,2025-26,5,10,CSE505,Software Engineering,3,79.2,86.1,75.7,81.4,88.9,92.1,improving,0,,improving,0.85,False
+S0022,2025-26,5,10,CSE501,Operating Systems,4,67.0,62.3,67.1,63.4,68.4,81.3,stable,1,D,improving,0.72,False
+S0022,2025-26,5,10,CSE502,Database Management Systems,4,56.0,56.1,63.2,57.7,55.2,80.4,stable,0,,improving,0.72,False
+S0022,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,67.5,61.2,63.5,63.0,68.4,72.5,stable,0,,improving,0.72,False
+S0022,2025-26,5,10,CSE504,Computer Networks,3,62.7,58.0,59.8,62.9,68.5,75.7,stable,0,,improving,0.72,False
+S0022,2025-26,5,10,CSE505,Software Engineering,3,61.1,55.4,69.1,61.2,56.7,76.0,improving,0,,improving,0.72,False
+S0023,2025-26,5,10,CSE501,Operating Systems,4,65.2,57.8,71.3,74.3,69.3,82.6,declining,1,D,improving,0.91,False
+S0023,2025-26,5,10,CSE502,Database Management Systems,4,55.8,56.2,56.5,53.5,60.0,74.3,declining,0,,improving,0.91,False
+S0023,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,53.8,46.0,48.6,52.9,49.3,77.5,improving,0,,improving,0.91,False
+S0023,2025-26,5,10,CSE504,Computer Networks,3,59.4,56.2,56.0,55.7,54.8,76.5,declining,1,D,improving,0.91,False
+S0023,2025-26,5,10,CSE505,Software Engineering,3,68.1,68.2,68.7,67.8,74.7,83.3,declining,0,,improving,0.91,False
+S0024,2025-26,5,10,CSE501,Operating Systems,4,58.6,63.9,64.7,58.2,67.5,83.2,declining,0,,stable,0.81,False
+S0024,2025-26,5,10,CSE502,Database Management Systems,4,53.2,56.3,43.9,59.8,60.2,89.3,declining,0,,stable,0.81,False
+S0024,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,56.1,54.4,46.9,57.8,55.1,86.8,stable,0,,stable,0.81,False
+S0024,2025-26,5,10,CSE504,Computer Networks,3,56.0,63.9,54.5,55.9,58.5,87.1,stable,0,,stable,0.81,False
+S0024,2025-26,5,10,CSE505,Software Engineering,3,54.1,51.1,55.4,55.3,61.5,85.2,declining,0,,stable,0.81,False
+S0025,2025-26,5,10,CSE501,Operating Systems,4,65.1,71.9,57.9,68.0,62.6,88.6,stable,0,,stable,0.64,False
+S0025,2025-26,5,10,CSE502,Database Management Systems,4,64.5,56.8,65.8,70.3,60.4,86.0,declining,0,,stable,0.64,False
+S0025,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,57.8,53.0,61.1,54.6,66.9,89.5,improving,0,,stable,0.64,False
+S0025,2025-26,5,10,CSE504,Computer Networks,3,59.0,63.4,57.9,56.3,55.6,90.8,stable,0,,stable,0.64,False
+S0025,2025-26,5,10,CSE505,Software Engineering,3,57.3,65.7,49.1,54.0,66.2,90.2,stable,0,,stable,0.64,False
+S0026,2025-26,5,10,CSE501,Operating Systems,4,65.4,63.7,59.2,73.9,64.2,85.1,improving,0,,improving,0.82,False
+S0026,2025-26,5,10,CSE502,Database Management Systems,4,68.7,65.5,71.8,65.1,77.9,85.6,declining,0,,improving,0.82,False
+S0026,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,63.3,60.7,64.0,62.8,59.2,81.0,stable,0,,improving,0.82,False
+S0026,2025-26,5,10,CSE504,Computer Networks,3,61.4,56.6,63.9,62.2,61.6,83.0,declining,0,,improving,0.82,False
+S0026,2025-26,5,10,CSE505,Software Engineering,3,67.6,76.9,68.0,76.2,74.5,77.3,stable,0,,improving,0.82,False
+S0027,2025-26,5,10,CSE501,Operating Systems,4,72.8,72.0,64.7,76.2,69.7,99.9,stable,0,,declining,0.79,False
+S0027,2025-26,5,10,CSE502,Database Management Systems,4,70.9,73.5,73.1,77.2,78.5,100.0,improving,0,,declining,0.79,False
+S0027,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,60.5,67.7,63.5,61.8,58.3,95.0,declining,0,,declining,0.79,False
+S0027,2025-26,5,10,CSE504,Computer Networks,3,58.5,66.3,63.8,56.5,57.9,100.0,declining,0,,declining,0.79,False
+S0027,2025-26,5,10,CSE505,Software Engineering,3,61.9,57.9,52.7,67.8,57.5,91.0,declining,0,,declining,0.79,False
+S0028,2025-26,5,10,CSE501,Operating Systems,4,58.7,58.1,58.4,60.2,58.6,78.0,stable,0,,stable,0.65,False
+S0028,2025-26,5,10,CSE502,Database Management Systems,4,61.0,70.9,52.6,61.8,58.7,75.9,stable,0,,stable,0.65,False
+S0028,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,58.8,58.7,67.2,54.3,54.8,76.5,improving,0,,stable,0.65,False
+S0028,2025-26,5,10,CSE504,Computer Networks,3,62.4,56.6,56.4,66.0,64.9,78.7,stable,0,,stable,0.65,False
+S0028,2025-26,5,10,CSE505,Software Engineering,3,48.8,47.4,52.6,56.8,49.3,78.5,improving,0,,stable,0.65,False
+S0029,2025-26,5,10,CSE501,Operating Systems,4,48.7,53.3,44.5,54.6,44.7,88.1,declining,0,,stable,0.71,False
+S0029,2025-26,5,10,CSE502,Database Management Systems,4,48.0,39.1,55.1,46.5,51.2,82.8,declining,0,,stable,0.71,False
+S0029,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,55.6,65.4,48.6,63.1,51.4,83.4,declining,0,,stable,0.71,False
+S0029,2025-26,5,10,CSE504,Computer Networks,3,58.6,53.9,57.0,59.1,61.4,83.2,stable,0,,stable,0.71,False
+S0029,2025-26,5,10,CSE505,Software Engineering,3,51.6,48.9,44.6,59.7,55.6,79.3,stable,0,,stable,0.71,False
+S0030,2025-26,5,10,CSE501,Operating Systems,4,53.1,46.1,43.3,48.8,59.5,85.8,improving,0,,stable,0.93,False
+S0030,2025-26,5,10,CSE502,Database Management Systems,4,50.4,52.2,55.5,50.8,45.6,81.1,declining,0,,stable,0.93,False
+S0030,2025-26,5,10,CSE503,Design and Analysis of Algorithms,3,52.3,44.8,53.4,56.2,59.2,83.0,declining,0,,stable,0.93,False
+S0030,2025-26,5,10,CSE504,Computer Networks,3,53.3,54.4,49.2,53.2,62.3,82.2,declining,0,,stable,0.93,False
+S0030,2025-26,5,10,CSE505,Software Engineering,3,57.9,57.6,50.0,56.5,60.8,74.8,declining,0,,stable,0.93,False
+S0031,2025-26,5,10,ECE501,Digital Signal Processing,4,46.1,51.4,38.0,54.6,52.0,53.8,stable,0,,declining,0.36,False
+S0031,2025-26,5,10,ECE502,VLSI Design,4,55.0,61.6,59.4,58.8,54.8,61.4,declining,0,,declining,0.36,False
+S0031,2025-26,5,10,ECE503,Microprocessors,3,53.5,52.2,58.6,63.5,50.9,55.4,stable,0,,declining,0.36,False
+S0031,2025-26,5,10,ECE504,Control Systems,3,52.0,43.0,50.1,55.7,55.8,60.9,declining,0,,declining,0.36,False
+S0031,2025-26,5,10,ECE505,Communication Systems,3,55.5,58.0,56.3,59.6,52.0,56.3,stable,0,,declining,0.36,False
+S0032,2025-26,5,10,ECE501,Digital Signal Processing,4,41.7,33.5,43.5,40.0,47.7,68.7,stable,0,,declining,0.47,False
+S0032,2025-26,5,10,ECE502,VLSI Design,4,36.2,35.1,43.5,42.0,39.0,63.2,improving,0,,declining,0.47,True
+S0032,2025-26,5,10,ECE503,Microprocessors,3,33.9,31.4,42.8,36.5,32.4,60.1,stable,0,,declining,0.47,True
+S0032,2025-26,5,10,ECE504,Control Systems,3,36.9,42.4,43.0,33.6,41.0,70.3,stable,0,,declining,0.47,False
+S0032,2025-26,5,10,ECE505,Communication Systems,3,45.6,53.3,46.0,48.9,43.8,68.6,stable,0,,declining,0.47,False
+S0033,2025-26,5,10,ECE501,Digital Signal Processing,4,47.0,56.0,53.6,46.2,42.8,57.8,declining,0,,stable,0.38,False
+S0033,2025-26,5,10,ECE502,VLSI Design,4,46.4,45.7,44.8,43.2,42.9,49.3,declining,0,,stable,0.38,False
+S0033,2025-26,5,10,ECE503,Microprocessors,3,39.7,40.7,34.0,37.1,43.1,50.9,stable,0,,stable,0.38,True
+S0033,2025-26,5,10,ECE504,Control Systems,3,38.5,46.8,46.5,45.9,43.0,53.9,stable,0,,stable,0.38,True
+S0033,2025-26,5,10,ECE505,Communication Systems,3,36.4,45.6,38.1,43.1,37.1,46.6,stable,0,,stable,0.38,True
+S0034,2025-26,5,10,ECE501,Digital Signal Processing,4,74.2,71.0,69.2,77.1,74.8,58.9,improving,0,,improving,0.6,False
+S0034,2025-26,5,10,ECE502,VLSI Design,4,71.9,72.8,71.9,76.6,81.2,50.7,stable,0,,improving,0.6,False
+S0034,2025-26,5,10,ECE503,Microprocessors,3,71.4,70.7,62.0,75.7,76.6,56.3,stable,0,,improving,0.6,False
+S0034,2025-26,5,10,ECE504,Control Systems,3,73.5,64.3,65.5,78.3,83.4,47.5,stable,0,,improving,0.6,False
+S0034,2025-26,5,10,ECE505,Communication Systems,3,80.4,81.3,82.8,85.9,88.3,48.8,declining,0,,improving,0.6,False
+S0035,2025-26,5,10,ECE501,Digital Signal Processing,4,65.7,57.2,59.6,60.8,67.4,63.3,improving,0,,stable,0.73,False
+S0035,2025-26,5,10,ECE502,VLSI Design,4,58.7,64.1,66.6,63.5,55.6,62.8,declining,0,,stable,0.73,False
+S0035,2025-26,5,10,ECE503,Microprocessors,3,58.8,67.7,67.8,60.0,63.8,64.8,declining,0,,stable,0.73,False
+S0035,2025-26,5,10,ECE504,Control Systems,3,54.6,56.9,49.3,59.6,54.9,69.9,declining,0,,stable,0.73,False
+S0035,2025-26,5,10,ECE505,Communication Systems,3,64.7,60.1,64.6,62.7,72.6,69.2,declining,0,,stable,0.73,False
+S0036,2025-26,5,10,ECE501,Digital Signal Processing,4,78.1,72.7,86.7,81.7,79.4,58.8,stable,0,,improving,0.72,False
+S0036,2025-26,5,10,ECE502,VLSI Design,4,66.6,58.2,66.5,74.9,71.1,58.4,stable,0,,improving,0.72,False
+S0036,2025-26,5,10,ECE503,Microprocessors,3,66.0,72.5,60.0,71.7,72.4,59.0,declining,0,,improving,0.72,False
+S0036,2025-26,5,10,ECE504,Control Systems,3,76.8,81.4,82.8,81.8,84.5,64.0,stable,0,,improving,0.72,False
+S0036,2025-26,5,10,ECE505,Communication Systems,3,74.6,73.7,83.1,75.5,78.1,53.4,improving,0,,improving,0.72,False
+S0037,2025-26,5,10,ECE501,Digital Signal Processing,4,66.9,64.8,61.8,69.3,74.0,83.9,improving,0,,improving,0.3,False
+S0037,2025-26,5,10,ECE502,VLSI Design,4,68.1,70.4,67.0,69.1,70.2,80.2,stable,0,,improving,0.3,False
+S0037,2025-26,5,10,ECE503,Microprocessors,3,73.7,78.6,70.5,80.7,81.5,75.0,stable,0,,improving,0.3,False
+S0037,2025-26,5,10,ECE504,Control Systems,3,72.4,67.2,75.8,71.2,75.1,84.6,stable,0,,improving,0.3,False
+S0037,2025-26,5,10,ECE505,Communication Systems,3,76.4,83.9,69.7,83.7,71.9,77.9,declining,0,,improving,0.3,False
+S0038,2025-26,5,10,ECE501,Digital Signal Processing,4,72.0,69.8,78.2,77.6,74.0,82.7,improving,0,,stable,0.37,False
+S0038,2025-26,5,10,ECE502,VLSI Design,4,73.8,83.2,68.7,72.5,70.9,82.3,improving,0,,stable,0.37,False
+S0038,2025-26,5,10,ECE503,Microprocessors,3,79.4,69.6,80.5,82.1,86.5,76.3,stable,0,,stable,0.37,False
+S0038,2025-26,5,10,ECE504,Control Systems,3,75.4,81.1,68.1,76.3,83.8,72.0,stable,0,,stable,0.37,False
+S0038,2025-26,5,10,ECE505,Communication Systems,3,68.8,64.2,68.0,66.5,71.7,80.5,stable,0,,stable,0.37,False
+S0039,2025-26,5,10,ECE501,Digital Signal Processing,4,55.9,49.4,61.2,56.3,62.6,75.1,improving,0,,stable,0.34,False
+S0039,2025-26,5,10,ECE502,VLSI Design,4,42.9,37.4,47.4,50.5,39.1,83.2,declining,0,,stable,0.34,False
+S0039,2025-26,5,10,ECE503,Microprocessors,3,53.6,57.1,54.1,58.4,62.4,73.8,stable,0,,stable,0.34,False
+S0039,2025-26,5,10,ECE504,Control Systems,3,57.5,56.4,61.0,65.1,67.4,74.5,declining,0,,stable,0.34,False
+S0039,2025-26,5,10,ECE505,Communication Systems,3,43.2,48.3,40.3,47.9,45.9,75.7,improving,0,,stable,0.34,False
+S0040,2025-26,5,10,ECE501,Digital Signal Processing,4,57.8,60.6,54.8,56.0,63.2,97.5,stable,0,,improving,0.69,False
+S0040,2025-26,5,10,ECE502,VLSI Design,4,62.3,69.0,53.8,68.4,72.1,99.5,stable,0,,improving,0.69,False
+S0040,2025-26,5,10,ECE503,Microprocessors,3,61.8,65.4,67.2,71.8,64.2,90.0,stable,0,,improving,0.69,False
+S0040,2025-26,5,10,ECE504,Control Systems,3,60.0,56.6,64.6,57.8,57.5,89.8,declining,0,,improving,0.69,False
+S0040,2025-26,5,10,ECE505,Communication Systems,3,56.7,47.3,57.9,55.9,60.7,94.5,declining,0,,improving,0.69,False
+S0041,2025-26,5,10,ECE501,Digital Signal Processing,4,71.2,62.3,80.3,80.9,77.3,94.3,improving,0,,improving,0.72,False
+S0041,2025-26,5,10,ECE502,VLSI Design,4,72.1,66.5,71.1,74.0,79.5,96.9,stable,0,,improving,0.72,False
+S0041,2025-26,5,10,ECE503,Microprocessors,3,64.6,62.0,55.5,71.4,66.1,94.0,improving,0,,improving,0.72,False
+S0041,2025-26,5,10,ECE504,Control Systems,3,69.7,64.4,61.0,76.2,70.3,93.3,stable,0,,improving,0.72,False
+S0041,2025-26,5,10,ECE505,Communication Systems,3,65.4,70.6,74.2,70.3,66.9,97.7,stable,0,,improving,0.72,False
+S0042,2025-26,5,10,ECE501,Digital Signal Processing,4,62.3,58.7,54.4,63.5,59.2,88.8,stable,0,,stable,0.66,False
+S0042,2025-26,5,10,ECE502,VLSI Design,4,54.5,56.9,53.7,49.8,53.2,85.3,improving,0,,stable,0.66,False
+S0042,2025-26,5,10,ECE503,Microprocessors,3,60.3,60.9,50.3,57.7,56.7,90.5,stable,0,,stable,0.66,False
+S0042,2025-26,5,10,ECE504,Control Systems,3,57.4,47.9,66.2,54.0,54.3,85.7,declining,0,,stable,0.66,False
+S0042,2025-26,5,10,ECE505,Communication Systems,3,63.7,73.4,55.5,73.3,61.8,91.4,stable,0,,stable,0.66,False
+S0043,2025-26,5,10,ECE501,Digital Signal Processing,4,64.3,57.3,74.2,65.0,69.0,83.6,improving,0,,declining,0.8,False
+S0043,2025-26,5,10,ECE502,VLSI Design,4,58.5,62.6,51.5,61.5,63.6,77.5,improving,0,,declining,0.8,False
+S0043,2025-26,5,10,ECE503,Microprocessors,3,63.1,53.8,67.3,73.1,58.2,73.9,stable,0,,declining,0.8,False
+S0043,2025-26,5,10,ECE504,Control Systems,3,58.8,62.5,60.6,59.3,64.3,79.1,improving,0,,declining,0.8,False
+S0043,2025-26,5,10,ECE505,Communication Systems,3,63.5,66.8,62.9,63.3,59.8,74.9,improving,1,F,declining,0.8,False
+S0044,2025-26,5,10,ECE501,Digital Signal Processing,4,62.7,56.1,58.4,64.0,62.6,81.8,declining,0,,stable,0.82,False
+S0044,2025-26,5,10,ECE502,VLSI Design,4,52.2,57.7,45.2,60.9,55.0,76.2,improving,0,,stable,0.82,False
+S0044,2025-26,5,10,ECE503,Microprocessors,3,53.7,62.0,59.6,63.2,50.2,79.3,stable,0,,stable,0.82,False
+S0044,2025-26,5,10,ECE504,Control Systems,3,54.8,50.5,56.3,52.5,56.8,80.0,improving,0,,stable,0.82,False
+S0044,2025-26,5,10,ECE505,Communication Systems,3,57.8,64.2,60.9,63.5,63.5,82.7,stable,0,,stable,0.82,False
+S0045,2025-26,5,10,ECE501,Digital Signal Processing,4,47.7,49.8,39.0,46.3,43.6,84.5,improving,0,,improving,0.58,False
+S0045,2025-26,5,10,ECE502,VLSI Design,4,58.8,65.2,55.0,62.0,62.2,83.6,stable,0,,improving,0.58,False
+S0045,2025-26,5,10,ECE503,Microprocessors,3,61.8,53.8,68.4,65.7,60.5,86.8,improving,0,,improving,0.58,False
+S0045,2025-26,5,10,ECE504,Control Systems,3,55.5,47.7,47.1,61.8,54.9,88.6,declining,0,,improving,0.58,False
+S0045,2025-26,5,10,ECE505,Communication Systems,3,50.6,54.8,59.6,47.0,50.5,80.7,stable,0,,improving,0.58,False
+S0046,2025-26,5,10,ECE501,Digital Signal Processing,4,78.8,80.2,75.1,75.9,77.8,94.0,stable,0,,improving,0.59,False
+S0046,2025-26,5,10,ECE502,VLSI Design,4,83.8,75.1,78.9,82.3,93.6,92.2,stable,0,,improving,0.59,False
+S0046,2025-26,5,10,ECE503,Microprocessors,3,74.1,76.8,71.7,83.0,80.6,89.1,declining,1,D,improving,0.59,False
+S0046,2025-26,5,10,ECE504,Control Systems,3,78.6,81.5,87.0,77.3,86.9,84.9,stable,0,,improving,0.59,False
+S0046,2025-26,5,10,ECE505,Communication Systems,3,81.0,80.9,83.3,78.3,79.2,86.9,stable,0,,improving,0.59,False
+S0047,2025-26,5,10,ECE501,Digital Signal Processing,4,59.3,67.0,56.8,61.0,60.4,75.6,declining,0,,declining,0.7,False
+S0047,2025-26,5,10,ECE502,VLSI Design,4,55.7,65.0,62.0,61.6,63.7,84.3,stable,0,,declining,0.7,False
+S0047,2025-26,5,10,ECE503,Microprocessors,3,65.1,60.4,59.5,61.8,70.0,82.8,declining,0,,declining,0.7,False
+S0047,2025-26,5,10,ECE504,Control Systems,3,58.7,57.8,59.6,67.5,66.8,84.4,declining,1,D,declining,0.7,False
+S0047,2025-26,5,10,ECE505,Communication Systems,3,56.2,47.9,54.0,55.1,53.7,84.8,improving,1,D,declining,0.7,False
+S0048,2025-26,5,10,ECE501,Digital Signal Processing,4,57.9,60.7,61.4,57.9,62.6,87.1,declining,0,,stable,0.87,False
+S0048,2025-26,5,10,ECE502,VLSI Design,4,49.8,54.0,52.9,51.6,54.3,86.8,stable,0,,stable,0.87,False
+S0048,2025-26,5,10,ECE503,Microprocessors,3,50.1,43.3,46.7,50.1,51.9,87.2,improving,0,,stable,0.87,False
+S0048,2025-26,5,10,ECE504,Control Systems,3,47.8,51.6,56.7,49.2,56.3,86.1,improving,0,,stable,0.87,False
+S0048,2025-26,5,10,ECE505,Communication Systems,3,57.9,64.8,49.0,64.6,58.5,88.5,improving,1,D,stable,0.87,False
+S0049,2025-26,5,10,ECE501,Digital Signal Processing,4,75.1,77.9,79.8,80.8,83.0,75.6,improving,0,,improving,0.76,False
+S0049,2025-26,5,10,ECE502,VLSI Design,4,67.6,60.1,61.3,67.6,63.7,74.1,declining,0,,improving,0.76,False
+S0049,2025-26,5,10,ECE503,Microprocessors,3,77.6,86.9,70.5,83.3,81.6,81.7,improving,0,,improving,0.76,False
+S0049,2025-26,5,10,ECE504,Control Systems,3,63.1,65.2,72.8,68.2,68.8,85.2,stable,0,,improving,0.76,False
+S0049,2025-26,5,10,ECE505,Communication Systems,3,75.8,73.1,65.9,78.4,84.9,76.5,stable,0,,improving,0.76,False
+S0050,2025-26,5,10,ECE501,Digital Signal Processing,4,47.3,38.9,51.8,55.3,44.4,80.7,improving,0,,improving,0.78,False
+S0050,2025-26,5,10,ECE502,VLSI Design,4,55.3,59.3,58.3,56.1,58.6,78.3,improving,0,,improving,0.78,False
+S0050,2025-26,5,10,ECE503,Microprocessors,3,58.6,67.1,66.9,63.3,67.5,82.2,improving,0,,improving,0.78,False
+S0050,2025-26,5,10,ECE504,Control Systems,3,48.2,40.1,45.2,53.7,55.1,84.3,improving,0,,improving,0.78,False
+S0050,2025-26,5,10,ECE505,Communication Systems,3,52.1,42.4,47.7,52.1,51.2,86.9,declining,0,,improving,0.78,False
+S0051,2025-26,5,10,ECE501,Digital Signal Processing,4,49.6,55.8,53.1,47.5,54.3,91.0,stable,0,,declining,0.85,False
+S0051,2025-26,5,10,ECE502,VLSI Design,4,55.7,47.7,49.0,52.7,65.0,88.6,stable,0,,declining,0.85,False
+S0051,2025-26,5,10,ECE503,Microprocessors,3,61.8,63.1,70.2,61.3,58.5,91.9,stable,0,,declining,0.85,False
+S0051,2025-26,5,10,ECE504,Control Systems,3,61.5,61.0,70.9,64.8,60.6,91.1,improving,0,,declining,0.85,False
+S0051,2025-26,5,10,ECE505,Communication Systems,3,49.0,45.2,50.3,44.6,45.2,93.6,improving,0,,declining,0.85,False
+S0052,2025-26,5,10,ECE501,Digital Signal Processing,4,63.4,58.0,57.2,69.9,72.7,80.2,declining,0,,stable,0.85,False
+S0052,2025-26,5,10,ECE502,VLSI Design,4,68.3,72.5,72.4,75.6,70.6,84.9,stable,0,,stable,0.85,False
+S0052,2025-26,5,10,ECE503,Microprocessors,3,68.6,59.3,64.1,65.0,66.5,86.2,stable,0,,stable,0.85,False
+S0052,2025-26,5,10,ECE504,Control Systems,3,59.4,58.1,56.5,65.2,63.1,84.4,stable,1,D,stable,0.85,False
+S0052,2025-26,5,10,ECE505,Communication Systems,3,70.1,70.0,69.7,65.5,79.2,82.3,stable,1,D,stable,0.85,False
+S0053,2025-26,5,10,ECE501,Digital Signal Processing,4,47.2,38.4,37.7,51.2,43.3,95.2,declining,0,,stable,0.71,False
+S0053,2025-26,5,10,ECE502,VLSI Design,4,56.3,52.1,47.6,62.4,52.8,85.0,stable,0,,stable,0.71,False
+S0053,2025-26,5,10,ECE503,Microprocessors,3,53.3,57.5,59.3,57.4,61.0,88.9,declining,0,,stable,0.71,False
+S0053,2025-26,5,10,ECE504,Control Systems,3,50.0,58.9,45.5,45.4,48.6,88.4,stable,0,,stable,0.71,False
+S0053,2025-26,5,10,ECE505,Communication Systems,3,60.5,56.3,60.9,60.6,67.8,85.9,improving,0,,stable,0.71,False
+S0054,2025-26,5,10,ECE501,Digital Signal Processing,4,76.1,82.0,77.9,82.7,77.0,83.2,improving,0,,declining,0.98,False
+S0054,2025-26,5,10,ECE502,VLSI Design,4,70.6,70.5,67.7,74.0,72.8,90.9,stable,0,,declining,0.98,False
+S0054,2025-26,5,10,ECE503,Microprocessors,3,70.8,72.5,72.7,70.5,70.8,91.1,stable,0,,declining,0.98,False
+S0054,2025-26,5,10,ECE504,Control Systems,3,72.4,80.3,63.1,80.2,69.8,88.9,stable,0,,declining,0.98,False
+S0054,2025-26,5,10,ECE505,Communication Systems,3,79.9,79.0,89.0,79.2,87.9,93.9,stable,0,,declining,0.98,False
+S0055,2025-26,5,10,ECE501,Digital Signal Processing,4,64.5,65.5,73.4,66.1,63.5,77.8,stable,1,F,improving,0.83,False
+S0055,2025-26,5,10,ECE502,VLSI Design,4,54.0,58.8,62.5,50.1,50.7,84.4,stable,0,,improving,0.83,False
+S0055,2025-26,5,10,ECE503,Microprocessors,3,66.9,67.4,75.0,75.1,74.1,82.3,stable,0,,improving,0.83,False
+S0055,2025-26,5,10,ECE504,Control Systems,3,55.1,58.3,47.8,57.8,50.9,79.7,improving,0,,improving,0.83,False
+S0055,2025-26,5,10,ECE505,Communication Systems,3,66.1,57.2,73.1,74.0,66.2,84.0,stable,0,,improving,0.83,False
+S0056,2025-26,5,10,ECE501,Digital Signal Processing,4,69.1,60.8,76.7,78.0,76.4,89.8,stable,1,D,stable,0.9,False
+S0056,2025-26,5,10,ECE502,VLSI Design,4,61.8,63.0,58.4,61.6,56.9,90.2,stable,0,,stable,0.9,False
+S0056,2025-26,5,10,ECE503,Microprocessors,3,61.2,58.5,68.8,61.3,66.4,92.1,stable,0,,stable,0.9,False
+S0056,2025-26,5,10,ECE504,Control Systems,3,71.7,72.9,61.7,67.2,81.6,92.4,declining,0,,stable,0.9,False
+S0056,2025-26,5,10,ECE505,Communication Systems,3,60.9,66.7,59.9,67.7,56.0,86.5,declining,0,,stable,0.9,False
+S0057,2025-26,5,10,ECE501,Digital Signal Processing,4,55.8,51.8,52.0,65.3,57.4,90.7,stable,0,,stable,0.75,False
+S0057,2025-26,5,10,ECE502,VLSI Design,4,54.7,53.3,61.2,63.3,63.7,92.1,stable,0,,stable,0.75,False
+S0057,2025-26,5,10,ECE503,Microprocessors,3,59.3,60.6,63.3,65.5,64.4,94.3,improving,0,,stable,0.75,False
+S0057,2025-26,5,10,ECE504,Control Systems,3,55.3,45.3,62.4,59.5,52.2,95.1,declining,0,,stable,0.75,False
+S0057,2025-26,5,10,ECE505,Communication Systems,3,52.2,59.3,50.5,55.8,47.2,93.0,declining,0,,stable,0.75,False
+S0058,2025-26,5,10,ECE501,Digital Signal Processing,4,59.7,65.9,63.3,58.9,69.1,89.7,declining,1,D,declining,0.63,False
+S0058,2025-26,5,10,ECE502,VLSI Design,4,66.5,71.6,68.7,64.1,69.7,90.4,stable,0,,declining,0.63,False
+S0058,2025-26,5,10,ECE503,Microprocessors,3,53.6,51.2,53.7,55.1,50.2,83.0,declining,0,,declining,0.63,False
+S0058,2025-26,5,10,ECE504,Control Systems,3,52.6,42.9,52.1,50.1,58.2,90.7,improving,0,,declining,0.63,False
+S0058,2025-26,5,10,ECE505,Communication Systems,3,54.3,50.4,62.1,57.5,62.6,83.9,stable,0,,declining,0.63,False
+S0059,2025-26,5,10,ECE501,Digital Signal Processing,4,57.2,67.2,49.5,65.0,65.2,92.4,stable,0,,declining,0.64,False
+S0059,2025-26,5,10,ECE502,VLSI Design,4,54.2,60.2,54.2,63.1,58.5,92.0,declining,0,,declining,0.64,False
+S0059,2025-26,5,10,ECE503,Microprocessors,3,64.0,57.7,73.5,71.2,71.9,91.6,declining,0,,declining,0.64,False
+S0059,2025-26,5,10,ECE504,Control Systems,3,61.7,54.5,57.8,63.4,61.5,90.4,declining,0,,declining,0.64,False
+S0059,2025-26,5,10,ECE505,Communication Systems,3,61.4,52.9,66.7,68.3,62.4,94.5,declining,0,,declining,0.64,False
+S0060,2025-26,5,10,ECE501,Digital Signal Processing,4,59.6,59.3,65.2,59.0,66.7,78.5,declining,0,,stable,0.67,False
+S0060,2025-26,5,10,ECE502,VLSI Design,4,54.1,64.1,61.5,62.3,63.4,79.9,stable,0,,stable,0.67,False
+S0060,2025-26,5,10,ECE503,Microprocessors,3,61.4,55.8,70.1,56.5,58.5,77.6,improving,0,,stable,0.67,False
+S0060,2025-26,5,10,ECE504,Control Systems,3,63.9,60.5,66.2,72.3,67.9,82.9,stable,0,,stable,0.67,False
+S0060,2025-26,5,10,ECE505,Communication Systems,3,58.5,67.8,60.9,57.7,60.3,84.6,stable,0,,stable,0.67,False

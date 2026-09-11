@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/*
+  Design tokens extracted from institutional reference (Agentic AI Day 2026 page).
+  Preserve this palette across all role dashboards for visual consistency
+  with the institution's existing digital ecosystem.
+*/
+@theme {
+  /* Brand blue - primary accent, buttons, links, active states */
+  --color-brand-50: #eaf2fc;
+  --color-brand-100: #dceafb;
+  --color-brand-200: #b9d4f7;
+  --color-brand-300: #8fb8f0;
+  --color-brand-400: #5a8de8;
+  --color-brand-500: #2e5fe8;
+  --color-brand-600: #2347c4;
+  --color-brand-700: #1c379a;
+
+  /* Navy / slate text hierarchy */
+  --color-ink-900: #1e293b;
+  --color-ink-700: #334155;
+  --color-ink-500: #64748b;
+  --color-ink-300: #cbd5e1;
+
+  /* Risk severity colors (functional, not decorative) */
+  --color-risk-critical: #dc2626;
+  --color-risk-high: #ea580c;
+  --color-risk-medium: #d97706;
+  --color-risk-low: #16a34a;
+
+  /* Surface and layout tokens for dense operational screens */
+  --color-surface: #ffffff;
+  --color-canvas: #f8fafc;
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
+  --color-focus: #2e5fe8;
+  --font-display: "Aptos Display", "Trebuchet MS", sans-serif;
+  --font-body: "Aptos", "Trebuchet MS", sans-serif;
+
+  /* Status dot colors */
+  --color-status-active: #16a34a;
+  --color-status-idle: #94a3b8;
+  --color-status-alert: #dc2626;
+
+  --radius-card: 8px;
+  --shadow-card: 0 1px 2px rgba(30, 41, 59, 0.04), 0 4px 16px rgba(30, 41, 59, 0.06);
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink-900);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-focus) 28%, transparent);
+    outline-offset: 2px;
+  }
+}
+
+::selection {
+  background: var(--color-brand-100);
+  color: var(--color-brand-700);
+}
