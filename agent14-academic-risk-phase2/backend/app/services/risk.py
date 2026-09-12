@@ -53,6 +53,7 @@ def build_student_risk_profile(db: Session, student_id: str, user: User) -> dict
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
     from ml.predictor import predict_all_risks
+    
     result = predict_all_risks(student_data, course_data)
     if not can_view_support_attention_risk(user.role):
         result["risks"].pop("discontinuation", None)
@@ -62,4 +63,13 @@ def build_student_risk_profile(db: Session, student_id: str, user: User) -> dict
         "projected_attendance_below_threshold": float(student_data.get("projected_final_attendance", 100)) < thresholds["attendance_threshold"],
         "source": "admin_configuration",
     }
+    student_metrics = {
+    "current_gpa": float(student_data.get("current_gpa", 0)),
+    "current_cgpa": float(student_data.get("current_cgpa", 0)),
+    "attendance": float(student_data.get("current_attendance_percentage", 0)),
+    "backlogs": int(student_data.get("current_backlog_count", 0)),
+    "internal_marks": float(student_data.get("internal_marks_average", 0)),
+    "absence_rate": round(float(student_data.get("recent_absence_rate", 0)) * 100, 1),
+}
+    result["student_metrics"] = student_metrics
     return {"student": {"student_id": student.id, "student_name": student.name, "department": student.department, "batch": student.batch, "section": student.section}, **result}

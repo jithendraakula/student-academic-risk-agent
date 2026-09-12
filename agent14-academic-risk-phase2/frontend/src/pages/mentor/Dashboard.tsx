@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../../components/Card";
+import PageHeader from "../../components/PageHeader";
 import RiskBadge, { scoreToLevel } from "../../components/RiskBadge";
 import Table, { type TableColumn } from "../../components/Table";
 import { useAuth } from "../../context/AuthContext";
 import { acknowledgeAlert, getWatchlist, updateIntervention, type MentorAlert } from "../../features/mentor/api";
 import { readableRiskType, scorePercent } from "../../features/mentor/formatters";
 
-function Metric({ label, value, detail, tone = "text-ink-900" }: { label: string; value: number | string; detail: string; tone?: string }) {
+function Metric({ icon, label, value, detail, tone = "text-ink-900" }: { icon: string; label: string; value: number | string; detail: string; tone?: string }) {
   return (
-    <Card className="p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">{label}</p>
-      <p className={`mt-2 text-3xl font-bold tracking-tight ${tone}`}>{value}</p>
-      <p className="mt-1 text-xs text-slate-500">{detail}</p>
+    <Card className="p-5">
+      <p className="text-2xl">{icon}</p>
+      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">{label}</p>
+      <p className={`mt-2 text-4xl font-bold tracking-tight ${tone}`}>{value}</p>
+      <p className="mt-2 text-sm text-slate-500">{detail}</p>
     </Card>
   );
 }
@@ -39,6 +41,40 @@ function groupAlertsByStudent(items: MentorAlert[]): StudentWatchlistRow[] {
       primary: [...alerts].sort((left, right) => right.priority_score - left.priority_score)[0],
     }))
     .sort((left, right) => right.primary.priority_score - left.primary.priority_score);
+}
+
+function getRiskReason(alert: MentorAlert) {
+  switch (alert.risk_type) {
+    case "ATTENDANCE_SHORTAGE":
+      return "Low attendance";
+    case "BACKLOG":
+      return "Multiple backlogs";
+    case "GPA_THRESHOLD":
+      return "Low GPA";
+    case "COURSE_FAILURE":
+      return "Course failure risk";
+    case "DISCONTINUATION":
+      return "Requires support attention";
+    default:
+      return "Academic risk";
+  }
+}
+
+function getRecommendedAction(alert: MentorAlert) {
+  switch (alert.risk_type) {
+    case "ATTENDANCE_SHORTAGE":
+      return "Attendance counseling";
+    case "BACKLOG":
+      return "Academic mentoring";
+    case "GPA_THRESHOLD":
+      return "Study improvement plan";
+    case "COURSE_FAILURE":
+      return "Course intervention";
+    case "DISCONTINUATION":
+      return "Parent meeting";
+    default:
+      return "Review student profile";
+  }
 }
 
 export default function MentorDashboard() {
@@ -96,26 +132,47 @@ export default function MentorDashboard() {
     { key: "risk", header: "Risk profile", render: (item) => <div className="flex max-w-[280px] flex-wrap items-center gap-1.5"><RiskBadge level={scoreToLevel(item.primary.risk_score)} /><span className="text-xs font-semibold text-slate-600">{readableRiskType(item.primary.risk_type)}</span>{item.alerts.length > 1 ? <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-500">+{item.alerts.length - 1} more</span> : null}</div> },
     { key: "score", header: "Highest risk", render: (item) => <span className="font-bold text-ink-900">{scorePercent(item.primary.risk_score)}</span> },
     { key: "priority", header: "Priority", render: (item) => <span className="font-semibold text-brand-700">{scorePercent(item.primary.priority_score)}</span> },
+    {
+      key: "reason",
+      header: "Why at risk",
+      render: (item) => (
+        <span className="text-sm text-slate-600">
+          {getRiskReason(item.primary)}
+        </span>
+      ),
+    },
+    {
+      key: "recommendation",
+      header: "Recommended action",
+      render: (item) => (
+        <span className="font-medium text-brand-700">
+          {getRecommendedAction(item.primary)}
+        </span>
+      ),
+    },
     { key: "status", header: "Alert status", render: (item) => <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">{item.alerts.filter((alert) => alert.status !== "RESOLVED").length} open · {item.alerts.filter((alert) => alert.status === "NEW").length} new</span> },
     { key: "action", header: "Action", render: (item) => <button type="button" onClick={() => setSelectedAlert(item.primary)} className="font-semibold text-brand-600 hover:text-brand-700">Review alerts</button> },
   ];
 
   return (
     <main className="min-h-screen bg-canvas">
-      <header className="border-b border-slate-200 bg-white px-5 py-4 md:px-8">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-5">
-          <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-600">Mentor workspace</p><h1 className="mt-1 text-2xl font-bold tracking-tight text-ink-900">Good morning, {user?.name ?? "Mentor"}</h1><p className="mt-1 text-sm text-slate-500">Which of your students needs attention first?</p></div>
-          <button type="button" onClick={logout} className="text-sm font-semibold text-slate-500 hover:text-ink-900">Sign out</button>
-        </div>
-      </header>
+      <PageHeader title="Student Success Early Warning System" subtitle="Mentor Workspace" />
 
       <div className="mx-auto max-w-7xl space-y-6 px-5 py-6 md:px-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-ink-900">Good morning, {user?.name ?? "Mentor"}</h2>
+            <p className="mt-1 text-sm text-slate-500">Which of your students needs attention first?</p>
+          </div>
+          <button type="button" onClick={logout} className="text-sm font-semibold text-slate-500 hover:text-ink-900">Sign out</button>
+        </div>
+
         {error ? <div role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Mentor summary">
-          <Metric label="Assigned students" value={assignedStudents} detail="Students in your cohort" />
-          <Metric label="Critical cases" value={critical} detail="Require immediate attention" tone="text-red-700" />
-          <Metric label="High-risk cases" value={high} detail="Priority support queue" tone="text-orange-700" />
-          <Metric label="Open alerts" value={openAlerts} detail={`${newAlerts} new and awaiting review`} tone="text-brand-700" />
+          <Metric icon="👥" label="Assigned students" value={assignedStudents} detail="Students in your cohort" />
+          <Metric icon="🚨" label="Critical cases" value={critical} detail="Require immediate attention" tone="text-red-700" />
+          <Metric icon="⚠️" label="High-risk cases" value={high} detail="Priority support queue" tone="text-orange-700" />
+          <Metric icon="📬" label="Open alerts" value={openAlerts} detail={`${newAlerts} new and awaiting review`} tone="text-brand-700" />
         </section>
 
         <Card as="section" className="p-0">
