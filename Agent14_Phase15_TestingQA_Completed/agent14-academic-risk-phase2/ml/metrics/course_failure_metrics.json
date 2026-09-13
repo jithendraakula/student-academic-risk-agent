@@ -1,0 +1,83 @@
+{
+  "model_key": "course_failure",
+  "model": "RandomForestClassifier",
+  "target": "End-of-semester course failure",
+  "target_column": "course_failed",
+  "train_cohorts": [
+    2023,
+    2024
+  ],
+  "held_out_cohort": 2025,
+  "train_samples": 6000,
+  "test_samples": 1200,
+  "positive_train": 510,
+  "negative_train": 5490,
+  "positive_test": 97,
+  "negative_test": 1103,
+  "feature_columns": [
+    "course_credits",
+    "internal_marks",
+    "midterm_marks",
+    "quiz_average",
+    "assignment_average",
+    "practical_marks",
+    "course_attendance_percentage",
+    "course_attendance_trend",
+    "previous_course_attempts",
+    "previous_course_grade",
+    "assessment_trend",
+    "assignment_completion_rate"
+  ],
+  "transformed_feature_count": 17,
+  "decision_threshold": 0.59,
+  "threshold_selection": "20% training-only validation split optimized for F1",
+  "top_global_features": [
+    {
+      "feature": "numeric__course_attendance_percentage",
+      "importance": 0.27381
+    },
+    {
+      "feature": "numeric__internal_marks",
+      "importance": 0.237496
+    },
+    {
+      "feature": "numeric__midterm_marks",
+      "importance": 0.132257
+    },
+    {
+      "feature": "numeric__quiz_average",
+      "importance": 0.105468
+    },
+    {
+      "feature": "numeric__assignment_average",
+      "importance": 0.082486
+    },
+    {
+      "feature": "numeric__practical_marks",
+      "importance": 0.059794
+    },
+    {
+      "feature": "numeric__assignment_completion_rate",
+      "importance": 0.040253
+    },
+    {
+      "feature": "numeric__course_credits",
+      "importance": 0.010938
+    },
+    {
+      "feature": "categorical__course_attendance_trend_declining",
+      "importance": 0.008928
+    },
+    {
+      "feature": "numeric__previous_course_attempts",
+      "importance": 0.007876
+    }
+  ],
+  "trained_at": "2026-09-12T14:03:25.272762+00:00",
+  "accuracy": 0.8783,
+  "balanced_accuracy": 0.6799,
+  "precision": 0.3185,
+  "recall": 0.4433,
+  "f1": 0.3707,
+  "roc_auc": 0.8203
+}

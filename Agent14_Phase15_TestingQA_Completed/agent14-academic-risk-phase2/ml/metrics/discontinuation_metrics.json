@@ -1,0 +1,111 @@
+{
+  "model_key": "discontinuation",
+  "model": "RandomForestClassifier",
+  "target": "End-of-semester support/discontinuation outcome",
+  "target_column": "discontinued",
+  "train_cohorts": [
+    2023,
+    2024
+  ],
+  "held_out_cohort": 2025,
+  "train_samples": 1200,
+  "test_samples": 240,
+  "positive_train": 150,
+  "negative_train": 1050,
+  "positive_test": 40,
+  "negative_test": 200,
+  "feature_columns": [
+    "department",
+    "batch",
+    "section",
+    "current_gpa",
+    "current_cgpa",
+    "previous_gpa",
+    "previous_cgpa",
+    "gpa_change",
+    "internal_marks_average",
+    "midterm_marks_average",
+    "quiz_average",
+    "assignment_average",
+    "practical_marks_average",
+    "assessment_trend",
+    "assignment_completion_rate",
+    "current_attendance_percentage",
+    "attendance_last_30_days",
+    "attendance_trend",
+    "consecutive_absence_days",
+    "total_absent_days",
+    "recent_absence_rate",
+    "projected_final_attendance",
+    "current_backlog_count",
+    "previous_backlog_count",
+    "total_historical_backlogs",
+    "new_backlogs_last_semester",
+    "repeated_backlog_subject_count",
+    "backlog_growth_rate",
+    "assessment_participation_rate",
+    "recent_engagement_score",
+    "engagement_trend",
+    "fee_status",
+    "fee_arrears_amount",
+    "payment_delay_days",
+    "installment_pending",
+    "prolonged_absence_flag",
+    "prolonged_absence_days",
+    "academic_decline_flag",
+    "repeated_backlog_flag",
+    "engagement_decline_flag"
+  ],
+  "transformed_feature_count": 49,
+  "decision_threshold": 0.44000000000000006,
+  "threshold_selection": "20% training-only validation split optimized for F1",
+  "top_global_features": [
+    {
+      "feature": "numeric__attendance_last_30_days",
+      "importance": 0.078864
+    },
+    {
+      "feature": "numeric__recent_absence_rate",
+      "importance": 0.064863
+    },
+    {
+      "feature": "numeric__total_absent_days",
+      "importance": 0.057381
+    },
+    {
+      "feature": "numeric__projected_final_attendance",
+      "importance": 0.05692
+    },
+    {
+      "feature": "numeric__recent_engagement_score",
+      "importance": 0.055663
+    },
+    {
+      "feature": "numeric__assessment_participation_rate",
+      "importance": 0.047144
+    },
+    {
+      "feature": "numeric__current_attendance_percentage",
+      "importance": 0.045144
+    },
+    {
+      "feature": "numeric__assignment_completion_rate",
+      "importance": 0.039086
+    },
+    {
+      "feature": "numeric__midterm_marks_average",
+      "importance": 0.03867
+    },
+    {
+      "feature": "numeric__quiz_average",
+      "importance": 0.03529
+    }
+  ],
+  "trained_at": "2026-09-12T14:03:29.723321+00:00",
+  "accuracy": 0.7667,
+  "balanced_accuracy": 0.64,
+  "precision": 0.3462,
+  "recall": 0.45,
+  "f1": 0.3913,
+  "roc_auc": 0.6745
+}

@@ -1,0 +1,50 @@
+{
+  "suite": "Agent 14 Phase 15 cumulative QA",
+  "mode": "fast",
+  "passed": true,
+  "results": [
+    {
+      "label": "Python AST syntax",
+      "passed": true,
+      "details": [
+        "parsed 72 Python files"
+      ]
+    },
+    {
+      "label": "Processed data contract",
+      "passed": true,
+      "details": [
+        "all expected datasets/counts validated"
+      ]
+    },
+    {
+      "label": "Canonical risk/priority policy",
+      "passed": true,
+      "details": [
+        "risk aliases, priority calculation, and alert threshold verified"
+      ]
+    },
+    {
+      "label": "Frontend contract/security",
+      "passed": true,
+      "details": [
+        "checked 29 TS/TSX files and branding assets"
+      ]
+    },
+    {
+      "label": "Phase 1 validator",
+      "passed": true,
+      "returncode": 0,
+      "duration_s": 1.55,
+      "output": "PHASE 1 DATA VALIDATION PASSED\nstudents=360 teachers=15 assignments=360 semester_snapshots=1800 course_snapshots=9000 historical_outcomes=1440 reference_rows=70 alerts=73\ncohorts=[2023, 2024, 2025]; current_semesters=[3, 5, 7]\n{'course_failed': 0.288, 'new_backlog': 0.223, 'gpa_below_threshold': 0.397, 'attendance_shortage': 0.351, 'discontinued': 0.132}\n"
+    },
+    {
+      "label": "ML smoke test",
+      "passed": true,
+      "returncode": 0,
+      "duration_s": 4.2,
+      "output": "d\": 0.59,\n        \"top_factors\": [\n          {\n            \"feature\": \"Course attendance percentage\",\n            \"raw_feature\": \"course_attendance_percentage\",\n            \"value\": 56.3,\n            \"importance\": 0.2738\n          },\n          {\n            \"feature\": \"Course internal assessment marks\",\n            \"raw_feature\": \"internal_marks\",\n            \"value\": 48.0,\n            \"importance\": 0.2375\n          },\n          {\n            \"feature\": \"Course midterm marks\",\n            \"raw_feature\": \"midterm_marks\",\n            \"value\": 51.5,\n            \"importance\": 0.1323\n          }\n        ],\n        \"model_version\": \"2026-09-12T14:03:25.272762+00:00\",\n        \"model_key\": \"course_failure\"\n      },\n      {\n        \"course_id\": \"CSE705\",\n        \"course_name\": \"Professional Elective\",\n        \"risk_probability\": 0.4986,\n        \"risk_score\": 49.9,\n        \"risk_level\": \"MODERATE\",\n        \"confidence\": \"LOW\",\n        \"decision_threshold\": 0.59,\n        \"top_factors\": [\n          {\n            \"feature\": \"Course attendance percentage\",\n            \"raw_feature\": \"course_attendance_percentage\",\n            \"value\": 65.8,\n            \"importance\": 0.2738\n          },\n          {\n            \"feature\": \"Course internal assessment marks\",\n            \"raw_feature\": \"internal_marks\",\n            \"value\": 57.9,\n            \"importance\": 0.2375\n          },\n          {\n            \"feature\": \"Course midterm marks\",\n            \"raw_feature\": \"midterm_marks\",\n            \"value\": 58.1,\n            \"importance\": 0.1323\n          }\n        ],\n        \"model_version\": \"2026-09-12T14:03:25.272762+00:00\",\n        \"model_key\": \"course_failure\"\n      }\n    ],\n    \"backlog\": {\n      \"risk_probability\": 0.5326,\n      \"risk_score\": 53.3,\n      \"risk_level\": \"HIGH\",\n      \"confidence\": \"LOW\",\n      \"decision_threshold\": 0.41000000000000003,\n      \"top_factors\": [\n        {\n          \"feature\": \"GPA change\",\n          \"raw_feature\": \"gpa_change\",\n          \"value\": -0.23,\n          \"importance\": 0.0659\n        },\n        {\n          \"feature\": \"Average quiz performance\",\n          \"raw_feature\": \"quiz_average\",\n          \"value\": 45.8,\n          \"importance\": 0.0532\n        },\n        {\n          \"feature\": \"Average internal assessment marks\",\n          \"raw_feature\": \"internal_marks_average\",\n          \"value\": 54.4,\n          \"importance\": 0.0492\n        }\n      ],\n      \"model_version\": \"2026-09-12T14:03:26.382672+00:00\",\n      \"model_key\": \"backlog\"\n    },\n    \"gpa_threshold\": {\n      \"risk_probability\": 0.3677,\n      \"risk_score\": 36.8,\n      \"risk_level\": \"MODERATE\",\n      \"confidence\": \"LOW\",\n      \"decision_threshold\": 0.51,\n      \"top_factors\": [\n        {\n          \"feature\": \"Current GPA\",\n          \"raw_feature\": \"current_gpa\",\n          \"value\": 7.28,\n          \"importance\": 0.2278\n        },\n        {\n          \"feature\": \"Current CGPA\",\n          \"raw_feature\": \"current_cgpa\",\n          \"value\": 7.57,\n          \"importance\": 0.1817\n        },\n        {\n          \"feature\": \"Previous GPA\",\n          \"raw_feature\": \"previous_gpa\",\n          \"value\": 7.51,\n          \"importance\": 0.0913\n        }\n      ],\n      \"model_version\": \"2026-09-12T14:03:27.494803+00:00\",\n      \"model_key\": \"gpa_threshold\"\n    },\n    \"attendance_shortage\": {\n      \"risk_probability\": 0.9999,\n      \"risk_score\": 100.0,\n      \"risk_level\": \"CRITICAL\",\n      \"confidence\": \"HIGH\",\n      \"decision_threshold\": 0.58,\n      \"top_factors\": [\n        {\n          \"feature\": \"Recent absence rate\",\n          \"raw_feature\": \"recent_absence_rate\",\n          \"value\": 0.43,\n          \"importance\": 0.2498\n        },\n        {\n          \"feature\": \"Attendance over the last 30 days\",\n          \"raw_feature\": \"attendance_last_30_days\",\n          \"value\": 57.1,\n          \"importance\": 0.195\n        },\n        {\n          \"feature\": \"Current attendance percentage\",\n          \"raw_feature\": \"current_attendance_percentage\",\n          \"value\": 59.1,\n          \"importance\": 0.1784\n        }\n      ],\n      \"model_version\": \"2026-09-12T14:03:28.607321+00:00\",\n      \"model_key\": \"attendance_shortage\"\n    },\n    \"discontinuation\": {\n      \"risk_probability\": 0.8067,\n      \"risk_score\": 80.7,\n      \"risk_level\": \"CRITICAL\",\n      \"confidence\": \"HIGH\",\n      \"decision_threshold\": 0.44000000000000006,\n      \"top_factors\": [\n        {\n          \"feature\": \"Attendance over the last 30 days\",\n          \"raw_feature\": \"attendance_last_30_days\",\n          \"value\": 57.1,\n          \"importance\": 0.0789\n        },\n        {\n          \"feature\": \"Recent absence rate\",\n          \"raw_feature\": \"recent_absence_rate\",\n          \"value\": 0.43,\n          \"importance\": 0.0649\n        },\n        {\n          \"feature\": \"Total absent days\",\n          \"raw_feature\": \"total_absent_days\",\n          \"value\": 24,\n          \"importance\": 0.0574\n        }\n      ],\n      \"model_version\": \"2026-09-12T14:03:29.723321+00:00\",\n      \"model_key\": \"discontinuation\"\n    }\n  }\n}\nML SMOKE TEST PASSED\n"
+    }
+  ],
+  "generated_at": "2026-09-12T16:51:23"
+}
