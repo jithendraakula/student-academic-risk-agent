@@ -25,8 +25,10 @@ def get_mentor_summary(db: Session = Depends(get_db), user: User = Depends(requi
     workspace = mentor_workspace(db, user)
     return {key: workspace[key] for key in (
         "mentor_id", "mentor_name", "department", "assigned_students",
-        "critical_students", "high_risk_students", "students_needing_action",
-        "open_alerts", "new_alerts", "risk_source", "alert_policy",
+        "critical_students", "high_risk_students", "high_only_students", "elevated_risk_students",
+        "students_needing_action", "students_with_multiple_risks", "risk_signals", "actionable_risk_signals",
+        "open_alerts", "open_alert_students", "new_alerts", "new_alert_students",
+        "risk_distribution", "metric_semantics", "risk_thresholds", "risk_source", "alert_source", "alert_policy",
     )}
 
 

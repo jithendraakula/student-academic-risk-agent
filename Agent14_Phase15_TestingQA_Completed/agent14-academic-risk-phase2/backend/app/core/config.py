@@ -15,10 +15,12 @@ TRUSTED_HOSTS = [x.strip() for x in os.getenv("TRUSTED_HOSTS", "localhost,127.0.
 LOGIN_MAX_FAILURES = int(os.getenv("LOGIN_MAX_FAILURES", "5"))
 LOGIN_LOCK_MINUTES = int(os.getenv("LOGIN_LOCK_MINUTES", "15"))
 MAX_REQUEST_BYTES = int(os.getenv("MAX_REQUEST_BYTES", str(2 * 1024 * 1024)))
-ENABLE_DOCS = os.getenv("ENABLE_DOCS", "true").lower() == "true"
+ENABLE_DOCS = os.getenv("ENABLE_DOCS", "false" if ENVIRONMENT == "production" else "true").lower() == "true"
 if ENVIRONMENT == "production":
     if JWT_SECRET == "changeme-in-production":
         raise RuntimeError("JWT_SECRET must be configured in production")
+    if not (DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgresql+psycopg://")):
+        raise RuntimeError("DATABASE_URL must use PostgreSQL with psycopg in production")
     if not ALLOWED_ORIGINS or "*" in ALLOWED_ORIGINS:
         raise RuntimeError("Explicit ALLOWED_ORIGINS are required in production")
     if not TRUSTED_HOSTS or "*" in TRUSTED_HOSTS:
@@ -37,3 +39,10 @@ SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
 SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", SMTP_USERNAME or "no-reply@vignan.ac.in")
 NOTIFICATION_HOD_PRIORITY_THRESHOLD = float(os.getenv("NOTIFICATION_HOD_PRIORITY_THRESHOLD", "80"))
 NOTIFICATION_DEAN_PRIORITY_THRESHOLD = float(os.getenv("NOTIFICATION_DEAN_PRIORITY_THRESHOLD", "90"))
+
+# Phase 14 — external AI privacy boundary. Third-party LLM calls are de-identified
+# by default; production must explicitly opt in before student identifiers are sent.
+AI_INCLUDE_STUDENT_IDENTIFIERS = os.getenv("AI_INCLUDE_STUDENT_IDENTIFIERS", "false").lower() == "true"
+AI_ALLOWED_EXTERNAL_DATA = os.getenv("AI_ALLOWED_EXTERNAL_DATA", "false").lower() == "true"
+if ENVIRONMENT == "production" and AI_INCLUDE_STUDENT_IDENTIFIERS and not AI_ALLOWED_EXTERNAL_DATA:
+    raise RuntimeError("AI_INCLUDE_STUDENT_IDENTIFIERS requires explicit AI_ALLOWED_EXTERNAL_DATA=true in production")

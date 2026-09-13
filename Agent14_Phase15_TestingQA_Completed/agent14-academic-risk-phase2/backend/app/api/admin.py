@@ -20,7 +20,7 @@ class ThresholdConfig(BaseModel):
 @router.get("/students")
 def list_students(db: Session = Depends(get_db), user: User = Depends(require_roles("admin"))):
     students = db.scalars(select(Student)).all()
-    return {"items": [{"student_id": student.id, "student_name": student.name, "department": student.department, "batch": student.batch, "section": student.section} for student in students]}
+    return {"items": [{"student_id": student.id, "roll_number": student.roll_number, "student_name": student.name, "department": student.department, "batch": student.batch, "section": student.section} for student in students]}
 
 
 @router.get("/teachers")

@@ -4,12 +4,20 @@ export interface MentorComparisonRow {
   mentor_id: string;
   mentor_name: string;
   department: string;
+  sections?: string[];
   assigned_students: number;
   critical_students: number;
   high_risk_students: number;
+  high_only_students?: number;
+  elevated_risk_students?: number;
   students_needing_action: number;
+  students_with_multiple_risks?: number;
+  risk_signals?: number;
+  actionable_risk_signals?: number;
   open_alerts: number;
+  open_alert_students?: number;
   new_alerts: number;
+  new_alert_students?: number;
   intervention_load: number;
   action_rate: number;
 }
@@ -28,18 +36,29 @@ export interface HodSummary {
   total_mentors: number;
   critical_students: number;
   high_risk_students: number;
+  high_only_students?: number;
+  elevated_risk_students?: number;
   students_needing_action: number;
+  students_with_multiple_risks?: number;
+  risk_signals?: number;
+  actionable_risk_signals?: number;
   open_alerts: number;
+  open_alert_students?: number;
   new_alerts: number;
+  new_alert_students?: number;
   intervention_load: number;
   support_attention_students: number;
   average_priority: number;
   risk_distribution: RiskOverviewRow[];
+  metric_semantics?: Record<string, { meaning: string; unit: string }>;
+  risk_thresholds?: { elevated: number; critical: number };
+  alert_source?: string;
 }
 
 export interface DepartmentStudent {
   student_id: string;
   student_name: string;
+  roll_number?: string | null;
   batch: string;
   section: string;
   department: string;
@@ -78,6 +97,6 @@ export async function getDepartmentStudents() {
 }
 
 export async function getMentorStudents(mentorId: string, params?: { q?: string; section?: string; risk_type?: string; needs_action?: boolean }) {
-  const response = await api.get<{ mentor_id: string; mentor_name: string; department: string; items: MentorStudent[] }>(`/hod/mentors/${mentorId}/students`, { params });
+  const response = await api.get<{ mentor_id: string; mentor_name: string; department: string; sections: string[]; items: MentorStudent[] }>(`/hod/mentors/${mentorId}/students`, { params });
   return response.data;
 }

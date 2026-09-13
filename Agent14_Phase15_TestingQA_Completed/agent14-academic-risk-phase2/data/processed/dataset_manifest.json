@@ -1,0 +1,20 @@
+{
+  "dataset_version":"agent14-cse-2026-r8",
+  "department":"Computer Science and Engineering",
+  "students":500,
+  "sections":10,
+  "students_per_section":50,
+  "mentors":5,
+  "hods":1,
+  "deans":1,
+  "assignments":500,
+  "semester_snapshots":2500,
+  "course_snapshots":12500,
+  "historical_outcomes":2000,
+  "reference_rows":25,
+  "observations":123,
+  "seed_alerts":72,
+  "roll_number_first":"241FA04001",
+  "roll_number_last":"241FA04500",
+  "current_semester":5
+}

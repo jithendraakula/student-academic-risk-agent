@@ -1,19 +1,23 @@
 {
   "model_key": "course_failure",
-  "model": "RandomForestClassifier",
+  "model": "Calibrated RandomForestClassifier",
+  "base_model": "RandomForestClassifier",
+  "calibration_method": "sigmoid",
+  "calibration_cv": 3,
   "target": "End-of-semester course failure",
   "target_column": "course_failed",
-  "train_cohorts": [
-    2023,
-    2024
+  "train_semesters": [
+    1,
+    2,
+    3
   ],
-  "held_out_cohort": 2025,
-  "train_samples": 6000,
-  "test_samples": 1200,
-  "positive_train": 510,
-  "negative_train": 5490,
-  "positive_test": 97,
-  "negative_test": 1103,
+  "held_out_semester": 4,
+  "train_samples": 7500,
+  "test_samples": 2500,
+  "positive_train": 133,
+  "negative_train": 7367,
+  "positive_test": 53,
+  "negative_test": 2447,
   "feature_columns": [
     "course_credits",
     "internal_marks",
@@ -28,56 +32,59 @@
     "assessment_trend",
     "assignment_completion_rate"
   ],
-  "transformed_feature_count": 17,
-  "decision_threshold": 0.59,
-  "threshold_selection": "20% training-only validation split optimized for F1",
+  "transformed_feature_count": 15,
+  "decision_threshold": 0.1,
+  "threshold_selection": "20% training-only validation split optimized for F1 after probability calibration",
   "top_global_features": [
     {
       "feature": "numeric__course_attendance_percentage",
-      "importance": 0.27381
-    },
-    {
-      "feature": "numeric__internal_marks",
-      "importance": 0.237496
-    },
-    {
-      "feature": "numeric__midterm_marks",
-      "importance": 0.132257
-    },
-    {
-      "feature": "numeric__quiz_average",
-      "importance": 0.105468
-    },
-    {
-      "feature": "numeric__assignment_average",
-      "importance": 0.082486
-    },
-    {
-      "feature": "numeric__practical_marks",
-      "importance": 0.059794
+      "importance": 0.18933
     },
     {
       "feature": "numeric__assignment_completion_rate",
-      "importance": 0.040253
+      "importance": 0.160782
+    },
+    {
+      "feature": "numeric__practical_marks",
+      "importance": 0.11968
+    },
+    {
+      "feature": "numeric__internal_marks",
+      "importance": 0.11463
+    },
+    {
+      "feature": "numeric__midterm_marks",
+      "importance": 0.114589
+    },
+    {
+      "feature": "numeric__assignment_average",
+      "importance": 0.102385
+    },
+    {
+      "feature": "numeric__quiz_average",
+      "importance": 0.100135
+    },
+    {
+      "feature": "categorical__assessment_trend_declining",
+      "importance": 0.027329
     },
     {
       "feature": "numeric__course_credits",
-      "importance": 0.010938
-    },
-    {
-      "feature": "categorical__course_attendance_trend_declining",
-      "importance": 0.008928
+      "importance": 0.016271
     },
     {
       "feature": "numeric__previous_course_attempts",
-      "importance": 0.007876
+      "importance": 0.013734
     }
   ],
-  "trained_at": "2026-09-12T14:03:25.272762+00:00",
-  "accuracy": 0.8783,
-  "balanced_accuracy": 0.6799,
-  "precision": 0.3185,
-  "recall": 0.4433,
-  "f1": 0.3707,
-  "roc_auc": 0.8203
+  "trained_at": "2026-09-13T10:01:13.393424+00:00",
+  "accuracy": 0.9724,
+  "balanced_accuracy": 0.4967,
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "roc_auc": 0.6396,
+  "brier_score": 0.0207,
+  "holdout_positive_rate": 0.0212,
+  "holdout_mean_predicted_probability": 0.0177
 }

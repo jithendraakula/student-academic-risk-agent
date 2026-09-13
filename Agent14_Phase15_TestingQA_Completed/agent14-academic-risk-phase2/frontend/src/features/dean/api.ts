@@ -26,6 +26,7 @@ export interface RiskHeatmapRow {
 export interface DeanStudent {
   student_id: string;
   student_name: string;
+  roll_number?: string | null;
   batch: string;
   section: string;
   department: string;
@@ -42,18 +43,29 @@ export interface DeanSummary {
   departments: number;
   critical_students: number;
   high_risk_students: number;
+  high_only_students?: number;
+  elevated_risk_students?: number;
   students_needing_action: number;
+  students_with_multiple_risks?: number;
+  risk_signals?: number;
+  actionable_risk_signals?: number;
   support_attention_students: number;
   open_alerts: number;
+  open_alert_students?: number;
   new_alerts: number;
+  new_alert_students?: number;
   intervention_load: number;
   average_priority: number;
-  risk_distribution: Array<{ risk_type: string; risk_label: string; affected_students: number; affected_rate: number; average_priority: number }>;
+  risk_distribution: Array<{ risk_type: string; risk_label: string; affected_students: number; affected_rate: number; actionable_students: number; average_priority: number }>;
+  metric_semantics?: Record<string, { meaning: string; unit: string }>;
+  risk_thresholds?: { elevated: number; critical: number };
+  alert_source?: string;
 }
 
 export interface PriorityQueueRow {
   student_id: string;
   student_name: string;
+  roll_number?: string | null;
   department: string;
   batch: string;
   section: string;

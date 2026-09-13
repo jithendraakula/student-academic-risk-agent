@@ -19,9 +19,19 @@ def _source_feature(transformed: str) -> str:
     # using known feature names rather than treating the category as a feature.
     return raw
 
+def _factor_pipeline(pipeline):
+    classifiers = getattr(pipeline, "calibrated_classifiers_", [])
+    if classifiers:
+        estimator = getattr(classifiers[0], "estimator", None)
+        if estimator is not None and hasattr(estimator, "named_steps"):
+            return estimator
+    return pipeline
+
+
 def _top_factors(pipeline, row, top_n=3):
-    pre=pipeline.named_steps["preprocessor"]
-    model=pipeline.named_steps["model"]
+    factor_pipe = _factor_pipeline(pipeline)
+    pre=factor_pipe.named_steps["preprocessor"]
+    model=factor_pipe.named_steps["model"]
     transformed=list(pre.get_feature_names_out())
     importances=getattr(model,"feature_importances_",np.zeros(len(transformed)))
     source_features=list(getattr(pre,"feature_names_in_",[]))

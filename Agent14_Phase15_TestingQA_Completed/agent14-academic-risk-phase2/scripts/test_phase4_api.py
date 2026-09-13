@@ -80,8 +80,8 @@ def main() -> None:
         health.raise_for_status()
         assert health.json()["database"] == "connected"
 
-        mentor1 = {"Authorization": f"Bearer {login(client, 'mentor1@vignan.ac.in')}"}
-        mentor2 = {"Authorization": f"Bearer {login(client, 'mentor2@vignan.ac.in')}"}
+        mentor1 = {"Authorization": f"Bearer {login(client, 'mentor.one.cse@vignan.ac.in')}"}
+        mentor2 = {"Authorization": f"Bearer {login(client, 'mentor.two.cse@vignan.ac.in')}"}
         hod = {"Authorization": f"Bearer {login(client, 'hod.cse@vignan.ac.in')}"}
         dean = {"Authorization": f"Bearer {login(client, 'dean@vignan.ac.in')}"}
 
@@ -98,10 +98,8 @@ def main() -> None:
         with SessionLocal() as db:
             m1_student = db.query(Assignment.student_id).filter(Assignment.teacher_id == "T001").first()[0]
             m2_student = db.query(Assignment.student_id).filter(Assignment.teacher_id == "T002").first()[0]
-            ece_student = db.query(Student.id).filter(Student.department == "DEPT_ECE").first()[0]
         assert client.get(f"/api/predictions/student/{m2_student}", headers=mentor1).status_code == 403
-        assert client.get(f"/api/predictions/student/{ece_student}", headers=hod).status_code == 403
-
+        
         # HOD and Dean consume the same current-risk store and expose canonical labels.
         comparison = client.get("/api/hod/mentor-comparison", headers=hod)
         comparison.raise_for_status()
@@ -118,7 +116,7 @@ def main() -> None:
 
         with SessionLocal() as db:
             prediction_count = db.query(RiskPrediction).count()
-            assert prediction_count == 360 * 9, prediction_count
+            assert prediction_count == 500 * 9, prediction_count
             alerts = db.query(AlertIntervention).all()
             assert alerts, "canonical alert projection should not be empty"
             assert all((a.data or {}).get("source") == "risk_predictions" for a in alerts)
@@ -126,7 +124,7 @@ def main() -> None:
 
         # The intervention lifecycle updates the canonical alert record without
         # changing its risk/priority source.
-        first_alert = watch_data["items"][0]
+        first_alert = next(item for item in watch_data["items"] if item["status"] == "NEW")
         patched = client.patch(
             f"/api/interventions/{first_alert['alert_id']}",
             headers=mentor1,

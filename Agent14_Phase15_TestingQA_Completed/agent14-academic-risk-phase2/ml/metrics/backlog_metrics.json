@@ -1,19 +1,23 @@
 {
   "model_key": "backlog",
-  "model": "RandomForestClassifier",
+  "model": "Calibrated RandomForestClassifier",
+  "base_model": "RandomForestClassifier",
+  "calibration_method": "sigmoid",
+  "calibration_cv": 3,
   "target": "End-of-semester new backlog",
   "target_column": "new_backlog",
-  "train_cohorts": [
-    2023,
-    2024
+  "train_semesters": [
+    1,
+    2,
+    3
   ],
-  "held_out_cohort": 2025,
-  "train_samples": 1200,
-  "test_samples": 240,
-  "positive_train": 274,
-  "negative_train": 926,
-  "positive_test": 47,
-  "negative_test": 193,
+  "held_out_semester": 4,
+  "train_samples": 1500,
+  "test_samples": 500,
+  "positive_train": 118,
+  "negative_train": 1382,
+  "positive_test": 44,
+  "negative_test": 456,
   "feature_columns": [
     "department",
     "batch",
@@ -56,56 +60,59 @@
     "repeated_backlog_flag",
     "engagement_decline_flag"
   ],
-  "transformed_feature_count": 49,
-  "decision_threshold": 0.41000000000000003,
-  "threshold_selection": "20% training-only validation split optimized for F1",
+  "transformed_feature_count": 54,
+  "decision_threshold": 0.12000000000000001,
+  "threshold_selection": "20% training-only validation split optimized for F1 after probability calibration",
   "top_global_features": [
     {
+      "feature": "numeric__current_backlog_count",
+      "importance": 0.0647
+    },
+    {
+      "feature": "numeric__new_backlogs_last_semester",
+      "importance": 0.062368
+    },
+    {
+      "feature": "numeric__backlog_growth_rate",
+      "importance": 0.053531
+    },
+    {
       "feature": "numeric__gpa_change",
-      "importance": 0.065859
+      "importance": 0.050429
     },
     {
-      "feature": "numeric__quiz_average",
-      "importance": 0.053156
-    },
-    {
-      "feature": "numeric__internal_marks_average",
-      "importance": 0.049152
-    },
-    {
-      "feature": "numeric__midterm_marks_average",
-      "importance": 0.043995
-    },
-    {
-      "feature": "numeric__recent_engagement_score",
-      "importance": 0.042785
-    },
-    {
-      "feature": "numeric__attendance_last_30_days",
-      "importance": 0.042178
-    },
-    {
-      "feature": "numeric__projected_final_attendance",
-      "importance": 0.041959
-    },
-    {
-      "feature": "numeric__previous_cgpa",
-      "importance": 0.041699
-    },
-    {
-      "feature": "numeric__practical_marks_average",
-      "importance": 0.041673
+      "feature": "numeric__assignment_average",
+      "importance": 0.04873
     },
     {
       "feature": "numeric__current_gpa",
-      "importance": 0.039739
+      "importance": 0.046558
+    },
+    {
+      "feature": "numeric__practical_marks_average",
+      "importance": 0.045333
+    },
+    {
+      "feature": "numeric__quiz_average",
+      "importance": 0.044835
+    },
+    {
+      "feature": "numeric__midterm_marks_average",
+      "importance": 0.044385
+    },
+    {
+      "feature": "numeric__previous_gpa",
+      "importance": 0.042112
     }
   ],
-  "trained_at": "2026-09-12T14:03:26.382672+00:00",
-  "accuracy": 0.6792,
-  "balanced_accuracy": 0.6235,
-  "precision": 0.3125,
-  "recall": 0.5319,
-  "f1": 0.3937,
-  "roc_auc": 0.6939
+  "trained_at": "2026-09-13T10:01:17.783007+00:00",
+  "accuracy": 0.852,
+  "balanced_accuracy": 0.6519,
+  "precision": 0.2727,
+  "recall": 0.4091,
+  "f1": 0.3273,
+  "roc_auc": 0.698,
+  "brier_score": 0.0732,
+  "holdout_positive_rate": 0.088,
+  "holdout_mean_predicted_probability": 0.0836
 }

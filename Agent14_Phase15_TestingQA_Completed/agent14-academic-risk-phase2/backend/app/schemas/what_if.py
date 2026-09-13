@@ -11,7 +11,7 @@ class CourseWhatIf(BaseModel):
     assignment_average: Optional[float] = Field(default=None, ge=0, le=100)
     practical_marks: Optional[float] = Field(default=None, ge=0, le=100)
     course_attendance_percentage: Optional[float] = Field(default=None, ge=0, le=100)
-    assignment_completion_rate: Optional[float] = Field(default=None, ge=0, le=1)
+    assignment_completion_rate: Optional[float] = Field(default=None, ge=0, le=1, description="Fraction from 0 to 1; independent from assessment participation")
 
 
 class WhatIfRequest(BaseModel):

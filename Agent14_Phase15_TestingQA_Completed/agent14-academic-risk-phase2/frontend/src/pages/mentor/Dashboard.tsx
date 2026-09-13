@@ -1,38 +1,34 @@
 import { useEffect, useMemo, useState } from "react";
-import InstitutionalShell from "../../components/InstitutionalShell";
-import WorkspaceIntro from "../../components/WorkspaceIntro";
 import { Link } from "react-router-dom";
 import Card from "../../components/Card";
-import RiskBadge, { scoreToLevel } from "../../components/RiskBadge";
+import InstitutionalShell from "../../components/InstitutionalShell";
+import WorkspaceIntro from "../../components/WorkspaceIntro";
+import RiskBadge from "../../components/RiskBadge";
 import Table, { type TableColumn } from "../../components/Table";
+import { ActionButton, Icon, MetricCard, SectionHeading } from "../../components/AcademicUI";
 import { useAuth } from "../../context/AuthContext";
 import { acknowledgeAlert, getMentorWorkspace, updateIntervention, type MentorAlert, type MentorStudentRow } from "../../features/mentor/api";
-import { readableRiskType, scorePercent } from "../../features/mentor/formatters";
+import { readableRiskType } from "../../features/mentor/formatters";
 
-function Metric({ icon, label, value, detail, tone = "text-ink-900" }: { icon: string; label: string; value: number | string; detail: string; tone?: string }) {
-  return (
-    <Card className="p-5">
-      <p className="text-xl" aria-hidden="true">{icon}</p>
-      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">{label}</p>
-      <p className={`mt-2 text-3xl font-bold tracking-tight ${tone}`}>{value}</p>
-      <p className="mt-2 text-sm text-slate-500">{detail}</p>
-    </Card>
-  );
+function riskLevelLabel(level: string) {
+  const normalized = level?.toUpperCase();
+  return normalized === "MEDIUM" ? "MODERATE" : normalized || "LOW";
 }
 
-function getRiskReason(row: MentorStudentRow) {
-  return row.primary_risk ? readableRiskType(row.primary_risk) : "No elevated risk signal";
+function score100(value: number) {
+  return `${Math.round(value)} / 100`;
 }
 
 function getRecommendedAction(row: MentorStudentRow) {
+  if (!row.needs_action) return "Monitor";
   if (row.primary_alert?.suggested_action) return row.primary_alert.suggested_action;
   switch (row.primary_risk) {
-    case "attendance_shortage": return "Review attendance barrier and recovery plan.";
+    case "attendance_shortage": return "Review attendance barrier and agree on a recovery target.";
     case "backlog": return "Review backlog clearance plan.";
-    case "gpa_threshold": return "Set an academic improvement target.";
-    case "course_failure": return "Review course performance and recovery plan.";
-    case "discontinuation": return "Coordinate support follow-up and monitor continuity.";
-    default: return "Review student profile.";
+    case "gpa_threshold": return "Set a realistic academic improvement target.";
+    case "course_failure": return "Review the affected course and agree on a recovery step.";
+    case "support_attention": return "Coordinate supportive follow-up and continuity review.";
+    default: return "Review the student case.";
   }
 }
 
@@ -72,7 +68,7 @@ export default function MentorDashboard() {
   }
 
   useEffect(() => {
-    const timer = window.setTimeout(() => void loadWorkspace(), 300);
+    const timer = window.setTimeout(() => void loadWorkspace(), 160);
     return () => window.clearTimeout(timer);
   }, [search, riskFilter, severityFilter, actionOnly]);
 
@@ -90,7 +86,7 @@ export default function MentorDashboard() {
     event.preventDefault();
     if (!selectedAlert || !interventionNotes.trim()) return;
     if (interventionStatus === "FOLLOW_UP" && !followUpDate) {
-      setError("Choose a follow-up date before saving a follow-up intervention.");
+      setError("Choose a follow-up date before saving a follow-up action.");
       return;
     }
     setSavingIntervention(true);
@@ -100,6 +96,7 @@ export default function MentorDashboard() {
       setSelectedAlert(null);
       setInterventionNotes("");
       setFollowUpDate("");
+      setError(null);
     } catch {
       setError("The intervention could not be saved. Please try again.");
     } finally {
@@ -110,113 +107,113 @@ export default function MentorDashboard() {
   const filterLabel = useMemo(() => {
     if (actionOnly) return "Students requiring action";
     if (riskFilter !== "all") return readableRiskType(riskFilter);
-    return "All assigned students";
-  }, [actionOnly, riskFilter]);
+    if (severityFilter !== "all") return `${riskLevelLabel(severityFilter)} risk students`;
+    return "Assigned students";
+  }, [actionOnly, riskFilter, severityFilter]);
 
   const columns: TableColumn<MentorStudentRow>[] = [
     {
       key: "student",
       header: "Student",
       render: (row) => (
-        <Link to={`/mentor/student/${row.student_id}`} className="font-semibold text-ink-900 hover:text-brand-600">
-          {row.student_name}
-          <span className="mt-0.5 block text-xs font-normal text-slate-400">{row.student_id} · {row.section}</span>
+        <Link to={`/mentor/student/${row.student_id}`} className="group block min-w-0">
+          <span className="block break-words font-semibold text-ink-900 group-hover:text-brand-700">{row.student_name}</span>
+          <span className="mt-1 block text-xs font-medium text-slate-500">{row.roll_number ?? row.student_id} · {row.section}</span>
         </Link>
       ),
     },
     {
-      key: "risk",
-      header: "Primary risk",
+      key: "concern",
+      header: "Primary concern",
       render: (row) => (
-        <div className="flex max-w-[250px] flex-wrap items-center gap-2">
-          <RiskBadge level={scoreToLevel(row.risk_score)} />
-          <span className="text-xs font-semibold text-slate-600">{getRiskReason(row)}</span>
+        <div className="min-w-0">
+          <RiskBadge level={riskLevelLabel(row.risk_level) as any} />
+          <p className="mt-2 text-sm font-semibold text-slate-700">{row.primary_risk ? readableRiskType(row.primary_risk) : "No elevated risk"}</p>
         </div>
       ),
     },
-    { key: "riskScore", header: "Risk", render: (row) => <span className="font-bold text-ink-900">{scorePercent(row.risk_score)}</span> },
-    { key: "priority", header: "Priority", render: (row) => <span className="font-semibold text-brand-700">{scorePercent(row.priority_score)}</span> },
     {
-      key: "alerts",
-      header: "Alerts",
-      render: (row) => <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">{row.open_alerts} open · {row.new_alerts} new</span>,
+      key: "risk",
+      header: "Risk",
+      render: (row) => <div><p className="font-extrabold text-ink-900">{score100(row.risk_score)}</p><p className="mt-1 text-[11px] text-slate-500">Risk / 100</p></div>,
     },
     {
-      key: "recommendation",
-      header: "Recommended action",
-      render: (row) => <span className="block max-w-[300px] whitespace-normal text-sm text-slate-600">{getRecommendedAction(row)}</span>,
+      key: "priority",
+      header: "Priority",
+      render: (row) => <div><p className="font-extrabold text-brand-700">{score100(row.priority_score)}</p><p className="mt-1 text-[11px] text-slate-500">Priority / 100</p></div>,
+    },
+    {
+      key: "work",
+      header: "Case work",
+      render: (row) => <div><p className="text-sm font-semibold text-slate-700">{row.open_alerts} open</p><p className="mt-1 text-[11px] text-slate-500">{row.new_alerts} new · {row.open_alerts === 1 ? "1 work item" : `${row.open_alerts} work items`}</p></div>,
+    },
+    {
+      key: "next",
+      header: "Next step",
+      render: (row) => <span className={row.needs_action ? "block max-w-[320px] text-sm leading-5 text-slate-700" : "block text-sm text-slate-500"}>{getRecommendedAction(row)}</span>,
     },
     {
       key: "action",
-      header: "Action",
+      header: "",
       render: (row) => (
-        <div className="flex items-center gap-3">
-          <Link to={`/mentor/student/${row.student_id}`} className="font-semibold text-brand-600 hover:text-brand-700">Open</Link>
-          {row.primary_alert ? <button type="button" onClick={() => setSelectedAlert(row.primary_alert)} className="font-semibold text-slate-600 hover:text-ink-900">Intervene</button> : null}
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Link to={`/mentor/student/${row.student_id}`} className="ui-button ui-button-secondary !min-h-9 !px-3 !text-xs"><Icon name="open" />Open case</Link>
+          {row.needs_action && row.primary_alert ? <ActionButton variant="primary" className="!min-h-9 !px-3 !text-xs" onClick={() => setSelectedAlert(row.primary_alert!)}>Intervene</ActionButton> : null}
         </div>
       ),
     },
   ];
 
   return (
-    <InstitutionalShell
-      eyebrow="CSE · VIGNAN'S UNIVERSITY"
-      title="STUDENT ACADEMIC RISK MANAGEMENT"
-      subtitle="Mentor Workspace · Early warning and intervention queue"
-    >
-      <div className="space-y-6">
-      <WorkspaceIntro role="mentor" name={user?.name} context={workspace?.risk_source} />
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-semibold text-ink-900">Good morning, {user?.name ?? "Mentor"}</h2>
-            <p className="mt-1 text-sm text-slate-500">Review your assigned students by risk, priority, and intervention status.</p>
+    <InstitutionalShell eyebrow="CSE · VIGNAN'S UNIVERSITY" title="STUDENT ACADEMIC RISK MANAGEMENT" subtitle="Mentor workspace · academic support cases">
+      <div className="space-y-7">
+        <WorkspaceIntro role="mentor" name={user?.name} context="CSE · Semester 5 · 2026–27" />
+
+        {error ? <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div> : null}
+
+        <section aria-labelledby="mentor-metrics-title" className="space-y-3">
+          <SectionHeading eyebrow="Today at a glance" title="Start with the students who need attention" description="" />
+          <h2 id="mentor-metrics-title" className="sr-only">Mentor workload summary</h2>
+          <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <MetricCard icon="attention" label="Needs action" value={loading ? "" : workspace?.students_needing_action ?? 0} detail="Unique students requiring a decision" tone="brand" loading={loading} />
+            <MetricCard icon="critical" label="Critical students" value={loading ? "" : workspace?.critical_students ?? 0} detail="Students with at least one critical signal" tone="critical" loading={loading} />
+            <MetricCard icon="attention" label="High-risk students" value={loading ? "" : workspace?.high_risk_students ?? 0} detail="Students at high or critical risk" tone="attention" loading={loading} />
+            <MetricCard icon="alerts" label="Open case work" value={loading ? "" : workspace?.open_alerts ?? 0} detail={loading ? "Active work items" : `${workspace?.open_alert_students ?? 0} students represented`} tone="brand" loading={loading} />
+            <MetricCard icon="students" label="Assigned students" value={loading ? "" : workspace?.assigned_students ?? 0} detail="Students in your assigned sections" loading={loading} />
           </div>
-        </div>
-
-        {error ? <div role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
-
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5" aria-label="Mentor summary">
-          <Metric icon="👥" label="Assigned students" value={workspace?.assigned_students ?? 0} detail="Students in your cohort" />
-          <Metric icon="🚨" label="Critical students" value={workspace?.critical_students ?? 0} detail="At least one critical risk" tone="text-red-700" />
-          <Metric icon="⚠️" label="High-risk students" value={workspace?.high_risk_students ?? 0} detail="High or critical risk" tone="text-orange-700" />
-          <Metric icon="🎯" label="Needs action" value={workspace?.students_needing_action ?? 0} detail="Canonical alert policy" tone="text-brand-700" />
-          <Metric icon="📬" label="Open alerts" value={workspace?.open_alerts ?? 0} detail={`${workspace?.new_alerts ?? 0} new`} tone="text-brand-700" />
         </section>
 
-        <Card as="section" className="p-0">
-          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-100 px-5 py-4">
-            <div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Mentor queue</p><h2 className="mt-1 text-lg font-bold text-ink-900">{filterLabel}</h2></div>
-            <span className="text-xs text-slate-500">Source: {workspace?.risk_source ?? "canonical risk predictions"}</span>
+        <Card id="mentor-queue" as="section" className="min-w-0 overflow-hidden" style={{ scrollMarginTop: "120px" }}>
+          <div className="border-b border-slate-100 px-5 py-4 md:px-6">
+            <SectionHeading eyebrow="Attention queue" title={filterLabel} description="Review a case to see why it needs attention and decide the next step." action={<span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-600">{loading ? "Loading" : `${rows.length} shown`}</span>} />
           </div>
-          <div className="grid gap-3 border-b border-slate-100 px-5 py-4 md:grid-cols-[1fr_190px_150px_auto]">
-            <label className="flex flex-col gap-1 text-xs font-semibold text-slate-600">Search<input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Student name or ID" className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-ink-900 transition-colors duration-150 focus:border-brand-400" /></label>
-            <label className="flex flex-col gap-1 text-xs font-semibold text-slate-600">Risk type<select value={riskFilter} onChange={(event) => setRiskFilter(event.target.value)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-ink-900 transition-colors duration-150 focus:border-brand-400"><option value="all">All risks</option><option value="course_failure">Course failure</option><option value="backlog">Backlog</option><option value="gpa_threshold">GPA threshold</option><option value="attendance_shortage">Attendance shortage</option><option value="discontinuation">Support attention</option></select></label>
-            <label className="flex flex-col gap-1 text-xs font-semibold text-slate-600">Severity<select value={severityFilter} onChange={(event) => setSeverityFilter(event.target.value)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-ink-900 transition-colors duration-150 focus:border-brand-400"><option value="all">All levels</option><option value="CRITICAL">Critical</option><option value="HIGH">High</option><option value="MODERATE">Moderate</option><option value="LOW">Low</option></select></label>
-            <label className="flex items-center gap-2 self-end rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"><input type="checkbox" checked={actionOnly} onChange={(event) => setActionOnly(event.target.checked)} /> Needs action</label>
+          <div className="border-b border-slate-100 bg-[#fbfdff] px-5 py-4 md:px-6">
+            <div className="u8-filter-grid grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_210px_170px_auto] lg:items-end">
+              <label className="grid min-w-0 gap-1.5 text-xs font-semibold text-slate-600">Find a student<input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Name or roll number" className="ui-control w-full" /></label>
+              <label className="grid gap-1.5 text-xs font-semibold text-slate-600">Risk type<select value={riskFilter} onChange={(event) => setRiskFilter(event.target.value)} className="ui-control"><option value="all">All risk types</option><option value="course_failure">Course failure</option><option value="backlog">Backlog</option><option value="gpa_threshold">GPA threshold</option><option value="attendance_shortage">Attendance shortage</option><option value="support_attention">Support attention</option></select></label>
+              <label className="grid gap-1.5 text-xs font-semibold text-slate-600">Risk level<select value={severityFilter} onChange={(event) => setSeverityFilter(event.target.value)} className="ui-control"><option value="all">All levels</option><option value="CRITICAL">Critical</option><option value="HIGH">High</option><option value="MODERATE">Moderate</option><option value="LOW">Low</option></select></label>
+              <label className="inline-flex min-h-[42px] items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700"><input type="checkbox" checked={actionOnly} onChange={(event) => setActionOnly(event.target.checked)} className="h-4 w-4 accent-[#2767bf]" /> Needs action only</label>
+            </div>
           </div>
           <div className="p-3 md:p-5">
-            {loading ? <p className="px-2 py-8 text-sm text-slate-500">Loading your mentor queue...</p> : <Table columns={columns} rows={rows} rowKey={(row) => row.student_id} caption="Mentor student queue" emptyMessage="No students match the current filters." />}
+            {loading ? (
+              <div className="space-y-2" aria-busy="true">
+                {[1, 2, 3, 4, 5].map((item) => <div key={item} className="grid grid-cols-1 gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-4 md:grid-cols-[1.2fr_.9fr_.6fr_.6fr_.75fr_1.4fr_.8fr]"><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /></div>)}
+              </div>
+            ) : (
+              <Table columns={columns} rows={rows} rowKey={(row) => row.student_id} caption="Mentor student attention queue" emptyMessage="No students match the current filters." />
+            )}
           </div>
         </Card>
 
         {selectedAlert ? (
-          <Card as="section" className="border-brand-200 bg-brand-50/40">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-600">Intervention record</p>
-                <h2 className="mt-1 text-lg font-bold text-ink-900">{selectedAlert.student_name} · {readableRiskType(selectedAlert.risk_type)}</h2>
-                <p className="mt-1 text-sm text-slate-500">Priority {scorePercent(selectedAlert.priority_score)} · Risk {scorePercent(selectedAlert.risk_score)} · {selectedAlert.risk_level ?? "current"}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                {selectedAlert.status === "NEW" ? <button type="button" onClick={() => void handleAcknowledge(selectedAlert.alert_id)} className="text-sm font-semibold text-brand-600 hover:text-brand-700">Acknowledge</button> : null}
-                <button type="button" onClick={() => setSelectedAlert(null)} className="text-sm font-semibold text-slate-500 hover:text-ink-900">Cancel</button>
-              </div>
-            </div>
-            <form onSubmit={(event) => void handleIntervention(event)} className="mt-4 grid gap-3 md:grid-cols-[190px_190px_1fr_auto] md:items-end">
-              <label className="flex flex-col gap-1 text-xs font-semibold text-slate-600">Next status<select value={interventionStatus} onChange={(event) => setInterventionStatus(event.target.value as typeof interventionStatus)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-ink-900"><option value="ACKNOWLEDGED">Acknowledged</option><option value="ACTION_TAKEN">Action taken</option><option value="FOLLOW_UP">Follow-up</option><option value="RESOLVED">Resolved</option></select></label>
-              <label className="flex flex-col gap-1 text-xs font-semibold text-slate-600">Follow-up date<input required={interventionStatus === "FOLLOW_UP"} type="date" min={new Date().toISOString().slice(0, 10)} value={followUpDate} onChange={(event) => setFollowUpDate(event.target.value)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-ink-900" /></label>
-              <label className="flex flex-col gap-1 text-xs font-semibold text-slate-600">Notes<textarea required value={interventionNotes} onChange={(event) => setInterventionNotes(event.target.value)} placeholder="Describe the mentor action or next follow-up" className="min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-ink-900" /></label>
-              <button type="submit" disabled={savingIntervention || !interventionNotes.trim()} className="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60">{savingIntervention ? "Saving..." : "Save intervention"}</button>
+          <Card as="section" className="border-brand-200 bg-[#f8fbff] p-5 md:p-6">
+            <SectionHeading eyebrow="Support action" title={`${selectedAlert.student_name} · ${readableRiskType(selectedAlert.risk_type)}`} description="Record the support action and follow-up." action={<div className="flex flex-wrap items-center justify-end gap-2">{selectedAlert.status === "NEW" ? <ActionButton variant="secondary" className="!min-h-9 !px-3 !text-xs" onClick={() => void handleAcknowledge(selectedAlert.alert_id)}>Acknowledge</ActionButton> : null}<ActionButton variant="ghost" className="!min-h-9 !px-2 !text-xs" onClick={() => setSelectedAlert(null)}>Close</ActionButton></div>} />
+            <form onSubmit={(event) => void handleIntervention(event)} className="mt-4 grid min-w-0 gap-4 lg:grid-cols-[180px_180px_minmax(0,1fr)_auto] lg:items-end">
+              <label className="grid gap-1.5 text-xs font-semibold text-slate-600">Next status<select value={interventionStatus} onChange={(event) => setInterventionStatus(event.target.value as typeof interventionStatus)} className="ui-control"><option value="ACKNOWLEDGED">Acknowledged</option><option value="ACTION_TAKEN">Action taken</option><option value="FOLLOW_UP">Follow-up</option><option value="RESOLVED">Resolved</option></select></label>
+              <label className="grid gap-1.5 text-xs font-semibold text-slate-600">Follow-up date<input required={interventionStatus === "FOLLOW_UP"} type="date" min={new Date().toISOString().slice(0, 10)} value={followUpDate} onChange={(event) => setFollowUpDate(event.target.value)} className="ui-control" /></label>
+              <label className="grid gap-1.5 text-xs font-semibold text-slate-600">What did you do?<textarea required value={interventionNotes} onChange={(event) => setInterventionNotes(event.target.value)} placeholder="Record the support action, agreement or follow-up plan." className="min-h-[84px] min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-ink-900" /></label>
+              <ActionButton type="submit" disabled={savingIntervention || !interventionNotes.trim()} variant="primary">Save action</ActionButton>
             </form>
           </Card>
         ) : null}

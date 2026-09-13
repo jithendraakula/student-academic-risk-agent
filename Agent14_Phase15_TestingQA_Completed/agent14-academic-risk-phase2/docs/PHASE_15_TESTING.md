@@ -37,3 +37,8 @@ Before Phase 16 deployment, the target environment must also complete `npm ci &&
 ## QA principle
 
 A test that was not actually run is not marked as passed. Environment or dependency limitations are recorded separately from verified application behavior.
+
+
+## R9 follow-up gate
+
+`python scripts/test_r9_runtime_alerts.py` validates live alert/work-item semantics against a fresh runtime database. The seed CSV count is not treated as the production KPI.

@@ -55,7 +55,7 @@ def login(client, email):
 def main():
     with TestClient(app) as client:
         dean = login(client, 'dean@vignan.ac.in')
-        mentor = login(client, 'mentor1@vignan.ac.in')
+        mentor = login(client, 'mentor.one.cse@vignan.ac.in')
         hod = login(client, 'hod.cse@vignan.ac.in')
         admin = login(client, 'admin@vignan.ac.in')
 
@@ -97,8 +97,6 @@ def main():
 
         with SessionLocal() as db:
             dept = db.query(Student.department).distinct().first()[0]
-            ece = db.query(Student.id).filter(Student.department != 'DEPT_CSE').first()
-            assert ece is not None
             before = db.query(RiskPrediction).count()
 
         students = client.get(f'/api/dean/departments/{dept}/students', headers=dean)
@@ -114,8 +112,10 @@ def main():
         assert client.get('/api/dean/summary', headers=hod).status_code == 403
         assert client.get('/api/dean/summary', headers=admin).status_code == 403
 
-        # Dean can access a college-wide student profile through the shared RBAC policy.
-        profile = client.get(f'/api/predictions/student/{ece[0]}', headers=dean)
+        # Dean can access a college-wide CSE student profile through the shared RBAC policy.
+        with SessionLocal() as db:
+            any_student = db.query(Student.id).first()[0]
+        profile = client.get(f'/api/predictions/student/{any_student}', headers=dean)
         profile.raise_for_status()
         assert 'risks' in profile.json()
 

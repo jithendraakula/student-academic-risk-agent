@@ -17,9 +17,11 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.domain import AlertIntervention, InterventionRecord, Student, User
+from app.models.domain import AcademicObservation, AlertIntervention, InterventionRecord, Student, User
 from app.services.aggregation import student_summary
+from app.core.config import AI_INCLUDE_STUDENT_IDENTIFIERS, AI_ALLOWED_EXTERNAL_DATA
 from app.services.rbac import can_access_student, can_view_support_attention_risk
+from app.services.context_intelligence import summarize_observations
 from app.services.risk import build_student_risk_profile
 from app.services.risk_engine import RISK_TYPES
 from app.services.what_if import simulate_student
@@ -113,15 +115,27 @@ def build_context(db: Session, student_id: str, user: User, intent: CopilotInten
         .where(InterventionRecord.student_id == student_id)
         .order_by(InterventionRecord.created_at.desc())
     ).all()
+    observations = db.scalars(
+        select(AcademicObservation)
+        .where(AcademicObservation.student_id == student_id)
+        .order_by(AcademicObservation.observed_on.desc(), AcademicObservation.id.desc())
+    ).all()
+    academic_context = summarize_observations(observations)
+
+    if AI_INCLUDE_STUDENT_IDENTIFIERS and not AI_ALLOWED_EXTERNAL_DATA:
+        raise HTTPException(status_code=500, detail="External AI student-identifier sharing is not permitted by server policy")
+
+    student_context = {
+        "case_reference": f"student-case-{student["student_id"]}",
+        "department": student["department"],
+        "batch": student["batch"],
+        "section": student["section"],
+    }
+    if AI_INCLUDE_STUDENT_IDENTIFIERS:
+        student_context.update({"id": student["student_id"], "name": student["student_name"]})
 
     context = {
-        "student": {
-            "id": student["student_id"],
-            "name": student["student_name"],
-            "department": student["department"],
-            "batch": student["batch"],
-            "section": student["section"],
-        },
+        "student": student_context,
         "metrics": profile.get("student_metrics", {}),
         "thresholds": profile.get("thresholds", {}),
         "canonical_summary": {
@@ -152,6 +166,13 @@ def build_context(db: Session, student_id: str, user: User, intent: CopilotInten
             }
             for row in interventions[:8]
         ],
+        "academic_context": {
+            "primary_context_intent": academic_context.get("primary_context_intent"),
+            "primary_action_path": academic_context.get("primary_action_path"),
+            "active_follow_up_count": academic_context.get("active_follow_up_count", 0),
+            "observations": academic_context.get("observations", [])[:8],
+            "method": academic_context.get("method"),
+        },
     }
 
     if intent == CopilotIntent.WHAT_IF_EXPLANATION:
@@ -250,6 +271,7 @@ def run_copilot(db: Session, student_id: str, user: User, payload: CopilotReques
         **parsed,
         "source_snapshot": {
             "risk_source": "RiskPrediction + canonical priority engine",
+            "student_identifiers_sent_to_provider": AI_INCLUDE_STUDENT_IDENTIFIERS,
             "risk_types": list(RISK_TYPES),
             "what_if_persistent": False if payload.intent == CopilotIntent.WHAT_IF_EXPLANATION else None,
         },

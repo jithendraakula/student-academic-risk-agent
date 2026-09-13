@@ -3,6 +3,7 @@ import api from "../../services/api";
 export interface AdminStudent {
   student_id: string;
   student_name: string;
+  roll_number?: string | null;
   department: string;
   batch: string;
   section: string;

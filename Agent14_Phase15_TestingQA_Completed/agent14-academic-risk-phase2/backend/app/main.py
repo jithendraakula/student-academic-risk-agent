@@ -38,8 +38,15 @@ if ENVIRONMENT == "production":
 async def security_headers(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex
     content_length = request.headers.get("content-length")
-    if content_length and int(content_length) > MAX_REQUEST_BYTES:
-        return Response("Request body too large", status_code=413, headers={"X-Request-ID": request_id})
+    if content_length:
+        try:
+            declared_length = int(content_length)
+        except (TypeError, ValueError):
+            return Response("Invalid Content-Length", status_code=400, headers={"X-Request-ID": request_id})
+        if declared_length < 0:
+            return Response("Invalid Content-Length", status_code=400, headers={"X-Request-ID": request_id})
+        if declared_length > MAX_REQUEST_BYTES:
+            return Response("Request body too large", status_code=413, headers={"X-Request-ID": request_id})
     started = time.perf_counter()
     response = await call_next(request)
     response.headers["X-Request-ID"] = request_id

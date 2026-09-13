@@ -69,6 +69,7 @@ class SystemSetting(Base):
 class Student(Base):
     __tablename__ = "students"
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    roll_number: Mapped[str | None] = mapped_column(String(32), unique=True, index=True, nullable=True)
     name: Mapped[str] = mapped_column(String(255))
     department: Mapped[str] = mapped_column(String(64), index=True)
     program: Mapped[str] = mapped_column(String(128))
@@ -126,6 +127,24 @@ class AcademicReference(Base):
     __tablename__ = "academic_reference_data"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     data: Mapped[dict[str, Any]] = mapped_column(JSON)
+
+
+class AcademicObservation(Base):
+    """Human-readable faculty observation attached to a student case.
+
+    Observation text provides context. The context/intent intelligence layer derives
+    an auditable workflow intent from it; it is not a substitute for quantitative ML risk.
+    """
+    __tablename__ = "academic_observations"
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"), index=True)
+    observed_on: Mapped[str] = mapped_column(String(16), index=True)
+    category: Mapped[str] = mapped_column(String(64), index=True)
+    observation_text: Mapped[str] = mapped_column(Text)
+    source_role: Mapped[str] = mapped_column(String(32))
+    follow_up_required: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    status: Mapped[str] = mapped_column(String(16), default="OPEN", index=True)
 
 
 class RiskPrediction(Base):

@@ -8,9 +8,10 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.domain import AlertIntervention, Assignment, RiskPrediction, Student, Teacher, User
+from app.models.domain import AcademicObservation, AlertIntervention, Assignment, RiskPrediction, Student, Teacher, User
 from app.services.risk_engine import normalize_risk_type, should_create_alert, RISK_TYPES
 from app.services.rbac import can_view_support_attention_risk
+from app.services.context_intelligence import classify_observation
 
 OPEN_STATUSES = {"NEW", "ACKNOWLEDGED", "ACTION_TAKEN", "FOLLOW_UP"}
 
@@ -44,10 +45,43 @@ def _suggested_action(risk_type: str) -> str:
         "course_failure": "Review course performance and create a focused recovery plan.",
         "backlog": "Review pending courses and create a backlog clearance plan.",
         "gpa_threshold": "Review GPA drivers and set an academic improvement target.",
-        "attendance_shortage": "Review attendance barrier and create a recovery plan.",
+        "attendance_shortage": "Review the attendance barrier and create a recovery plan.",
         "discontinuation": "Coordinate appropriate academic/support follow-up and monitor continuity.",
     }
     return actions[normalize_risk_type(risk_type) or risk_type]
+
+
+_CONTEXT_TO_RISKS = {
+    "health_recovery": {"attendance_shortage", "discontinuation"},
+    "transport_attendance": {"attendance_shortage"},
+    "attendance_pattern": {"attendance_shortage"},
+    "assessment_support": {"course_failure", "gpa_threshold", "backlog"},
+    "subject_academic_support": {"course_failure", "gpa_threshold", "backlog"},
+    "family_support": {"attendance_shortage", "discontinuation", "gpa_threshold"},
+    "improvement_maintain": set(),
+    "general_support": set(),
+}
+
+
+def _context_for_alert(db: Session, student_id: str, risk_type: str) -> dict:
+    canonical = normalize_risk_type(risk_type) or risk_type
+    observations = db.scalars(
+        select(AcademicObservation)
+        .where(AcademicObservation.student_id == student_id)
+        .order_by(AcademicObservation.observed_on.desc(), AcademicObservation.id.desc())
+    ).all()
+    # Prefer active/open observations and recent evidence. Closed history is
+    # retained for the student record but should not normally route a new alert.
+    candidates = [o for o in observations if (getattr(o, "status", None) or "OPEN") != "CLOSED"]
+    for observation in candidates:
+        context = classify_observation(observation.category, observation.observation_text)
+        if canonical in _CONTEXT_TO_RISKS.get(context["intent"], set()):
+            return {
+                **context,
+                "observation_text": observation.observation_text,
+                "observation_date": str(observation.observed_on) if getattr(observation, "observed_on", None) else None,
+            }
+    return {}
 
 
 def _upsert_alert(db: Session, prediction: RiskPrediction, existing: AlertIntervention | None) -> AlertIntervention:
@@ -71,6 +105,7 @@ def _upsert_alert(db: Session, prediction: RiskPrediction, existing: AlertInterv
     existing.risk_score = prediction.risk_score
     existing.priority_score = prediction.priority_score
     previous_data = existing.data or {}
+    context = _context_for_alert(db, prediction.student_id, prediction.risk_type)
     existing.data = {
         **previous_data,
         "source": "risk_predictions",
@@ -84,7 +119,15 @@ def _upsert_alert(db: Session, prediction: RiskPrediction, existing: AlertInterv
         "decision_threshold": prediction.decision_threshold,
         "intervenability_score": prediction.intervenability_score,
         "model_version": prediction.model_version,
-        "suggested_action": previous_data.get("suggested_action") or _suggested_action(prediction.risk_type),
+        "suggested_action": context.get("recommended_action") or previous_data.get("suggested_action") or _suggested_action(prediction.risk_type),
+        "context_intent": context.get("intent"),
+        "context_intent_label": context.get("intent_label"),
+        "context_action_type": context.get("action_type"),
+        "context_urgency": context.get("urgency"),
+        "context_support_only": context.get("support_only", False),
+        "context_classifier": context.get("classifier"),
+        "context_observation": context.get("observation_text"),
+        "context_observation_date": context.get("observation_date"),
         "is_active": True,
         "last_synced_at": datetime.utcnow().isoformat(timespec="seconds"),
     }
@@ -204,14 +247,22 @@ def get_active_alerts(
     db: Session,
     student_ids: list[str],
     user: User | None = None,
+    *,
+    synchronize: bool = False,
 ) -> list[AlertIntervention]:
-    from app.services.aggregation import ensure_current_predictions
-    ensure_current_predictions(db, student_ids)
-    sync_canonical_alerts(
-        db,
-        student_ids,
-        include_support_attention=(user is None or can_view_support_attention_risk(user.role)),
-    )
+    """Read active alert work items without re-running ML/sync on every GET.
+
+    Callers that intentionally changed current predictions can opt into
+    synchronization; ordinary dashboard reads should remain read-only.
+    """
+    if synchronize:
+        from app.services.aggregation import ensure_current_predictions
+        ensure_current_predictions(db, student_ids)
+        sync_canonical_alerts(
+            db,
+            student_ids,
+            include_support_attention=(user is None or can_view_support_attention_risk(user.role)),
+        )
     alerts = db.scalars(
         select(AlertIntervention)
         .where(

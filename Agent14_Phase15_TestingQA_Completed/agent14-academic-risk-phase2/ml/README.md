@@ -1,9 +1,13 @@
-# Agent 14 ML — Phase 2
+# Agent 14 ML — R1 Risk Calibration
 
-Phase 2 trains five baseline Random Forest risk models using a strict temporal/cohort boundary.
+Agent 14 trains five calibrated ML risk models using checkpoint-week academic features and historical end-of-semester outcomes.
 
-## Training boundary
-Historical **week-6 checkpoint features** are joined to **end-of-semester outcomes**. Cohort `2025` is held out for evaluation; cohorts `2023` and `2024` are used for training. No current-semester outcome is used for training.
+## Active demo boundary
+- Cohort: 2024 CSE
+- Historical training semesters: 1, 2, 3
+- Temporal holdout: semester 4
+- Current application snapshot: semester 5
+- Checkpoint: week 6
 
 ## Models
 - Course Failure Risk
@@ -12,15 +16,21 @@ Historical **week-6 checkpoint features** are joined to **end-of-semester outcom
 - Attendance Shortage Risk
 - Support Attention Risk
 
-## Run
-From the project root:
+## Calibration
+Each model uses a Random Forest wrapped in 3-fold sigmoid probability calibration. This materially improves the relationship between predicted probabilities and the observed holdout prevalence for low-prevalence risks. Decision thresholds are selected only from a training-only validation split.
 
+## Product risk bands
+- LOW: < 20%
+- MODERATE: 20–39.9%
+- HIGH: 40–59.9%
+- CRITICAL: >= 60%
+
+These bands are product severity bands, not the training decision threshold. Alerts are still created by the canonical priority engine.
+
+## Run
 ```powershell
+python data/generators/generate_all.py
 python -m ml.train_all
+python scripts/test_r1_ml.py
 python -m ml.smoke_test
 ```
-
-Artifacts are written to `ml/models/` and metrics/metadata to `ml/metrics/`.
-
-## Interpretation
-The metrics are held-out cohort metrics, not training accuracy. The per-prediction `top_factors` are model-guided counterfactual feature contributions intended for explanation, not causal attribution.

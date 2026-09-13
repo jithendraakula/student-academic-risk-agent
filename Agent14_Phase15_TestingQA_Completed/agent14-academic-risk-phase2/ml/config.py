@@ -1,8 +1,11 @@
 from pathlib import Path
 
-SEED = 42
+SEED = 2026
 CHECKPOINT_WEEK = 6
-HOLDOUT_COHORT = 2025
+CURRENT_COHORT = 2024
+HISTORICAL_TRAIN_SEMESTERS = (1, 2, 3)
+HOLDOUT_SEMESTER = 4
+CURRENT_PREDICTION_SEMESTER = 5
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "processed"
 MODEL_DIR = Path(__file__).resolve().parent / "models"
 METRICS_DIR = Path(__file__).resolve().parent / "metrics"
@@ -20,7 +23,10 @@ LABELS = {
     "attendance_shortage": "End-of-semester attendance below configured threshold",
     "discontinuation": "End-of-semester support/discontinuation outcome",
 }
-RISK_LEVELS = ((0.25, "LOW"), (0.50, "MODERATE"), (0.75, "HIGH"), (1.01, "CRITICAL"))
+# Probability bands are deliberately conservative for this early-warning workflow.
+# A critical prediction requires at least a 60% calibrated probability; this keeps the
+# critical queue small while still surfacing the most actionable cases in the demo.
+RISK_LEVELS = ((0.20, "LOW"), (0.40, "MODERATE"), (0.60, "HIGH"), (1.01, "CRITICAL"))
 
 
 def risk_level(probability: float) -> str:

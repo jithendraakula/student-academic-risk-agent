@@ -14,7 +14,14 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
     const raw = sessionStorage.getItem("agent14_user");
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as AuthUser;
+    } catch {
+      sessionStorage.removeItem("agent14_user");
+      sessionStorage.removeItem("agent14_token");
+      return null;
+    }
   });
   const [token, setToken] = useState<string | null>(() =>
     sessionStorage.getItem("agent14_token")

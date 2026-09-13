@@ -24,6 +24,7 @@ export interface MentorAlert {
 export interface MentorStudentRow {
   student_id: string;
   student_name: string;
+  roll_number?: string | null;
   department: string;
   batch: string;
   section: string;
@@ -50,9 +51,20 @@ export interface MentorWorkspaceResponse {
   assigned_students: number;
   critical_students: number;
   high_risk_students: number;
+  high_only_students?: number;
+  elevated_risk_students?: number;
   students_needing_action: number;
+  students_with_multiple_risks?: number;
+  risk_signals?: number;
+  actionable_risk_signals?: number;
   open_alerts: number;
+  open_alert_students?: number;
   new_alerts: number;
+  new_alert_students?: number;
+  risk_distribution?: Array<{ risk_type: string; risk_label: string; affected_students: number; affected_rate: number; actionable_students: number; average_priority: number }>;
+  metric_semantics?: Record<string, { meaning: string; unit: string }>;
+  risk_thresholds?: { elevated: number; critical: number };
+  alert_source?: string;
   items: MentorStudentRow[];
   returned_students?: number;
   risk_source: string;
@@ -61,6 +73,15 @@ export interface MentorWorkspaceResponse {
 
 export interface RiskResult {
   risk_probability: number;
+  course_metrics?: {
+    internal_marks: number;
+    midterm_marks: number;
+    quiz_average: number;
+    assignment_average: number;
+    practical_marks: number;
+    course_attendance_percentage: number;
+    assignment_completion_rate: number;
+  };
   risk_score?: number;
   risk_level: "LOW" | "MODERATE" | "MEDIUM" | "HIGH" | "CRITICAL";
   confidence: "LOW" | "MEDIUM" | "HIGH";
@@ -72,6 +93,7 @@ export interface RiskResult {
 export interface RiskProfileResponse {
   student: {
     student_id: string;
+    roll_number?: string | null;
     student_name: string;
     department: string;
     batch: string;
@@ -91,7 +113,11 @@ export interface RiskProfileResponse {
     attendance: number;
     backlogs: number;
     internal_marks: number;
+    assignment_completion: number;
     absence_rate: number;
+    semester: number;
+    academic_year: string;
+    checkpoint_week: number;
   };
   risks: {
     course_failure: Array<RiskResult & { course_id: string; course_name: string }>;
@@ -99,6 +125,47 @@ export interface RiskProfileResponse {
     gpa_threshold: RiskResult;
     attendance_shortage: RiskResult;
     discontinuation: RiskResult;
+  };
+  case_management?: {
+    open_alerts: number;
+    items: Array<{ alert_id: string; risk_type: string; risk_label?: string; risk_level?: string; priority_score: number; status: string; suggested_action?: string; follow_up_date?: string | null; course_id?: string | null }>;
+    source: string;
+  };
+  current_status: {
+    risk_score: number;
+    highest_risk_score?: number;
+    priority_score: number;
+    risk_level: string;
+    primary_risk: string | null;
+    needs_action: boolean;
+    source: string;
+  };
+  academic_context: {
+    observation_count: number;
+    active_follow_up_count: number;
+    primary_context_intent: string | null;
+    primary_action_path: { intent: string; intent_label: string; recommended_action: string; count: number } | null;
+    intent_distribution: Array<{ intent: string; count: number }>;
+    observations: Array<{
+      observation_id: string;
+      observed_on: string;
+      category: string;
+      observation_text: string;
+      source_role: string;
+      follow_up_required: boolean;
+      status: string;
+      intent: string;
+      intent_label: string;
+      impact_area: string;
+      urgency: string;
+      action_type: string;
+      recommended_action: string;
+      support_only: boolean;
+      confidence: number;
+      classifier: string;
+      evidence_basis: string[];
+    }>;
+    method: string;
   };
 }
 
@@ -167,6 +234,7 @@ export interface WhatIfResponse {
     semester: number;
     checkpoint_week: number;
     changes: Record<string, unknown>;
+    scenario_summary?: { factors: string[]; factor_count: number; mode: string };
   };
   student: RiskProfileResponse["student"];
   baseline: { summary: { risk_score: number; priority_score: number; primary_risk: string | null; risk_level: string }; risks: RiskProfileResponse["risks"] };

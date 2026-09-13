@@ -1,175 +1,564 @@
-"""Generate Agent 14 synthetic Phase-1 data with a strict prediction-time boundary.
+"""Generate the canonical Agent 14 CSE demo dataset.
 
-Checkpoint features (week 6) are generated first. Historical end-of-semester outcomes are
-then generated from noisy latent/future processes. Current rows intentionally have no outcomes.
+Design goals:
+- 1 current CSE department
+- 10 sections, 50 students each (500 students)
+- 5 mentors, each responsible for exactly 2 sections
+- 1 HOD and 1 Dean
+- sequential 241FA04xxx-style roll numbers
+- mostly stable students with a small, intentional high/critical pocket
+- textual academic observations linked to explainable academic context
+- historical outcomes are generated from noisy latent processes rather than direct
+  copies of the prediction-time features
 """
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from pathlib import Path
 import math
 import numpy as np
 import pandas as pd
 from faker import Faker
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "processed"
-SEED = 42
-RNG = np.random.default_rng(SEED)
-fake = Faker("en_IN"); Faker.seed(SEED)
+from config import (
+    ACADEMIC_YEAR,
+    ATTENDANCE_THRESHOLD,
+    BATCH,
+    CHECKPOINT_WEEK,
+    COURSES,
+    CURRENT_SEMESTER,
+    DEPARTMENT_ID,
+    DEPARTMENT_NAME,
+    GPA_THRESHOLD,
+    MENTOR_IDS,
+    OUT,
+    PROGRAM,
+    SECTIONS,
+    STUDENTS_PER_SECTION,
+    CRITICAL_PER_SECTION,
+    HIGH_PER_SECTION,
+    WATCH_PER_SECTION,
+)
 
-DEPTS = [("DEPT_CSE", "CSE", "Computer Science and Engineering"), ("DEPT_ECE", "ECE", "Electronics and Communication Engineering")]
-COHORTS = [(2023,7),(2024,5),(2025,3)]
-SECTIONS=["A","B"]
-MENTORS_PER_DEPT=6
-N_PER_SECTION=30
-CHECKPOINT_WEEK=6
-ATTENDANCE_THRESHOLD=75.0
-GPA_THRESHOLD=7.0
+SEED = 2026
+rng = np.random.default_rng(SEED)
+fake = Faker("en_IN")
+Faker.seed(SEED)
 
-COURSES = {
-"DEPT_CSE": {
-1:[("CSE101","Programming Fundamentals",4),("CSE102","Engineering Mathematics I",4),("CSE103","Engineering Physics",3),("CSE104","Engineering Drawing",3),("CSE105","Communication Skills",3)],
-2:[("CSE201","Data Structures",4),("CSE202","Engineering Mathematics II",4),("CSE203","Digital Logic Design",3),("CSE204","Object Oriented Programming",3),("CSE205","Environmental Science",3)],
-3:[("CSE301","Database Systems",4),("CSE302","Computer Organization",4),("CSE303","Discrete Mathematics",3),("CSE304","Operating Systems Fundamentals",3),("CSE305","Web Technologies",3)],
-4:[("CSE401","Design and Analysis of Algorithms",4),("CSE402","Computer Networks",4),("CSE403","Theory of Computation",3),("CSE404","Software Engineering",3),("CSE405","Probability and Statistics",3)],
-5:[("CSE501","Operating Systems",4),("CSE502","Database Management Systems",4),("CSE503","Design and Analysis of Algorithms",3),("CSE504","Computer Networks",3),("CSE505","Software Engineering",3)],
-6:[("CSE601","Artificial Intelligence",4),("CSE602","Machine Learning",4),("CSE603","Cloud Computing",3),("CSE604","Compiler Design",3),("CSE605","Information Security",3)],
-7:[("CSE701","Distributed Systems",4),("CSE702","Big Data Analytics",4),("CSE703","Advanced Algorithms",3),("CSE704","Project Work I",3),("CSE705","Professional Elective",3)]},
-"DEPT_ECE": {
-1:[("ECE101","Engineering Mathematics I",4),("ECE102","Engineering Physics",3),("ECE103","Basic Electrical Engineering",3),("ECE104","Engineering Drawing",3),("ECE105","Communication Skills",3)],
-2:[("ECE201","Electronic Devices",4),("ECE202","Engineering Mathematics II",4),("ECE203","Digital Logic Design",3),("ECE204","Circuit Theory",3),("ECE205","Programming for Engineers",3)],
-3:[("ECE301","Signals and Systems",4),("ECE302","Analog Electronics",4),("ECE303","Network Theory",3),("ECE304","Electromagnetic Theory",3),("ECE305","Data Structures",3)],
-4:[("ECE401","Digital Communication",4),("ECE402","Microprocessors",4),("ECE403","Control Systems",3),("ECE404","Probability and Statistics",3),("ECE405","Embedded Systems",3)],
-5:[("ECE501","Digital Signal Processing",4),("ECE502","VLSI Design",4),("ECE503","Microprocessors",3),("ECE504","Control Systems",3),("ECE505","Communication Systems",3)],
-6:[("ECE601","Computer Architecture",4),("ECE602","Wireless Communication",4),("ECE603","IoT Systems",3),("ECE604","Digital System Design",3),("ECE605","Embedded C Programming",3)],
-7:[("ECE701","Advanced Communication Systems",4),("ECE702","Advanced VLSI",4),("ECE703","Image and Signal Processing",3),("ECE704","Project Work I",3),("ECE705","Professional Elective",3)]}}
 
-def clip(x,lo,hi): return float(np.clip(x,lo,hi))
-def sig(x): return 1/(1+math.exp(-max(-30,min(30,x))))
+def clip(x, lo, hi):
+    return float(np.clip(x, lo, hi))
 
-def main():
-    OUT.mkdir(parents=True, exist_ok=True)
-    # master teachers
-    teachers=[]
-    for dept_id,code,_ in DEPTS:
-        for i in range(MENTORS_PER_DEPT):
-            tid=f"T{len(teachers)+1:03d}"
-            teachers.append({"teacher_id":tid,"teacher_name":fake.name(),"role":"mentor","department":dept_id,"email":f"mentor{i+1}.{code.lower()}@vignan.ac.in"})
-    teachers += [
-        {"teacher_id":"H001","teacher_name":"HOD CSE","role":"hod","department":"DEPT_CSE","email":"hod.cse@vignan.ac.in"},
-        {"teacher_id":"H002","teacher_name":"HOD ECE","role":"hod","department":"DEPT_ECE","email":"hod.ece@vignan.ac.in"},
-        {"teacher_id":"D001","teacher_name":"Dean","role":"dean","department":"","email":"dean@vignan.ac.in"},
+
+def sigmoid(x):
+    x = float(np.clip(x, -30, 30))
+    return 1.0 / (1.0 + math.exp(-x))
+
+
+def bool_probability(p: float) -> bool:
+    return bool(rng.random() < np.clip(p, 0.0, 1.0))
+
+
+def academic_year_for_semester(semester: int) -> str:
+    """Return the academic year for a standard two-semester B.Tech progression.
+
+    The 2024-entry cohort maps as:
+      Sem 1-2 -> 2024-25
+      Sem 3-4 -> 2025-26
+      Sem 5-6 -> 2026-27
+      Sem 7-8 -> 2027-28
+    """
+    if not 1 <= semester <= 8:
+        raise ValueError(f"semester must be between 1 and 8, got {semester}")
+    start_year = BATCH + ((semester - 1) // 2)
+    return f"{start_year}-{str(start_year + 1)[-2:]}"
+
+
+def mentor_for_section(section: str) -> str:
+    idx = SECTIONS.index(section) // 2
+    return MENTOR_IDS[idx]
+
+
+def build_student_profile(section: str, position: int) -> dict:
+    critical_n = CRITICAL_PER_SECTION[section]
+    high_n = HIGH_PER_SECTION[section]
+    watch_n = WATCH_PER_SECTION[section]
+
+    if position < critical_n:
+        state = "critical"
+    elif position < critical_n + high_n:
+        state = "high"
+    elif position < critical_n + high_n + watch_n:
+        state = "watch"
+    else:
+        state = "stable"
+
+    params = {
+        "stable":  {"ability": (7.9, 0.45), "attendance": (87, 3.8), "engagement": (0.79, 0.06), "trend": (0.00, 0.05)},
+        "watch":   {"ability": (7.35, 0.48), "attendance": (78, 4.8), "engagement": (0.69, 0.07), "trend": (-0.05, 0.08)},
+        "high":    {"ability": (6.75, 0.55), "attendance": (70, 5.5), "engagement": (0.57, 0.08), "trend": (-0.13, 0.10)},
+        "critical":{"ability": (6.15, 0.55), "attendance": (61, 6.0), "engagement": (0.44, 0.09), "trend": (-0.24, 0.11)},
+    }[state]
+    ability = clip(rng.normal(*params["ability"]), 4.5, 9.5)
+    attendance = clip(rng.normal(*params["attendance"]), 48, 98)
+    engagement = clip(rng.normal(*params["engagement"]), 0.15, 0.96)
+    trend = clip(rng.normal(*params["trend"]), -0.50, 0.35)
+
+    # A minority of students have one contextual issue that should appear as text to
+    # a mentor. These are explanatory observations, not hidden ML labels.
+    context = "none"
+    if state in {"critical", "high"}:
+        weighted = ["illness", "transport", "assessment", "family", "late_arrival", "academic"]
+        context = rng.choice(weighted, p=[0.18, 0.12, 0.18, 0.12, 0.15, 0.25])
+    elif state == "watch" and rng.random() < 0.55:
+        context = rng.choice(["assessment", "late_arrival", "academic", "none"], p=[0.25, 0.25, 0.35, 0.15])
+    elif state == "stable" and rng.random() < 0.08:
+        context = "improvement"
+
+    return {
+        "state": state,
+        "ability": ability,
+        "attendance": attendance,
+        "engagement": engagement,
+        "trend": trend,
+        "context": context,
+        "mentor_id": mentor_for_section(section),
+    }
+
+
+def generate_students_and_teachers():
+    teachers = [
+        {"teacher_id": "T001", "teacher_name": "Mentor One", "role": "mentor", "department": DEPARTMENT_ID, "email": "mentor.one.cse@vignan.ac.in"},
+        {"teacher_id": "T002", "teacher_name": "Mentor Two", "role": "mentor", "department": DEPARTMENT_ID, "email": "mentor.two.cse@vignan.ac.in"},
+        {"teacher_id": "T003", "teacher_name": "Mentor Three", "role": "mentor", "department": DEPARTMENT_ID, "email": "mentor.three.cse@vignan.ac.in"},
+        {"teacher_id": "T004", "teacher_name": "Mentor Four", "role": "mentor", "department": DEPARTMENT_ID, "email": "mentor.four.cse@vignan.ac.in"},
+        {"teacher_id": "T005", "teacher_name": "Mentor Five", "role": "mentor", "department": DEPARTMENT_ID, "email": "mentor.five.cse@vignan.ac.in"},
+        {"teacher_id": "H001", "teacher_name": "CSE HOD", "role": "hod", "department": DEPARTMENT_ID, "email": "hod.cse@vignan.ac.in"},
+        {"teacher_id": "D001", "teacher_name": "Dean", "role": "dean", "department": "", "email": "dean@vignan.ac.in"},
     ]
-    teachers_df=pd.DataFrame(teachers)
 
-    students=[]; assignments=[]; student_profiles={}; student_counter=1
-    for batch,current_sem in COHORTS:
-        for dept_id,code,_ in DEPTS:
-            mentors=teachers_df[(teachers_df.role=="mentor")&(teachers_df.department==dept_id)].teacher_id.tolist()
-            for section in SECTIONS:
-                for j in range(N_PER_SECTION):
-                    sid=f"S{student_counter:04d}"
-                    seq=(student_counter-1)%10000+1
-                    roll=f"{str(batch)[-2:]}{1 if code=='CSE' else 2}{seq:05d}"
-                    # Fixed archetypes every mentor cohort: enough demo cases, but not all data are risk cases.
-                    mentor_index=(j//5)%MENTORS_PER_DEPT
-                    archetype=["critical","attendance","support","academic","normal","normal"][mentor_index%6]
-                    ability=clip(RNG.normal(7.5,0.75),4.2,9.5)
-                    attendance=clip(RNG.normal(84,6.5)+( -14 if archetype=="critical" else -18 if archetype=="attendance" else 3),45,98)
-                    engagement=clip(RNG.normal(0.72,0.10)+(-0.22 if archetype in ("support","critical") else -0.1 if archetype=="academic" else 0),0.15,0.98)
-                    fee_pressure=clip(RNG.beta(1.4,7)+(.35 if archetype=="support" else .08 if archetype=="critical" else 0),0,0.95)
-                    trend=(-0.32 if archetype=="critical" else -0.12 if archetype in ("attendance","academic") else 0.0)
-                    profile={"ability":ability,"attendance":attendance,"engagement":engagement,"fee_pressure":fee_pressure,"trend":trend,"archetype":archetype}
-                    student_profiles[sid]=profile
-                    students.append({"student_id":sid,"roll_number":roll,"student_name":fake.name(),"department":dept_id,"program":"B.Tech","batch":batch,"section":section,"academic_year":"2026-27","current_semester":current_sem})
-                    assignments.append({"assignment_id":f"ASG{student_counter:04d}","student_id":sid,"teacher_id":mentors[mentor_index],"academic_year":"2026-27","semester":current_sem,"assignment_type":"mentor"})
-                    student_counter+=1
-    students_df=pd.DataFrame(students); assignments_df=pd.DataFrame(assignments)
+    students = []
+    profiles = {}
+    assignments = []
+    sid_counter = 1
+    for section in SECTIONS:
+        for position in range(STUDENTS_PER_SECTION):
+            sid = f"S{sid_counter:04d}"
+            roll = f"241FA04{sid_counter:03d}"
+            profile = build_student_profile(section, position)
+            profile["section_position"] = position
+            profiles[sid] = profile
+            students.append({
+                "student_id": sid,
+                "roll_number": roll,
+                "student_name": fake.name(),
+                "department": DEPARTMENT_ID,
+                "program": PROGRAM,
+                "batch": BATCH,
+                "section": section,
+                "academic_year": ACADEMIC_YEAR,
+                "current_semester": CURRENT_SEMESTER,
+            })
+            assignments.append({
+                "assignment_id": f"ASG{sid_counter:04d}",
+                "student_id": sid,
+                "teacher_id": profile["mentor_id"],
+                "academic_year": ACADEMIC_YEAR,
+                "semester": CURRENT_SEMESTER,
+                "assignment_type": "mentor",
+            })
+            sid_counter += 1
 
-    # longitudinal semester snapshots
-    sem_rows=[]; semester_state={}
-    for s in students:
-        sid=s["student_id"]; p=student_profiles[sid]; current=int(s["current_semester"])
-        prev_backlog=0
-        for sem in range(1,current+1):
-            cur=(sem==current); damp=1 if cur else 0.8
-            gpa=clip(p["ability"]+p["trend"]*damp+RNG.normal(0,0.22),3.6,9.7)
-            prev_gpa=clip(gpa-RNG.normal(p["trend"],0.35),3.3,9.7)
-            attendance=clip(p["attendance"]+p["trend"]*4*damp+RNG.normal(0,3),40,99)
-            att30=clip(attendance+RNG.normal(-1.5 if p["trend"]<0 else 0.5,2.6),35,99)
-            engage=clip(p["engagement"]+p["trend"]*0.08+RNG.normal(0,0.03),0.05,0.99)
-            current_backlog=max(0,prev_backlog+int(RNG.poisson(max(0.05,0.12+(7.0-gpa)*0.18)))-int(RNG.binomial(prev_backlog,0.20)))
-            internal=clip(gpa*8.0+RNG.normal(0,5.5),15,95)
-            mid=clip(internal+RNG.normal(0,5.5),10,95); quiz=clip(internal+RNG.normal(0,6),10,98)
-            assign=clip(internal+8*engage+RNG.normal(0,5),10,100); practical=clip(internal+RNG.normal(2,6),10,100)
-            pfa=clip(0.72*attendance+0.28*att30+p["trend"]*3+RNG.normal(0,1.4),35,99)
-            consec=int(RNG.integers(5,12)) if att30<62 else int(RNG.integers(0,4))
-            absent=int(clip((100-attendance)*0.55+RNG.normal(2,2),0,45))
-            prolonged=bool(att30<58 or (attendance<68 and p["fee_pressure"]>0.55))
-            fee="overdue" if RNG.random() < (0.04+0.35*p["fee_pressure"]) else "pending" if RNG.random()<0.05 else "paid"
-            fee_amt=int(RNG.integers(5000,45000)) if fee=="overdue" else int(RNG.integers(500,4000)) if fee=="pending" else 0
-            pay_delay=int(RNG.integers(8,70)) if fee=="overdue" else 0
-            gpa_change=gpa-prev_gpa
-            row={"student_id":sid,"roll_number":s["roll_number"],"cohort":s["batch"],"academic_year":"2026-27" if cur else f"{2020+sem}-{str(2021+sem)[-2:]}","semester":sem,"checkpoint_week":CHECKPOINT_WEEK,"department":s["department"],"batch":s["batch"],"section":s["section"],"snapshot_type":"current" if cur else "historical","current_gpa":round(gpa,2),"current_cgpa":round(clip((gpa+prev_gpa)/2+RNG.normal(0,.12),3,10),2),"previous_gpa":round(prev_gpa,2),"previous_cgpa":round(prev_gpa+RNG.normal(0,.18),2),"gpa_change":round(gpa-prev_gpa,2),"internal_marks_average":round(internal,1),"midterm_marks_average":round(mid,1),"quiz_average":round(quiz,1),"assignment_average":round(assign,1),"practical_marks_average":round(practical,1),"assessment_trend":"declining" if gpa_change<-0.25 else "improving" if gpa_change>0.25 else "stable","assignment_completion_rate":round(clip(engage+RNG.normal(0,.04),0,1),2),"current_attendance_percentage":round(attendance,1),"attendance_last_30_days":round(att30,1),"attendance_trend":"declining" if att30<attendance-1 else "improving" if att30>attendance+1 else "stable","consecutive_absence_days":consec,"total_absent_days":absent,"recent_absence_rate":round((100-att30)/100,2),"projected_final_attendance":round(pfa,1),"current_backlog_count":current_backlog,"previous_backlog_count":prev_backlog,"total_historical_backlogs":max(current_backlog,prev_backlog)+int(RNG.integers(0,3)),"new_backlogs_last_semester":int(RNG.poisson(max(.1,.18+(7.2-gpa)*.15))),"repeated_backlog_subject_count":1 if current_backlog>0 and prev_backlog>0 else 0,"backlog_growth_rate":round((current_backlog-prev_backlog)/max(1,prev_backlog+1),2),"assessment_participation_rate":round(clip(engage+RNG.normal(0,.04),0,1),2),"recent_engagement_score":round(engage,2),"engagement_trend":"declining" if p["trend"]<-.18 or engage<.45 else "improving" if p["trend"]>.15 and engage>.65 else "stable","fee_status":fee,"fee_arrears_amount":fee_amt,"payment_delay_days":pay_delay,"installment_pending":fee!="paid","prolonged_absence_flag":prolonged,"prolonged_absence_days":consec if prolonged else 0,"academic_decline_flag":bool(gpa_change<-.25 or internal<45),"repeated_backlog_flag":bool(current_backlog>0 and prev_backlog>0),"engagement_decline_flag":bool(engage<.45)}
-            sem_rows.append(row); semester_state[(sid,sem)]=row; prev_backlog=current_backlog
-    semester_df=pd.DataFrame(sem_rows)
+    return pd.DataFrame(students), pd.DataFrame(teachers), pd.DataFrame(assignments), profiles
 
-    # course snapshots: historical rows get end-of-semester course failure outcomes; current rows are unlabeled.
-    course_rows=[]
-    for _,r in semester_df.iterrows():
-        for cid,cname,credits in COURSES[r["department"]][int(r["semester"])]:
-            difficulty=RNG.normal(0,2.8)
-            internal=clip(r["internal_marks_average"]+difficulty+RNG.normal(0,5.0),5,98)
-            mid=clip(internal+RNG.normal(0,6),5,98); quiz=clip(internal+RNG.normal(0,6.5),5,98)
-            ass=clip(r["assignment_average"]+difficulty+RNG.normal(0,5),5,100); practical=clip(r["practical_marks_average"]+RNG.normal(0,5),5,100)
-            catt=clip(r["current_attendance_percentage"]+RNG.normal(0,3.5),35,100)
-            prior=int(RNG.choice([0,0,0,1],p=[.84,.08,.05,.03]))
-            fail_p=sig(-1.25 + 0.085*(45-internal)+0.070*(70-catt)+0.80*prior+0.30*max(0,6.5-r["current_gpa"])+RNG.normal(0,.18))
-            failed=bool(RNG.random()<fail_p) if r["snapshot_type"]=="historical" else None
-            course_rows.append({"student_id":r["student_id"],"roll_number":r["roll_number"],"cohort":r["cohort"],"academic_year":r["academic_year"],"semester":int(r["semester"]),"checkpoint_week":CHECKPOINT_WEEK,"snapshot_type":r["snapshot_type"],"course_id":cid,"course_name":cname,"course_credits":credits,"internal_marks":round(internal,1),"midterm_marks":round(mid,1),"quiz_average":round(quiz,1),"assignment_average":round(ass,1),"practical_marks":round(practical,1),"course_attendance_percentage":round(catt,1),"course_attendance_trend":"declining" if catt<r["current_attendance_percentage"]-1 else "improving" if catt>r["current_attendance_percentage"]+1 else "stable","previous_course_attempts":prior,"previous_course_grade":None if prior==0 else str(RNG.choice(["D","F"])),"assessment_trend":r["assessment_trend"],"assignment_completion_rate":r["assignment_completion_rate"],"course_failed":failed})
-    course_df=pd.DataFrame(course_rows)
 
-    # historical outcomes: derive future outcomes with noise; course_failed is the aggregate of future course outcomes.
-    hist=semester_df[semester_df.snapshot_type=="historical"].copy()
-    fail_by=course_df[course_df.snapshot_type=="historical"].groupby(["student_id","semester"])["course_failed"].max()
-    rows=[]
-    for _,r in hist.iterrows():
-        fail=bool(fail_by[(r.student_id,int(r.semester))])
-        future_gpa=clip(r.current_gpa + 0.10*r.gpa_change + RNG.normal(0,.50) - 0.25*fail, 3,10)
-        future_att=clip(0.62*r.current_attendance_percentage+0.38*r.attendance_last_30_days + RNG.normal(-1.0,3.0),35,100)
-        gpa_low=bool(future_gpa<GPA_THRESHOLD)
-        attendance_short=bool(future_att<ATTENDANCE_THRESHOLD)
-        new_backlog=bool(RNG.random()<sig(-2.0+0.75*fail+0.55*r.current_backlog_count+0.6*int(r.academic_decline_flag)+RNG.normal(0,.5)))
-        disc=bool(RNG.random()<sig(-2.95+2.05*int(r.prolonged_absence_flag)+1.70*int(r.engagement_decline_flag)+0.95*int(r.current_backlog_count>=2)+0.65*int(r.fee_status=="overdue")+0.55*int(r.current_attendance_percentage<70)+0.75*int(fail)+RNG.normal(0,.22)))
-        rows.append({"student_id":r.student_id,"cohort":int(r.cohort),"academic_year":r.academic_year,"semester":int(r.semester),"checkpoint_week":CHECKPOINT_WEEK,"outcome_horizon":"end_of_semester","course_failed":fail,"new_backlog":new_backlog,"gpa_below_threshold":gpa_low,"attendance_shortage":attendance_short,"discontinued":disc})
-    outcomes_df=pd.DataFrame(rows)
+def semester_metrics(profile: dict, semester: int, current: bool, previous: dict | None) -> dict:
+    state = profile["state"]
+    progression = semester / CURRENT_SEMESTER
+    stability_noise = 0.20 if current else 0.26
 
-    # reference data
-    ref=[]
-    for did,_,dname in DEPTS:
-        for sem,courses in COURSES[did].items():
-            for cid,cname,credits in courses:
-                ref.append({"department_id":did,"department_name":dname,"course_id":cid,"course_name":cname,"semester":sem,"course_credits":credits,"passing_marks":40,"attendance_threshold":ATTENDANCE_THRESHOLD,"gpa_threshold":GPA_THRESHOLD})
-    ref_df=pd.DataFrame(ref)
+    # Current values are gently worse than early semesters for at-risk profiles, but
+    # still contain enough noise that the eventual outcomes are not direct copies.
+    gpa = clip(profile["ability"] + profile["trend"] * progression + rng.normal(0, stability_noise), 4.1, 9.7)
+    previous_gpa = previous["current_gpa"] if previous else clip(gpa + rng.normal(0, 0.35), 4.0, 9.8)
+    gpa_change = gpa - previous_gpa
 
-    # demo alerts from current data only (operational data, not training labels)
-    mentor_map=dict(zip(assignments_df.student_id,assignments_df.teacher_id))
-    alerts=[]; n=1; base=datetime(2026,9,1); status_cycle=["NEW","ACKNOWLEDGED","ACTION_TAKEN","FOLLOW_UP","RESOLVED"]
-    for _,r in semester_df[semester_df.snapshot_type=="current"].iterrows():
-        scores={"attendance":clip(max(0,ATTENDANCE_THRESHOLD-r.current_attendance_percentage)*2.5 + max(0,r.consecutive_absence_days*2.2),0,100),"gpa":clip(max(0,GPA_THRESHOLD-r.current_gpa)*32+(15 if r.gpa_change<0 else 0),0,100),"backlog":clip(r.current_backlog_count*18+max(0,r.backlog_growth_rate)*25+(18 if r.academic_decline_flag else 0),0,100),"support_attention":clip(22*int(r.prolonged_absence_flag)+25*int(r.engagement_decline_flag)+18*int(r.fee_status=="overdue")+17*int(r.repeated_backlog_flag),0,100)}
-        for typ,score in scores.items():
-            if score<50: continue
-            pri=round(score*.55 + (25 if typ in ("attendance","gpa","course") else 18) + RNG.uniform(0,8),1)
-            st=RNG.choice(status_cycle,p=[.25,.2,.2,.2,.15])
-            created=base-timedelta(days=int(RNG.integers(0,10)))
-            alerts.append({"alert_id":f"ALT{n:05d}","student_id":r.student_id,"teacher_id":mentor_map[r.student_id],"risk_type":typ,"risk_score":round(score,1),"priority_score":pri,"confidence_level":"Medium","intervenability_score":"High" if typ=="attendance" and not r.academic_decline_flag else "Medium","created_at":created.strftime("%Y-%m-%d"),"alert_status":st,"intervention_id":f"INT{n:05d}" if st!="NEW" else "","intervention_type":"mentor_check_in" if st!="NEW" else "","suggested_action":{"attendance":"Review attendance barrier and create a recovery plan","gpa":"Review weak subjects and create an academic study plan","backlog":"Connect the student to remedial support","support_attention":"Initiate a supportive mentor check-in"}[typ],"action_taken":"Mentor follow-up completed" if st in ("ACTION_TAKEN","FOLLOW_UP","RESOLVED") else "","intervention_date":(created+timedelta(days=2)).strftime("%Y-%m-%d") if st!="NEW" else "","follow_up_date":(created+timedelta(days=8)).strftime("%Y-%m-%d") if st in ("FOLLOW_UP","RESOLVED") else "","outcome_status":"improved" if st=="RESOLVED" and RNG.random()<.75 else "no_change" if st=="RESOLVED" else "","outcome_notes":"Risk reduced after intervention." if st=="RESOLVED" else "","risk_score_after_intervention":round(max(0,score-RNG.uniform(10,30)),1) if st=="RESOLVED" else ""}); n+=1
-    alerts_df=pd.DataFrame(alerts)
+    attendance = clip(profile["attendance"] + profile["trend"] * 10 * progression + rng.normal(0, 2.2), 45, 98)
+    att30 = clip(attendance + rng.normal(-1.8 if profile["trend"] < 0 else 0.6, 2.4), 40, 99)
+    engagement = clip(profile["engagement"] + profile["trend"] * 0.12 * progression + rng.normal(0, 0.025), 0.08, 0.98)
 
-    # save
-    for name,df in {"students":students_df,"teachers":teachers_df,"assignments":assignments_df,"student_semester_features":semester_df,"student_course_features":course_df,"historical_outcomes":outcomes_df,"academic_reference_data":ref_df,"alerts_interventions":alerts_df}.items():
-        df.to_csv(OUT/f"{name}.csv",index=False)
-    print(f"students={len(students_df)} teachers={len(teachers_df)} assignments={len(assignments_df)} semester={len(semester_df)} course={len(course_df)} outcomes={len(outcomes_df)} reference={len(ref_df)} alerts={len(alerts_df)}")
-    print(outcomes_df[["course_failed","new_backlog","gpa_below_threshold","attendance_shortage","discontinued"]].mean().round(3).to_dict())
+    prev_backlog = int(previous["current_backlog_count"]) if previous else 0
+    backlog_rate = max(0.02, 0.06 + max(0, 7.3 - gpa) * 0.13 + max(0, 72 - attendance) * 0.012)
+    new_backlogs = int(rng.poisson(backlog_rate))
+    cleared = int(rng.binomial(prev_backlog, 0.24 if state in {"stable", "watch"} else 0.15)) if prev_backlog else 0
+    current_backlog = max(0, prev_backlog + new_backlogs - cleared)
 
-if __name__=="__main__": main()
+    internal = clip(gpa * 8.4 + engagement * 9 + rng.normal(0, 4.2), 25, 94)
+    midterm = clip(internal + rng.normal(0, 4.8), 20, 94)
+    quiz = clip(internal + rng.normal(0, 5.2), 20, 95)
+    assignment = clip(internal + engagement * 7 + rng.normal(0, 4.5), 20, 96)
+    practical = clip(internal + rng.normal(1.5, 4.8), 20, 96)
+    completion = clip(0.40 + engagement * 0.62 + rng.normal(0, 0.035), 0.25, 1.0)
+    participation = clip(0.48 + engagement * 0.52 + rng.normal(0, 0.035), 0.25, 1.0)
+
+    absent_days = int(np.clip(round((100 - attendance) * 0.42 + rng.normal(1.2, 1.3)), 0, 30))
+    consecutive = int(rng.integers(2, 6)) if att30 < 68 else int(rng.integers(0, 3))
+    prolonged = bool(att30 < 58 or (attendance < 62 and engagement < 0.38))
+
+    fee_pressure = clip((1 - engagement) * 0.34 + (0.20 if profile["context"] == "family" else 0) + rng.normal(0, 0.06), 0, 0.85)
+    fee_status = "overdue" if rng.random() < fee_pressure * 0.16 else "pending" if rng.random() < 0.05 else "paid"
+    fee_arrears = int(rng.integers(5000, 25000)) if fee_status == "overdue" else int(rng.integers(500, 3500)) if fee_status == "pending" else 0
+    payment_delay = int(rng.integers(5, 50)) if fee_status == "overdue" else 0
+
+    return {
+        "current_gpa": round(gpa, 2),
+        "current_cgpa": round(clip((gpa * 0.62 + previous_gpa * 0.38) + rng.normal(0, 0.08), 4.0, 9.7), 2),
+        "previous_gpa": round(previous_gpa, 2),
+        "previous_cgpa": round(clip(previous_gpa + rng.normal(0, 0.13), 4.0, 9.7), 2),
+        "gpa_change": round(gpa_change, 2),
+        "internal_marks_average": round(internal, 1),
+        "midterm_marks_average": round(midterm, 1),
+        "quiz_average": round(quiz, 1),
+        "assignment_average": round(assignment, 1),
+        "practical_marks_average": round(practical, 1),
+        "assessment_trend": "declining" if gpa_change < -0.35 else "improving" if gpa_change > 0.35 else "stable",
+        "assignment_completion_rate": round(completion, 2),
+        "current_attendance_percentage": round(attendance, 1),
+        "attendance_last_30_days": round(att30, 1),
+        "attendance_trend": "declining" if att30 < attendance - 1.5 else "improving" if att30 > attendance + 1.5 else "stable",
+        "consecutive_absence_days": consecutive,
+        "total_absent_days": absent_days,
+        "recent_absence_rate": round((100 - att30) / 100, 2),
+        "projected_final_attendance": round(clip(attendance * 0.62 + att30 * 0.38, 40, 99), 1),
+        "current_backlog_count": current_backlog,
+        "previous_backlog_count": prev_backlog,
+        "total_historical_backlogs": max(current_backlog, prev_backlog) + int(rng.integers(0, 2)),
+        "new_backlogs_last_semester": new_backlogs,
+        "repeated_backlog_subject_count": int(min(current_backlog, rng.integers(0, 2 + current_backlog))),
+        "backlog_growth_rate": round((current_backlog - prev_backlog) / max(1, prev_backlog + 1), 3),
+        "assessment_participation_rate": round(participation, 2),
+        "recent_engagement_score": round(engagement, 2),
+        "engagement_trend": "declining" if engagement < profile["engagement"] - 0.035 else "improving" if engagement > profile["engagement"] + 0.035 else "stable",
+        "fee_status": fee_status,
+        "fee_arrears_amount": fee_arrears,
+        "payment_delay_days": payment_delay,
+        "installment_pending": bool(fee_status == "pending" and rng.random() < 0.65),
+        "prolonged_absence_flag": prolonged,
+        "prolonged_absence_days": int(consecutive + rng.integers(2, 8)) if prolonged else 0,
+        "academic_decline_flag": bool(gpa_change < -0.45 or (assignment < 48 and internal < 52)),
+        "repeated_backlog_flag": bool(current_backlog > 0 and prev_backlog > 0),
+        "engagement_decline_flag": bool(engagement < 0.46 or profile["trend"] < -0.20),
+    }
+
+
+def generate_semester_and_course_data(students_df, profiles):
+    semester_rows = []
+    course_rows = []
+    previous_by_student = {}
+
+    for student in students_df.to_dict("records"):
+        sid = student["student_id"]
+        profile = profiles[sid]
+        previous = None
+        for semester in range(1, CURRENT_SEMESTER + 1):
+            current = semester == CURRENT_SEMESTER
+            metrics = semester_metrics(profile, semester, current, previous)
+            row = {
+                "student_id": sid,
+                "roll_number": student["roll_number"],
+                "cohort": BATCH,
+                "academic_year": academic_year_for_semester(semester),
+                "semester": semester,
+                "checkpoint_week": CHECKPOINT_WEEK,
+                "department": DEPARTMENT_ID,
+                "batch": BATCH,
+                "section": student["section"],
+                "snapshot_type": "current" if current else "historical",
+                **metrics,
+            }
+            semester_rows.append(row)
+
+            for course_id, course_name, credits in COURSES[semester]:
+                # Course-specific performance is correlated with student state but has
+                # enough variability that one weak course does not make every course fail.
+                difficulty = {
+                    "CSE103": 1.5, "CSE202": 1.4, "CSE203": 1.2,
+                    "CSE401": 1.5, "CSE405": 1.3, "CSE501": 1.4,
+                    "CSE503": 1.5, "CSE504": 1.1,
+                }.get(course_id, 0.0)
+                course_marks = clip(metrics["internal_marks_average"] - difficulty + rng.normal(0, 5.5), 18, 96)
+                midterm = clip(course_marks + rng.normal(0, 6), 15, 96)
+                quiz = clip(course_marks + rng.normal(0, 6), 15, 98)
+                assignment = clip(course_marks + metrics["recent_engagement_score"] * 7 + rng.normal(0, 5), 15, 98)
+                practical = clip(course_marks + rng.normal(1, 6), 15, 98)
+                cat = clip(metrics["current_attendance_percentage"] + rng.normal(0, 3.5), 45, 98)
+                prior_attempts = int(1 if previous and previous.get("current_backlog_count", 0) > 0 and rng.random() < 0.22 else 0)
+                # Course failure is a relatively uncommon outcome, but it becomes materially
+                # more likely when marks, attendance, assignment completion, or prior attempts
+                # are weak. The outcome is stochastic and is not a direct copy of the feature.
+                course_gap = max(0.0, 50.0 - course_marks) / 10.0
+                attendance_gap = max(0.0, 75.0 - cat) / 10.0
+                completion_gap = max(0.0, 0.75 - metrics["assignment_completion_rate"]) / 0.10
+                course_signal = (
+                    -4.25
+                    + 0.92 * course_gap
+                    + 0.72 * attendance_gap
+                    + 0.45 * completion_gap
+                    + 0.62 * prior_attempts
+                    + 0.20 * max(0.0, 6.5 - metrics["current_gpa"])
+                )
+                failed = False if current else bool(rng.random() < sigmoid(course_signal))
+                course_rows.append({
+                    "student_id": sid,
+                    "roll_number": student["roll_number"],
+                    "cohort": BATCH,
+                    "academic_year": academic_year_for_semester(semester),
+                    "semester": semester,
+                    "checkpoint_week": CHECKPOINT_WEEK,
+                    "snapshot_type": "current" if current else "historical",
+                    "course_id": course_id,
+                    "course_name": course_name,
+                    "course_credits": credits,
+                    "internal_marks": round(course_marks, 1),
+                    "midterm_marks": round(midterm, 1),
+                    "quiz_average": round(quiz, 1),
+                    "assignment_average": round(assignment, 1),
+                    "practical_marks": round(practical, 1),
+                    "course_attendance_percentage": round(cat, 1),
+                    "course_attendance_trend": "declining" if cat < metrics["current_attendance_percentage"] - 2 else "stable",
+                    "previous_course_attempts": prior_attempts,
+                    "previous_course_grade": "F" if prior_attempts else "",
+                    "assessment_trend": metrics["assessment_trend"],
+                    "assignment_completion_rate": metrics["assignment_completion_rate"],
+                    "course_failed": np.nan if current else failed,
+                })
+            previous = metrics
+            previous_by_student[sid] = metrics
+
+    return pd.DataFrame(semester_rows), pd.DataFrame(course_rows)
+
+
+def generate_outcomes(semester_df, course_df, profiles):
+    outcomes = []
+    historical_sem = semester_df[semester_df["snapshot_type"] == "historical"]
+    for row in historical_sem.to_dict("records"):
+        p = profiles[row["student_id"]]
+        attendance_signal = (75 - row["projected_final_attendance"]) / 10
+        academic_signal = (7.0 - row["current_gpa"]) / 0.7
+        backlog_signal = row["current_backlog_count"] * 0.7 + max(0, row["backlog_growth_rate"]) * 1.1
+        engagement_signal = (0.50 - row["recent_engagement_score"]) / 0.12
+        decline_signal = 0.6 if row["academic_decline_flag"] else 0.0
+
+        # Outcome prevalences are intentionally lower than the R0 baseline so that a
+        # healthy cohort does not look like an institution-wide crisis. State affects the
+        # latent propensity, but features remain the primary observable evidence.
+        state_bias = {"stable": 0.0, "watch": 0.35, "high": 0.85, "critical": 1.35}[p["state"]]
+        attendance_p = sigmoid(-3.00 + 1.30 * attendance_signal + 0.60 * max(0, row["consecutive_absence_days"] - 2) / 2 + 0.60 * state_bias)
+        gpa_p = sigmoid(-3.40 + 1.50 * academic_signal + 0.80 * max(0, -row["gpa_change"]) + decline_signal * 0.45 + 0.50 * state_bias)
+        backlog_p = sigmoid(-3.20 + 1.10 * backlog_signal + 0.45 * max(0, 7.0 - row["current_gpa"]) + 0.50 * state_bias)
+        support_p = sigmoid(-6.00 + 0.80 * max(0, attendance_signal) + 0.60 * max(0, academic_signal) + 1.10 * max(0, engagement_signal) + 0.95 * (1 if row["prolonged_absence_flag"] else 0) + 0.60 * (1 if p["context"] in {"family", "illness"} else 0) + 0.65 * state_bias)
+
+        course_slice = course_df[(course_df.student_id == row["student_id"]) & (course_df.semester == row["semester"])]
+        weak_courses = int((course_slice.internal_marks < 48).sum())
+        average_course_attendance_gap = max(0.0, 75.0 - float(course_slice.course_attendance_percentage.mean())) / 10.0
+        average_course_marks_gap = max(0.0, 52.0 - float(course_slice.internal_marks.mean())) / 10.0
+        course_failure_p = sigmoid(
+            -3.70
+            + 0.85 * weak_courses
+            + 0.72 * average_course_attendance_gap
+            + 0.62 * average_course_marks_gap
+            + 0.34 * max(0, 6.8 - row["current_gpa"])
+            + 0.32 * state_bias
+        )
+
+        outcomes.append({
+            "student_id": row["student_id"],
+            "cohort": BATCH,
+            "academic_year": row["academic_year"],
+            "semester": row["semester"],
+            "checkpoint_week": row["checkpoint_week"],
+            "outcome_horizon": "end_of_semester",
+            "course_failed": bool_probability(course_failure_p),
+            "new_backlog": bool_probability(backlog_p),
+            "gpa_below_threshold": bool_probability(gpa_p),
+            "attendance_shortage": bool_probability(attendance_p),
+            "discontinued": bool_probability(support_p * 0.32),
+        })
+    return pd.DataFrame(outcomes)
+
+
+def generate_reference_data():
+    rows = []
+    for semester, courses in COURSES.items():
+        for course_id, course_name, credits in courses:
+            rows.append({
+                "department_id": DEPARTMENT_ID,
+                "department_name": DEPARTMENT_NAME,
+                "course_id": course_id,
+                "course_name": course_name,
+                "semester": semester,
+                "course_credits": credits,
+                "passing_marks": 40,
+                "attendance_threshold": ATTENDANCE_THRESHOLD,
+                "gpa_threshold": GPA_THRESHOLD,
+            })
+    return pd.DataFrame(rows)
+
+
+def generate_observations(students_df, profiles):
+    rows = []
+    obs_counter = 1
+    base_date = date(2026, 8, 3)
+    for student in students_df.to_dict("records"):
+        sid = student["student_id"]
+        p = profiles[sid]
+        context = p["context"]
+        observation_texts = []
+        category = None
+        follow_up = False
+
+        if context == "illness":
+            observation_texts.append("Absent for three consecutive days due to fever; mentor requested a check-in after return.")
+            category, follow_up = "health_related", True
+        elif context == "transport":
+            observation_texts.append("Recent first-hour attendance was affected by recurring transport delays; mentor is reviewing a practical attendance plan.")
+            category, follow_up = "attendance", True
+        elif context == "assessment":
+            observation_texts.append("Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.")
+            category, follow_up = "assessment", True
+        elif context == "family":
+            observation_texts.append("Student reported a short-term family responsibility affecting attendance and study time; mentor scheduled a follow-up.")
+            category, follow_up = "support", True
+        elif context == "late_arrival":
+            observation_texts.append("Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.")
+            category, follow_up = "attendance", True
+        elif context == "academic":
+            subject = rng.choice(["Design and Analysis of Algorithms", "Database Management Systems", "Computer Networks"])
+            observation_texts.append(f"Student is finding {subject} difficult and has requested additional problem-solving support.")
+            category, follow_up = "academic_performance", True
+        elif context == "improvement":
+            observation_texts.append("Attendance and assignment completion improved after the previous mentor follow-up.")
+            category, follow_up = "improvement", False
+
+        if observation_texts:
+            rows.append({
+                "observation_id": f"OBS{obs_counter:05d}",
+                "student_id": sid,
+                "observed_on": (base_date + timedelta(days=int(rng.integers(0, 30)))).isoformat(),
+                "category": category,
+                "observation_text": observation_texts[0],
+                "source_role": "mentor",
+                "follow_up_required": follow_up,
+                "status": "OPEN" if follow_up else "CLOSED",
+            })
+            obs_counter += 1
+    return pd.DataFrame(rows)
+
+
+def generate_alert_seed_data(semester_df, course_df, observations_df, students_df, profiles):
+    # Seed a modest number of historical/current work items so the intervention UI
+    # has examples. Canonical predictions/alerts will be regenerated from RiskPrediction
+    # after the new ML models are trained.
+    current = semester_df[semester_df["snapshot_type"] == "current"].copy()
+    candidates = current[(current["current_attendance_percentage"] < 72) | (current["current_gpa"] < 6.8) | (current["current_backlog_count"] >= 2)].copy()
+    candidates["priority_seed"] = (
+        (75 - candidates["current_attendance_percentage"]).clip(lower=0) * 1.8
+        + (7.0 - candidates["current_gpa"]).clip(lower=0) * 22
+        + candidates["current_backlog_count"] * 10
+    )
+    candidates = candidates.sort_values("priority_seed", ascending=False).head(72)
+
+    rows = []
+    for i, row in enumerate(candidates.to_dict("records"), start=1):
+        if row["current_attendance_percentage"] < 70:
+            risk_type = "attendance_shortage"
+            action = "Review attendance context and agree on a recovery plan."
+        elif row["current_backlog_count"] >= 2:
+            risk_type = "backlog"
+            action = "Arrange subject-focused backlog recovery support."
+        else:
+            risk_type = "gpa_threshold"
+            action = "Review academic progress and agree on a focused study plan."
+        mentor_id = profiles[row["student_id"]]["mentor_id"]
+        priority = float(np.clip(row["priority_seed"] + rng.uniform(10, 22), 40, 96))
+        status = str(rng.choice(["NEW", "ACKNOWLEDGED", "ACTION_TAKEN", "FOLLOW_UP"], p=[0.30, 0.30, 0.25, 0.15]))
+        rows.append({
+            "alert_id": f"ALT{i:05d}",
+            "student_id": row["student_id"],
+            "teacher_id": mentor_id,
+            "risk_type": risk_type,
+            "risk_score": round(float(np.clip(row["priority_seed"] + rng.uniform(5, 18), 20, 98)), 1),
+            "priority_score": round(priority, 1),
+            "confidence_level": "Medium",
+            "intervenability_score": "High" if risk_type == "attendance_shortage" else "Medium",
+            "created_at": "2026-09-01",
+            "alert_status": status,
+            "intervention_id": f"INT{i:05d}",
+            "intervention_type": "mentor_check_in",
+            "suggested_action": action,
+            "action_taken": "Mentor follow-up completed" if status in {"ACTION_TAKEN", "FOLLOW_UP"} else "",
+            "intervention_date": "2026-09-03" if status in {"ACTION_TAKEN", "FOLLOW_UP"} else "",
+            "follow_up_date": "2026-09-10" if status == "FOLLOW_UP" else "",
+            "outcome_status": "",
+            "outcome_notes": "",
+            "risk_score_after_intervention": "",
+        })
+    return pd.DataFrame(rows)
+
+
+def write_outputs():
+    OUT.mkdir(parents=True, exist_ok=True)
+    students, teachers, assignments, profiles = generate_students_and_teachers()
+    semester, courses = generate_semester_and_course_data(students, profiles)
+    outcomes = generate_outcomes(semester, courses, profiles)
+    reference = generate_reference_data()
+    observations = generate_observations(students, profiles)
+    alerts = generate_alert_seed_data(semester, courses, observations, students, profiles)
+
+    datasets = {
+        "students": students,
+        "teachers": teachers,
+        "assignments": assignments,
+        "student_semester_features": semester,
+        "student_course_features": courses,
+        "historical_outcomes": outcomes,
+        "academic_reference_data": reference,
+        "academic_observations": observations,
+        "alerts_interventions": alerts,
+    }
+    for name, frame in datasets.items():
+        frame.to_csv(OUT / f"{name}.csv", index=False)
+
+    summary = {
+        "dataset_version": "agent14-cse-2026-r8",
+        "department": DEPARTMENT_NAME,
+        "students": len(students),
+        "sections": len(SECTIONS),
+        "students_per_section": STUDENTS_PER_SECTION,
+        "mentors": len(MENTOR_IDS),
+        "hods": 1,
+        "deans": 1,
+        "assignments": len(assignments),
+        "semester_snapshots": len(semester),
+        "course_snapshots": len(courses),
+        "historical_outcomes": len(outcomes),
+        "reference_rows": len(reference),
+        "observations": len(observations),
+        "seed_alerts": len(alerts),
+        "roll_number_first": students.iloc[0]["roll_number"],
+        "roll_number_last": students.iloc[-1]["roll_number"],
+        "current_semester": CURRENT_SEMESTER,
+    }
+    pd.Series(summary).to_json(OUT / "dataset_manifest.json", indent=2)
+
+    print(summary)
+    print("Historical outcome rates:")
+    print(outcomes[["course_failed", "new_backlog", "gpa_below_threshold", "attendance_shortage", "discontinued"]].mean().round(3).to_dict())
+    print("State distribution:")
+    print(pd.Series([p["state"] for p in profiles.values()]).value_counts().to_dict())
+    print("Section/mentor check:")
+    print(assignments.merge(students[["student_id", "section"]], on="student_id").groupby("teacher_id")["section"].nunique().to_dict())
+
+
+if __name__ == "__main__":
+    write_outputs()

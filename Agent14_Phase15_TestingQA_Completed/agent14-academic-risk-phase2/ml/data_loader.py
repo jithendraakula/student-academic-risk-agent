@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import pandas as pd
 
-from .config import DATA_DIR, HOLDOUT_COHORT
+from .config import DATA_DIR, HISTORICAL_TRAIN_SEMESTERS, HOLDOUT_SEMESTER
 
 FILES = {
     "students": "students.csv",
@@ -75,11 +75,11 @@ def build_training_sets(data: dict[str, pd.DataFrame]) -> dict[str, dict]:
     return sets
 
 
-def split_by_cohort(frame: pd.DataFrame, holdout_cohort: int = HOLDOUT_COHORT):
-    if "cohort" not in frame.columns:
-        raise ValueError("cohort column is required for time/cohort-aware split")
-    train = frame.loc[frame["cohort"] != holdout_cohort].copy()
-    test = frame.loc[frame["cohort"] == holdout_cohort].copy()
+def split_by_temporal_semester(frame: pd.DataFrame, train_semesters=HISTORICAL_TRAIN_SEMESTERS, holdout_semester: int = HOLDOUT_SEMESTER):
+    if "semester" not in frame.columns:
+        raise ValueError("semester column is required for temporal split")
+    train = frame.loc[frame["semester"].isin(train_semesters)].copy()
+    test = frame.loc[frame["semester"].eq(holdout_semester)].copy()
     if train.empty or test.empty:
-        raise ValueError(f"Cohort holdout failed: train={len(train)}, test={len(test)}")
+        raise ValueError(f"Temporal split failed: train={len(train)}, test={len(test)}")
     return train, test

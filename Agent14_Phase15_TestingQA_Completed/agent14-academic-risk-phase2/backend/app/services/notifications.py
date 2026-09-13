@@ -54,14 +54,14 @@ def _message(alert: AlertIntervention) -> tuple[str, str]:
     data = alert.data or {}
     label = str(data.get("risk_label") or alert.risk_type.replace("_", " ").title())
     student_name = data.get("student_name") or alert.student_id
+    roll = data.get("roll_number")
+    display_student = str(roll or student_name)
     level = str(data.get("risk_level") or "HIGH").upper()
     priority = float(alert.priority_score or 0)
-    title = f"Academic risk alert: {student_name}"
-    body = (
-        f"{student_name} ({alert.student_id}) has a {level.lower()} {label} signal "
-        f"with priority {priority:.1f}. Review the canonical alert and follow the "
-        "appropriate academic support workflow."
-    )
+    title = f"{label} · {display_student}"
+    evidence = str(data.get("evidence") or data.get("context_observation") or data.get("context_summary") or "Current academic evidence needs review.")
+    action = str(data.get("suggested_action") or "Review the student case and decide the next support action.")
+    body = f"{level.title()} · Priority {priority:.0f}/100. {evidence} Recommended: {action}"
     return title, body
 
 
@@ -139,9 +139,42 @@ def emit_alert_notifications(db: Session, alerts: list[AlertIntervention]) -> di
 
 
 def notification_summary(db: Session, user: User) -> dict:
+    base = select(Notification).where(Notification.user_id == user.id, Notification.channel == CHANNEL_IN_APP)
     total = db.scalar(select(func.count(Notification.id)).where(Notification.user_id == user.id, Notification.channel == CHANNEL_IN_APP)) or 0
     unread = db.scalar(select(func.count(Notification.id)).where(Notification.user_id == user.id, Notification.channel == CHANNEL_IN_APP, Notification.is_read.is_(False))) or 0
-    return {"total": int(total), "unread": int(unread)}
+    rows = db.scalars(base.order_by(Notification.created_at.desc())).all()
+    # Category counts are intentionally derived from the same live alert metadata
+    # used by notification_list so the action-center tabs describe real work.
+    action_required = follow_up = escalation = 0
+    for row in rows:
+        alert = db.get(AlertIntervention, row.alert_id) if row.alert_id else None
+        data = (alert.data or {}) if alert else {}
+        level = str(data.get("risk_level") or "").upper()
+        status = str(alert.status or "") if alert else ""
+        priority = float(alert.priority_score or 0) if alert else 0.0
+        needs_action = alert is not None and status != "RESOLVED" and (status in {"NEW", "ACKNOWLEDGED", "ACTION_TAKEN", "FOLLOW_UP"} or priority >= NOTIFICATION_HOD_PRIORITY_THRESHOLD)
+        if status == "FOLLOW_UP":
+            follow_up += 1
+        elif row.kind == "critical_alert" or level == "CRITICAL":
+            action_required += 1
+        elif "escal" in row.kind.lower():
+            escalation += 1
+        elif needs_action:
+            action_required += 1
+    return {
+        "total": int(total), "unread": int(unread),
+        "action_required": int(action_required), "follow_up": int(follow_up), "escalation": int(escalation),
+    }
+
+
+def mark_all_read(db: Session, user: User) -> dict:
+    rows = db.scalars(select(Notification).where(Notification.user_id == user.id, Notification.channel == CHANNEL_IN_APP, Notification.is_read.is_(False))).all()
+    now = datetime.utcnow()
+    for row in rows:
+        row.is_read = True
+        row.read_at = now
+    db.commit()
+    return {"updated": len(rows), "marked_read_at": now.isoformat()}
 
 
 def notification_list(db: Session, user: User, *, unread_only: bool = False, limit: int = 30) -> list[dict]:
@@ -149,12 +182,44 @@ def notification_list(db: Session, user: User, *, unread_only: bool = False, lim
     if unread_only:
         query = query.where(Notification.is_read.is_(False))
     rows = db.scalars(query.order_by(Notification.created_at.desc()).limit(max(1, min(limit, 100)))).all()
-    return [{
-        "id": row.id, "alert_id": row.alert_id, "kind": row.kind,
-        "title": row.title, "message": row.message, "status": row.status,
-        "is_read": row.is_read,
-        "created_at": row.created_at.isoformat() if row.created_at else None,
-    } for row in rows]
+    items = []
+    for row in rows:
+        alert = db.get(AlertIntervention, row.alert_id) if row.alert_id else None
+        data = (alert.data or {}) if alert else {}
+        student = db.get(Student, alert.student_id) if alert else None
+        level = str(data.get("risk_level") or "").upper()
+        risk_label = str(data.get("risk_label") or (alert.risk_type.replace("_", " ").title() if alert else "Academic risk"))
+        priority = float(alert.priority_score or 0) if alert else 0.0
+        alert_status = str(alert.status or "") if alert else ""
+        action_required = alert is not None and alert_status != "RESOLVED" and (
+            alert_status in {"NEW", "ACKNOWLEDGED", "ACTION_TAKEN", "FOLLOW_UP"} or priority >= NOTIFICATION_HOD_PRIORITY_THRESHOLD
+        )
+        if alert_status == "FOLLOW_UP":
+            category = "follow_up"
+        elif row.kind == "critical_alert" or level == "CRITICAL":
+            category = "action_required"
+        elif "escal" in row.kind.lower():
+            category = "escalation"
+        else:
+            category = "information"
+        items.append({
+            "id": row.id, "alert_id": row.alert_id, "kind": row.kind,
+            "category": category, "title": row.title, "message": row.message,
+            "status": row.status, "is_read": row.is_read,
+            "student_id": alert.student_id if alert else data.get("student_id"),
+            "student_name": data.get("student_name") or (student.name if student else None),
+            "roll_number": student.roll_number if student else data.get("roll_number"),
+            "section": student.section if student else data.get("section"),
+            "department": student.department if student else data.get("department"),
+            "risk_type": alert.risk_type if alert else data.get("risk_type"),
+            "risk_label": risk_label, "risk_level": level or None,
+            "priority_score": priority, "alert_status": alert_status or None,
+            "recommended_action": data.get("suggested_action"),
+            "evidence": data.get("evidence") or data.get("context_observation") or data.get("context_summary"),
+            "action_required": action_required,
+            "created_at": row.created_at.isoformat() if row.created_at else None,
+        })
+    return items
 
 
 def mark_read(db: Session, user: User, notification_id: str) -> dict:

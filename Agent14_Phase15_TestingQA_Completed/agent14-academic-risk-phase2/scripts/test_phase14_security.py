@@ -54,7 +54,7 @@ def main() -> None:
     try:
         with TestClient(app) as client:
             assert client.get("/api/health").json()["database"] == "connected"
-            login = client.post("/api/auth/login", json={"email": "mentor1@vignan.ac.in", "password": "demo"})
+            login = client.post("/api/auth/login", json={"email": "mentor.one.cse@vignan.ac.in", "password": "demo"})
             assert login.status_code == 200, login.text
             token = login.json()["token"]
             headers = {"Authorization": f"Bearer {token}"}
@@ -74,8 +74,8 @@ def main() -> None:
             with SessionLocal() as db:
                 assert db.query(AuditLog).filter(AuditLog.action == "LOGIN_FAILED").count() >= 1
                 assert db.query(RevokedToken).count() >= 1
-                assert db.query(User).filter(User.email == "mentor1@vignan.ac.in").first().is_active is True
-                assert db.query(User).filter(User.email == "mentor1@vignan.ac.in").first().password_hash != "demo"
+                assert db.query(User).filter(User.email == "mentor.one.cse@vignan.ac.in").first().is_active is True
+                assert db.query(User).filter(User.email == "mentor.one.cse@vignan.ac.in").first().password_hash != "demo"
         print("PHASE 14 SECURITY TESTS PASSED")
     finally:
         try:

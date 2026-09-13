@@ -54,8 +54,8 @@ def main():
     db_path = BACKEND / 'phase9_test.db'
     try:
         with TestClient(app) as client:
-            mentor = login(client, 'mentor1@vignan.ac.in')
-            mentor2 = login(client, 'mentor2@vignan.ac.in')
+            mentor = login(client, 'mentor.one.cse@vignan.ac.in')
+            mentor2 = login(client, 'mentor.two.cse@vignan.ac.in')
             hod = login(client, 'hod.cse@vignan.ac.in')
             dean = login(client, 'dean@vignan.ac.in')
             admin = login(client, 'admin@vignan.ac.in')

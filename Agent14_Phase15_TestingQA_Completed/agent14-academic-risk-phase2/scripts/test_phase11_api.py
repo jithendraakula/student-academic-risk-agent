@@ -96,7 +96,7 @@ def main():
         with TestClient(app) as client:
             hod = login(client, "hod.cse@vignan.ac.in")
             dean = login(client, "dean@vignan.ac.in")
-            mentor = login(client, "mentor1@vignan.ac.in")
+            mentor = login(client, "mentor.one.cse@vignan.ac.in")
             admin = login(client, "admin@vignan.ac.in")
 
             before_predictions = None
@@ -139,8 +139,8 @@ def main():
             assert calls, "provider was never invoked"
             last_call_text = "\n".join(message["content"] for message in calls[-1])
             assert "RiskPrediction + canonical priority engine" in last_call_text
-            assert '"scope":{"institution":"all departments"}' in last_call_text
-            assert "mentor1@vignan.ac.in" not in last_call_text
+            assert '"scope":{"institution":"CSE"}' in last_call_text
+            assert "mentor.one.cse@vignan.ac.in" not in last_call_text
             assert "Mentor One" not in last_call_text or "mentor_name" in last_call_text
 
             # The first scoped analyses may materialize missing canonical predictions.

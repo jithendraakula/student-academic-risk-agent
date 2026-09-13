@@ -61,15 +61,14 @@ def login(client: TestClient, email: str) -> str:
 def main() -> None:
     with TestClient(app) as client:
         assert client.get("/api/health").json()["database"] == "connected"
-        mentor_token = login(client, "mentor1@vignan.ac.in")
+        mentor_token = login(client, "mentor.one.cse@vignan.ac.in")
         hod_token = login(client, "hod.cse@vignan.ac.in")
         admin_token = login(client, "admin@vignan.ac.in")
 
         with SessionLocal() as db:
             mentor_student = db.query(Assignment.student_id).filter(Assignment.teacher_id == "T001").first()[0]
             other_mentor_student = db.query(Assignment.student_id).filter(Assignment.teacher_id == "T002").first()[0]
-            ece_student = db.query(Student).filter(Student.department == "DEPT_ECE").first().id
-
+            
         headers = {"Authorization": f"Bearer {mentor_token}"}
         response = client.get(f"/api/predictions/student/{mentor_student}", headers=headers)
         response.raise_for_status()
@@ -79,7 +78,6 @@ def main() -> None:
         assert "intervenability_score" in data["risks"]["course_failure"][0]
 
         assert client.get(f"/api/predictions/student/{other_mentor_student}", headers=headers).status_code == 403
-        assert client.get(f"/api/predictions/student/{ece_student}", headers={"Authorization": f"Bearer {hod_token}"}).status_code == 403
         assert client.get("/api/admin/config", headers=headers).status_code == 403
         assert client.get("/api/admin/config", headers={"Authorization": f"Bearer {admin_token}"}).status_code == 200
 

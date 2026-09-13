@@ -77,14 +77,15 @@ def check_data_contract() -> dict:
     import pandas as pd
     data = ROOT / "data" / "processed"
     expected = {
-        "students.csv": (360, {"student_id", "department", "section", "current_semester"}),
-        "teachers.csv": (15, {"teacher_id", "role", "department", "email"}),
-        "assignments.csv": (360, {"assignment_id", "student_id", "teacher_id", "semester"}),
-        "student_semester_features.csv": (1800, {"student_id", "semester", "checkpoint_week", "snapshot_type", "current_gpa"}),
-        "student_course_features.csv": (9000, {"student_id", "semester", "course_id", "snapshot_type"}),
-        "historical_outcomes.csv": (1440, {"student_id", "semester", "checkpoint_week", "course_failed", "discontinued"}),
-        "academic_reference_data.csv": (70, {"department_id", "semester", "course_id", "attendance_threshold", "gpa_threshold"}),
-        "alerts_interventions.csv": (73, {"student_id", "risk_type", "alert_status"}),
+        "students.csv": (500, {"student_id", "department", "section", "current_semester"}),
+        "teachers.csv": (7, {"teacher_id", "role", "department", "email"}),
+        "assignments.csv": (500, {"assignment_id", "student_id", "teacher_id", "semester"}),
+        "student_semester_features.csv": (2500, {"student_id", "semester", "checkpoint_week", "snapshot_type", "current_gpa"}),
+        "student_course_features.csv": (12500, {"student_id", "semester", "course_id", "snapshot_type"}),
+        "historical_outcomes.csv": (2000, {"student_id", "semester", "checkpoint_week", "course_failed", "discontinued"}),
+        "academic_reference_data.csv": (25, {"department_id", "semester", "course_id", "attendance_threshold", "gpa_threshold"}),
+        "academic_observations.csv": (100, {"observation_id", "student_id", "category", "observation_text", "source_role"}),
+        "alerts_interventions.csv": (72, {"student_id", "risk_type", "alert_status"}),
     }
     errors = []
     for name, (rows, cols) in expected.items():
@@ -96,7 +97,10 @@ def check_data_contract() -> dict:
         missing = cols - set(df.columns)
         if missing:
             errors.append(f"{name} missing columns {sorted(missing)}")
-        if len(df) != rows:
+        if name == "academic_observations.csv":
+            if len(df) < rows:
+                errors.append(f"{name}: expected at least {rows}, got {len(df)}")
+        elif len(df) != rows:
             errors.append(f"{name}: expected {rows}, got {len(df)}")
     return {"label": "Processed data contract", "passed": not errors, "details": errors or ["all expected datasets/counts validated"]}
 
@@ -124,6 +128,30 @@ def check_canonical_policy() -> dict:
         errors.append("low priority incorrectly created alert")
     return {"label": "Canonical risk/priority policy", "passed": not errors, "details": errors or ["risk aliases, priority calculation, and alert threshold verified"]}
 
+
+
+def check_context_intelligence() -> dict:
+    sys.path.insert(0, str(BACKEND))
+    from app.services.context_intelligence import INTENTS, classify_observation  # type: ignore
+    checks = [
+        ("health_related", "Absent for three consecutive days due to fever; mentor requested a check-in after return.", "health_recovery"),
+        ("attendance", "Recent first-hour attendance was affected by recurring transport delays; mentor is reviewing a practical attendance plan.", "transport_attendance"),
+        ("attendance", "Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.", "attendance_pattern"),
+        ("assessment", "Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.", "assessment_support"),
+        ("support", "Student reported a short-term family responsibility affecting attendance and study time; mentor scheduled a follow-up.", "family_support"),
+        ("academic_performance", "Student is finding Database Management Systems difficult and has requested additional problem-solving support.", "subject_academic_support"),
+        ("improvement", "Attendance and assignment completion improved after the previous mentor follow-up.", "improvement_maintain"),
+    ]
+    errors = []
+    for category, text, expected in checks:
+        result = classify_observation(category, text)
+        if result["intent"] != expected:
+            errors.append(f"{expected}: got {result['intent']}")
+        if not result["recommended_action"]:
+            errors.append(f"{expected}: missing recommended action")
+    if not all(intent.support_only == (intent.key in {"health_recovery", "family_support"}) for intent in INTENTS.values()):
+        errors.append("support-only intent metadata inconsistent")
+    return {"label": "Context/intent intelligence", "passed": not errors, "details": errors or ["context intents and action pathways verified"]}
 
 def check_frontend_contract() -> dict:
     errors = []

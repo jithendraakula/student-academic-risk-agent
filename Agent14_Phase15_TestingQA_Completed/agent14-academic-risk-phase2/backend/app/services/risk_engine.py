@@ -125,10 +125,10 @@ def should_create_alert(risk_score: float, risk_level: str, priority_score: floa
 
 def risk_band_priority(risk_score: float) -> str:
     score = float(risk_score)
-    if score >= 75:
+    if score >= 60:
         return "CRITICAL"
-    if score >= 50:
+    if score >= 40:
         return "HIGH"
-    if score >= 25:
+    if score >= 20:
         return "MODERATE"
     return "LOW"

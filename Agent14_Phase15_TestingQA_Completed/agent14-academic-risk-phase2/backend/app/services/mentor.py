@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.domain import AlertIntervention, Assignment, Student, User
-from app.services.aggregation import student_summary
+from app.services.aggregation import scope_metrics, student_summary
 from app.services.alerts import get_active_alerts, alert_item
 from app.services.risk_engine import normalize_risk_type, RISK_TYPES
 from app.services.rbac import can_access_student, scoped_student_ids
@@ -42,22 +42,36 @@ def mentor_workspace(db: Session, user: User) -> dict:
             "alerts": student_alerts,
             "primary_alert": max(student_alerts, key=lambda a: a["priority_score"], default=None),
             "student_name": students[student_id].name if student_id in students else summary.get("student_name"),
+            "roll_number": students[student_id].roll_number if student_id in students else summary.get("roll_number"),
         })
 
     rows.sort(key=lambda row: (row.get("needs_action", False), row.get("priority_score", 0)), reverse=True)
+    metrics = scope_metrics(db, student_ids, include_support_attention=True, user=user)
     return {
         "mentor_id": user.id,
         "mentor_name": user.name,
         "department": user.department,
-        "assigned_students": len(student_ids),
-        "critical_students": sum(1 for row in rows if row.get("critical")),
-        "high_risk_students": sum(1 for row in rows if row.get("high_risk")),
-        "students_needing_action": sum(1 for row in rows if row.get("needs_action")),
-        "open_alerts": len(alerts),
-        "new_alerts": sum(1 for alert in alerts if alert.status == "NEW"),
+        "assigned_students": metrics["monitored_students"],
+        "critical_students": metrics["critical_students"],
+        "high_risk_students": metrics["high_risk_students"],
+        "high_only_students": metrics["high_only_students"],
+        "elevated_risk_students": metrics["elevated_risk_students"],
+        "students_needing_action": metrics["students_needing_action"],
+        "elevated_risk_students": metrics["elevated_risk_students"],
+        "students_with_multiple_risks": metrics["students_with_multiple_risks"],
+        "risk_signals": metrics["risk_signals"],
+        "actionable_risk_signals": metrics["actionable_risk_signals"],
+        "open_alerts": metrics["open_alerts"],
+        "open_alert_students": metrics["open_alert_students"],
+        "new_alerts": metrics["new_alerts"],
+        "new_alert_students": metrics["new_alert_students"],
+        "risk_distribution": metrics["risk_distribution"],
+        "metric_semantics": metrics["metric_semantics"],
+        "risk_thresholds": metrics["risk_thresholds"],
         "items": rows,
-        "risk_source": "risk_predictions",
-        "alert_policy": {"priority_threshold": 60, "critical_override": True},
+        "risk_source": metrics["risk_source"],
+        "alert_source": metrics["alert_source"],
+        "alert_policy": metrics["alert_policy"],
     }
 
 

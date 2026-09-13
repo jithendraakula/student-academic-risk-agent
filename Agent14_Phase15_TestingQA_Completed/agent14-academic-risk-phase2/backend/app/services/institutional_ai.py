@@ -73,7 +73,7 @@ def _build_dean_context(db: Session, user: User, intent: InstitutionalAIIntent) 
     summary = institution_summary(db, user)
     context: dict[str, Any] = {
         "role": "dean",
-        "scope": {"institution": "all departments"},
+        "scope": {"institution": "CSE"},
         "summary": _jsonable(summary),
         "canonical_definitions": {
             "risk_types": {key: RISK_TYPES[key] for key in RISK_TYPE_ORDER},

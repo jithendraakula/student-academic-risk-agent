@@ -43,13 +43,13 @@ def pick_alert(client, headers):
     r = client.get('/api/mentor/alerts', headers=headers); r.raise_for_status()
     items = r.json()['items']
     assert items
-    return items[0]
+    return next((item for item in items if item["status"] in {"NEW", "ACKNOWLEDGED"}), items[0])
 
 
 def main():
     try:
         with TestClient(app) as client:
-            mentor = login(client, 'mentor1@vignan.ac.in')
+            mentor = login(client, 'mentor.one.cse@vignan.ac.in')
             hod = login(client, 'hod.cse@vignan.ac.in')
             dean = login(client, 'dean@vignan.ac.in')
             admin = login(client, 'admin@vignan.ac.in')

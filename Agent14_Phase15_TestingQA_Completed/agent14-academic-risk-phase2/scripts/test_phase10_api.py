@@ -60,8 +60,8 @@ def main():
     original_call = ai_service._call_provider
     try:
         with TestClient(app) as client:
-            mentor = login(client, 'mentor1@vignan.ac.in')
-            mentor2 = login(client, 'mentor2@vignan.ac.in')
+            mentor = login(client, 'mentor.one.cse@vignan.ac.in')
+            mentor2 = login(client, 'mentor.two.cse@vignan.ac.in')
             admin = login(client, 'admin@vignan.ac.in')
 
             students = client.get('/api/mentor/students', headers=mentor)

@@ -1,19 +1,23 @@
 {
   "model_key": "discontinuation",
-  "model": "RandomForestClassifier",
+  "model": "Calibrated RandomForestClassifier",
+  "base_model": "RandomForestClassifier",
+  "calibration_method": "sigmoid",
+  "calibration_cv": 3,
   "target": "End-of-semester support/discontinuation outcome",
   "target_column": "discontinued",
-  "train_cohorts": [
-    2023,
-    2024
+  "train_semesters": [
+    1,
+    2,
+    3
   ],
-  "held_out_cohort": 2025,
-  "train_samples": 1200,
-  "test_samples": 240,
-  "positive_train": 150,
-  "negative_train": 1050,
-  "positive_test": 40,
-  "negative_test": 200,
+  "held_out_semester": 4,
+  "train_samples": 1500,
+  "test_samples": 500,
+  "positive_train": 7,
+  "negative_train": 1493,
+  "positive_test": 2,
+  "negative_test": 498,
   "feature_columns": [
     "department",
     "batch",
@@ -56,56 +60,59 @@
     "repeated_backlog_flag",
     "engagement_decline_flag"
   ],
-  "transformed_feature_count": 49,
-  "decision_threshold": 0.44000000000000006,
-  "threshold_selection": "20% training-only validation split optimized for F1",
+  "transformed_feature_count": 54,
+  "decision_threshold": 0.1,
+  "threshold_selection": "20% training-only validation split optimized for F1 after probability calibration",
   "top_global_features": [
     {
+      "feature": "numeric__midterm_marks_average",
+      "importance": 0.116909
+    },
+    {
+      "feature": "numeric__internal_marks_average",
+      "importance": 0.090019
+    },
+    {
+      "feature": "numeric__current_cgpa",
+      "importance": 0.076686
+    },
+    {
+      "feature": "numeric__assignment_average",
+      "importance": 0.071702
+    },
+    {
+      "feature": "numeric__consecutive_absence_days",
+      "importance": 0.06956
+    },
+    {
+      "feature": "numeric__previous_cgpa",
+      "importance": 0.065025
+    },
+    {
       "feature": "numeric__attendance_last_30_days",
-      "importance": 0.078864
+      "importance": 0.054933
     },
     {
-      "feature": "numeric__recent_absence_rate",
-      "importance": 0.064863
-    },
-    {
-      "feature": "numeric__total_absent_days",
-      "importance": 0.057381
-    },
-    {
-      "feature": "numeric__projected_final_attendance",
-      "importance": 0.05692
-    },
-    {
-      "feature": "numeric__recent_engagement_score",
-      "importance": 0.055663
-    },
-    {
-      "feature": "numeric__assessment_participation_rate",
-      "importance": 0.047144
+      "feature": "numeric__current_gpa",
+      "importance": 0.048944
     },
     {
       "feature": "numeric__current_attendance_percentage",
-      "importance": 0.045144
+      "importance": 0.045666
     },
     {
-      "feature": "numeric__assignment_completion_rate",
-      "importance": 0.039086
-    },
-    {
-      "feature": "numeric__midterm_marks_average",
-      "importance": 0.03867
-    },
-    {
-      "feature": "numeric__quiz_average",
-      "importance": 0.03529
+      "feature": "numeric__projected_final_attendance",
+      "importance": 0.045535
     }
   ],
-  "trained_at": "2026-09-12T14:03:29.723321+00:00",
-  "accuracy": 0.7667,
-  "balanced_accuracy": 0.64,
-  "precision": 0.3462,
-  "recall": 0.45,
-  "f1": 0.3913,
-  "roc_auc": 0.6745
+  "trained_at": "2026-09-13T10:01:35.234238+00:00",
+  "accuracy": 0.99,
+  "balanced_accuracy": 0.497,
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "roc_auc": 0.9749,
+  "brier_score": 0.0043,
+  "holdout_positive_rate": 0.004,
+  "holdout_mean_predicted_probability": 0.0067
 }

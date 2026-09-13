@@ -132,9 +132,15 @@ def _apply_changes(student_data: dict, course_data: list[dict], payload: WhatIfR
     if payload.assignment_completion_rate is not None:
         old = float(adjusted.get("assignment_completion_rate", 0) or 0)
         new = float(payload.assignment_completion_rate)
+        # Assignment completion is independent from assessment participation.
+        # A what-if scenario must not fabricate one academic behavior from another.
         adjusted["assignment_completion_rate"] = new
-        adjusted["assessment_participation_rate"] = max(float(adjusted.get("assessment_participation_rate", 0) or 0), new)
-        changes["assignment_completion_rate"] = {"from": old, "to": new, "delta": round(new - old, 4)}
+        changes["assignment_completion_rate"] = {
+            "from": round(old, 4),
+            "to": round(new, 4),
+            "delta": round(new - old, 4),
+            "unit": "fraction",
+        }
 
     adjusted_courses = [dict(course) for course in course_data]
     if payload.course:
@@ -149,8 +155,13 @@ def _apply_changes(student_data: dict, course_data: list[dict], payload: WhatIfR
             value = getattr(payload.course, field)
             if value is not None:
                 old = float(match.get(field, 0) or 0)
-                match[field] = float(value)
-                course_changes[field] = {"from": old, "to": float(value), "delta": round(float(value) - old, 2)}
+                new = float(value)
+                match[field] = new
+                course_changes[field] = {"from": old, "to": new, "delta": round(new - old, 2), "unit": "fraction" if field == "assignment_completion_rate" else "percent"}
+        if "assignment_completion_rate" in course_changes:
+            # Keep the course-level field independent; do not map it to another
+            # course assessment variable.
+            course_changes["assignment_completion_rate"]["note"] = "Independent from assessment participation"
         if "course_attendance_percentage" in course_changes:
             old = float(course_changes["course_attendance_percentage"]["from"])
             new = float(course_changes["course_attendance_percentage"]["to"])
@@ -158,6 +169,22 @@ def _apply_changes(student_data: dict, course_data: list[dict], payload: WhatIfR
         changes["course"] = {"course_id": payload.course.course_id, "fields": course_changes}
 
     return adjusted, adjusted_courses, changes
+
+
+def _scenario_summary(changes: dict) -> dict:
+    labels = {
+        "attendance_percentage": "attendance",
+        "gpa": "GPA",
+        "backlog_count": "backlog count",
+        "assignment_completion_rate": "assignment completion",
+        "course": "course performance",
+    }
+    active = [labels.get(key, key) for key in changes if changes.get(key)]
+    return {
+        "factors": active,
+        "factor_count": len(active),
+        "mode": "single_factor" if len(active) == 1 else "multi_factor" if active else "none",
+    }
 
 
 def simulate_student(db: Session, student_id: str, user: User, payload: WhatIfRequest) -> dict:
@@ -172,7 +199,7 @@ def simulate_student(db: Session, student_id: str, user: User, payload: WhatIfRe
     semester = db.scalars(
         select(SemesterFeature)
         .where(SemesterFeature.student_id == student_id)
-        .order_by(SemesterFeature.id.desc())
+        .order_by(SemesterFeature.semester.desc(), SemesterFeature.id.desc())
     ).first()
     if not semester:
         raise HTTPException(status_code=404, detail="Current semester features not found")
@@ -230,6 +257,7 @@ def simulate_student(db: Session, student_id: str, user: User, payload: WhatIfRe
             "semester": int(semester.semester),
             "checkpoint_week": int(baseline_student.get("checkpoint_week", 6) or 6),
             "changes": changes,
+        "scenario_summary": _scenario_summary(changes),
         },
         "student": {
             "student_id": student.id,

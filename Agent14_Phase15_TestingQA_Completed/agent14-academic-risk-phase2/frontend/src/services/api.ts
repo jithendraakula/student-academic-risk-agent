@@ -16,15 +16,20 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.status === 401) {
+    const status = error?.response?.status;
+    const url = String(error?.config?.url ?? "");
+    const isAuthLifecycleRequest = url.includes("/auth/login") || url.includes("/auth/logout");
+
+    if (status === 401 && !isAuthLifecycleRequest && typeof window !== "undefined") {
       sessionStorage.removeItem("agent14_token");
       sessionStorage.removeItem("agent14_user");
-      if (window.location.pathname !== "/login") {
-        window.location.assign("/login");
-      }
+      const next = `${window.location.pathname}${window.location.search}`;
+      const loginUrl = next === "/login" ? "/login" : `/login?reason=session_expired&next=${encodeURIComponent(next)}`;
+      if (window.location.pathname !== "/login") window.location.assign(loginUrl);
     }
+
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

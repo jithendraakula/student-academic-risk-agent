@@ -42,6 +42,7 @@ def list_mentor_students(
     result = mentor_students(db, user, mentor_id, query=q, section=section, risk_type=risk_type, needs_action=needs_action)
     if result is None:
         raise HTTPException(status_code=404, detail="Mentor not found in your department")
+    result["sections"] = sorted({str(item["section"]) for item in result.get("items", []) if item.get("section")})
     return result
 
 
