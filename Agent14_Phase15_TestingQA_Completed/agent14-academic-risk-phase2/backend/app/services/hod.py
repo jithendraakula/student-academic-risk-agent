@@ -30,7 +30,11 @@ def _intervention_metrics(db: Session, student_ids: list[str]) -> dict:
     }
 
 
-def _mentor_rows(db: Session, user: User) -> list[dict]:
+def _mentor_rows(
+    db: Session,
+    user: User,
+    summaries: dict[str, dict] | None = None,
+) -> list[dict]:
     mentors = db.scalars(
         select(Teacher)
         .where(Teacher.role == "mentor", Teacher.department == user.department)
@@ -45,15 +49,23 @@ def _mentor_rows(db: Session, user: User) -> list[dict]:
             )
         ).all())
         mentor_sections = sorted({row[0] for row in db.query(Student.section).where(Student.id.in_(student_ids)).distinct().all()}) if student_ids else []
-        summaries = student_summary(db, student_ids, include_support_attention=True)
+        mentor_summaries = (
+            {
+                student_id: summaries[student_id]
+                for student_id in student_ids
+                if student_id in summaries
+            }
+            if summaries is not None
+            else student_summary(db, student_ids, include_support_attention=True)
+        )
         alerts = get_active_alerts(db, student_ids, user)
         open_student_ids = {alert.student_id for alert in alerts}
-        action_students = sum(1 for sid in student_ids if summaries.get(sid, {}).get("needs_action") and sid in open_student_ids)
-        high_students = sum(1 for sid in student_ids if summaries.get(sid, {}).get("high_risk"))
-        critical_students = sum(1 for sid in student_ids if summaries.get(sid, {}).get("critical"))
+        action_students = sum(1 for sid in student_ids if mentor_summaries.get(sid, {}).get("needs_action") and sid in open_student_ids)
+        high_students = sum(1 for sid in student_ids if mentor_summaries.get(sid, {}).get("high_risk"))
+        critical_students = sum(1 for sid in student_ids if mentor_summaries.get(sid, {}).get("critical"))
         metrics = _intervention_metrics(db, student_ids)
-        risk_signals = sum(int(summaries.get(sid, {}).get("risk_signal_count", 0)) for sid in student_ids)
-        actionable_risk_signals = sum(int(summaries.get(sid, {}).get("actionable_risk_signal_count", 0)) for sid in student_ids)
+        risk_signals = sum(int(mentor_summaries.get(sid, {}).get("risk_signal_count", 0)) for sid in student_ids)
+        actionable_risk_signals = sum(int(mentor_summaries.get(sid, {}).get("actionable_risk_signal_count", 0)) for sid in student_ids)
         open_alert_students = len({alert.student_id for alert in alerts})
         rows.append({
             "mentor_id": mentor.id,
@@ -64,8 +76,8 @@ def _mentor_rows(db: Session, user: User) -> list[dict]:
             "critical_students": critical_students,
             "high_risk_students": high_students,
             "students_needing_action": action_students,
-            "elevated_risk_students": sum(1 for sid in student_ids if summaries.get(sid, {}).get("elevated_risk_students", 0) or summaries.get(sid, {}).get("high_risk")),
-            "students_with_multiple_risks": sum(1 for sid in student_ids if summaries.get(sid, {}).get("multiple_risks")),
+            "elevated_risk_students": sum(1 for sid in student_ids if mentor_summaries.get(sid, {}).get("elevated_risk_students", 0) or mentor_summaries.get(sid, {}).get("high_risk")),
+            "students_with_multiple_risks": sum(1 for sid in student_ids if mentor_summaries.get(sid, {}).get("multiple_risks")),
             "risk_signals": risk_signals,
             "actionable_risk_signals": actionable_risk_signals,
             "open_alerts": len(alerts),
@@ -82,7 +94,9 @@ def _mentor_rows(db: Session, user: User) -> list[dict]:
 
 
 def mentor_comparison(db: Session, user: User) -> dict:
-    rows = _mentor_rows(db, user)
+    student_ids = _department_student_ids(db, user)
+    summaries = student_summary(db, student_ids, include_support_attention=True)
+    rows = _mentor_rows(db, user, summaries)
     rows.sort(
         key=lambda row: (row["students_needing_action"], row["high_risk_students"], row["intervention_load"]),
         reverse=True,
@@ -97,8 +111,15 @@ def mentor_comparison(db: Session, user: User) -> dict:
 
 def department_summary(db: Session, user: User) -> dict:
     student_ids = _department_student_ids(db, user)
-    metrics = scope_metrics(db, student_ids, include_support_attention=True, user=user)
-    mentor_rows = _mentor_rows(db, user)
+    summaries = student_summary(db, student_ids, include_support_attention=True)
+    metrics = scope_metrics(
+        db,
+        student_ids,
+        include_support_attention=True,
+        user=user,
+        summaries=summaries,
+    )
+    mentor_rows = _mentor_rows(db, user, summaries)
     intervention_metrics = _intervention_metrics(db, student_ids)
     from app.models.domain import StudentCase
     completed_cases = len({c.student_id for c in db.scalars(select(StudentCase).where(StudentCase.student_id.in_(student_ids), StudentCase.status == "COMPLETED")).all()}) if student_ids else 0
@@ -134,8 +155,20 @@ def department_summary(db: Session, user: User) -> dict:
     }
 
 def department_risk_overview(db: Session, user: User) -> dict:
-    summary = department_summary(db, user)
-    return {"department": user.department, "items": summary["risk_distribution"], "risk_source": "risk_predictions"}
+    student_ids = _department_student_ids(db, user)
+    summaries = student_summary(db, student_ids, include_support_attention=True)
+    metrics = scope_metrics(
+        db,
+        student_ids,
+        include_support_attention=True,
+        user=user,
+        summaries=summaries,
+    )
+    return {
+        "department": user.department,
+        "items": metrics["risk_distribution"],
+        "risk_source": metrics["risk_source"],
+    }
 
 
 def mentor_students(

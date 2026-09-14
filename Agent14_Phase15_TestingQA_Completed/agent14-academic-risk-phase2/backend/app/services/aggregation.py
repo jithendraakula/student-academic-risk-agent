@@ -334,10 +334,16 @@ def scope_metrics(
     *,
     include_support_attention: bool = True,
     user=None,
+    summaries: dict[str, dict] | None = None,
 ) -> dict:
     """Return the canonical KPI contract for a role's authorized student scope."""
     ids = list(dict.fromkeys(str(sid) for sid in student_ids))
-    summaries = student_summary(db, ids, include_support_attention=include_support_attention)
+    if summaries is None:
+        summaries = student_summary(
+            db,
+            ids,
+            include_support_attention=include_support_attention,
+        )
     alerts = get_active_alerts(db, ids, user) if ids else []
 
     critical_students = {sid for sid, s in summaries.items() if s.get("critical")}
