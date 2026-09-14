@@ -22,6 +22,8 @@ def institution_summary(db: Session, user: User) -> dict:
     metrics = scope_metrics(db, ids, include_support_attention=True, user=user)
     all_alerts = db.scalars(select(AlertIntervention).where(AlertIntervention.student_id.in_(ids))).all() if ids else []
     resolved_interventions = sum(a.status == "RESOLVED" for a in all_alerts)
+    from app.models.domain import StudentCase
+    completed_cases = len({c.student_id for c in db.scalars(select(StudentCase).where(StudentCase.student_id.in_(ids), StudentCase.status == "COMPLETED")).all()}) if ids else 0
     overdue_follow_ups = sum(
         bool((a.data or {}).get("follow_up_date"))
         and str((a.data or {}).get("follow_up_date")) < __import__("datetime").date.today().isoformat()
@@ -71,6 +73,7 @@ def institution_summary(db: Session, user: User) -> dict:
         "new_alert_students": metrics["new_alert_students"],
         "intervention_load": metrics["intervention_load"],
         "resolved_interventions": resolved_interventions,
+        "completed_cases": completed_cases,
         "overdue_follow_ups": overdue_follow_ups,
         "average_priority": metrics["average_priority"],
         "risk_distribution": metrics["risk_distribution"],
@@ -190,6 +193,8 @@ def priority_queue(db: Session, user: User, limit: int = 25) -> dict:
             "risk_level": summary.get("risk_level", "LOW"),
             "critical": bool(summary.get("critical")),
             "risk_types": summary.get("risk_types", []),
+            "actionable_risk_types": summary.get("actionable_risk_types", []),
+            "risk_breakdown": summary.get("risk_breakdown", []),
         })
     rows.sort(key=lambda row: (row["critical"], row["priority_score"], row["risk_score"]), reverse=True)
     return {
@@ -222,6 +227,8 @@ def department_students(db: Session, user: User, department: str) -> dict | None
                 "primary_risk": summaries.get(student.id, {}).get("primary_risk"),
                 "needs_action": summaries.get(student.id, {}).get("needs_action", False),
                 "risk_types": summaries.get(student.id, {}).get("risk_types", []),
+                "actionable_risk_types": summaries.get(student.id, {}).get("actionable_risk_types", []),
+                "risk_breakdown": summaries.get(student.id, {}).get("risk_breakdown", []),
             }
             for student in students
         ],

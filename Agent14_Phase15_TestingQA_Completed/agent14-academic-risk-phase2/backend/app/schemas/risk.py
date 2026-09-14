@@ -13,3 +13,10 @@ class RiskProfileResponse(BaseModel):
     student: dict[str, Any]
     student_id: str
     risks: dict[str, Any]
+
+
+class CaseCompletionRequest(BaseModel):
+    action_category: str = Field(default="GENERAL_SUPPORT", min_length=1, max_length=64)
+    completion_reason: Optional[str] = Field(default=None, max_length=255)
+    notes: Optional[str] = Field(default=None, max_length=2000)
+    follow_up_outcome: Optional[str] = Field(default=None, max_length=128)

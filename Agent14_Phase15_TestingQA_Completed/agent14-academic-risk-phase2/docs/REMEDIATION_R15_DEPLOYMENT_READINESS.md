@@ -10,13 +10,15 @@ Backend:
 
 ```text
 ENVIRONMENT=production
-DATABASE_URL=postgresql+psycopg://...
+DATABASE_URL=postgresql+psycopg://postgres:<PASSWORD>@<HOST>:5432/postgres
 JWT_SECRET=<long random secret>
 JWT_ALGORITHM=HS256
-JWT_EXPIRE_MINUTES<=60
-ALLOWED_ORIGINS=<exact frontend origin(s)>
+JWT_EXPIRE_MINUTES=60
+ALLOWED_ORIGINS=https://<your-vercel-domain>.vercel.app
 TRUSTED_HOSTS=<exact backend host(s)>
 ENABLE_DOCS=false
+AI_PROVIDER=xai
+XAI_API_KEY=<your Grok API key>
 ```
 
 Frontend:
@@ -58,7 +60,8 @@ Before a production frontend build, configure `VITE_API_BASE_URL`.
 - Frontend production builds require an explicit API base URL.
 - `.env` and runtime artifacts are ignored by Git.
 - No real API keys or SMTP credentials belong in the repository or ZIP.
-- Real Gemini/Grok and SMTP delivery still require target-environment credentials.
+- Real Grok and SMTP delivery still require target-environment credentials.
+- `XAI_API_KEY` is read as the existing generic `AI_API_KEY` compatibility alias; do not commit either key.
 - Full frontend production build must be executed in a Node environment with dependencies installed.
 
 ## Deployment sequence for Phase 16

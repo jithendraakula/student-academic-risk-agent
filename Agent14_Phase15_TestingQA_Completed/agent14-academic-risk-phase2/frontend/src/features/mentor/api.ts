@@ -38,10 +38,23 @@ export interface MentorStudentRow {
   risk_types: string[];
   risk_scores: Record<string, number>;
   priority_scores: Record<string, number>;
+  risk_breakdown: Array<{
+    risk_type: string;
+    risk_label: string;
+    risk_level: string;
+    risk_score: number;
+    priority_score: number;
+    actionable: boolean;
+    elevated: boolean;
+    course_ids: string[];
+  }>;
   open_alerts: number;
   new_alerts: number;
   alerts: MentorAlert[];
   primary_alert: MentorAlert | null;
+  case_completed?: boolean;
+  case_id?: string | null;
+  completion_category?: string | null;
 }
 
 export interface MentorWorkspaceResponse {
@@ -61,12 +74,17 @@ export interface MentorWorkspaceResponse {
   open_alert_students?: number;
   new_alerts: number;
   new_alert_students?: number;
+  completed_cases?: number;
   risk_distribution?: Array<{ risk_type: string; risk_label: string; affected_students: number; affected_rate: number; actionable_students: number; average_priority: number }>;
   metric_semantics?: Record<string, { meaning: string; unit: string }>;
   risk_thresholds?: { elevated: number; critical: number };
   alert_source?: string;
   items: MentorStudentRow[];
   returned_students?: number;
+  total_students?: number;
+  page?: number;
+  page_size?: number;
+  total_pages?: number;
   risk_source: string;
   alert_policy: { priority_threshold: number; critical_override: boolean };
 }
@@ -129,6 +147,9 @@ export interface RiskProfileResponse {
   case_management?: {
     open_alerts: number;
     items: Array<{ alert_id: string; risk_type: string; risk_label?: string; risk_level?: string; priority_score: number; status: string; suggested_action?: string; follow_up_date?: string | null; course_id?: string | null }>;
+    case_completed?: boolean;
+    completed_at?: string | null;
+    completed_by?: string | null;
     source: string;
   };
   current_status: {
@@ -175,6 +196,8 @@ export async function getMentorWorkspace(params?: {
   severity?: string;
   status?: string;
   needs_action?: boolean;
+  page?: number;
+  page_size?: number;
 }) {
   const response = await api.get<MentorWorkspaceResponse>("/mentor/students", { params });
   return response.data;
@@ -193,6 +216,11 @@ export async function getWatchlist() {
 export async function getAlerts() {
   const response = await api.get<{ items: MentorAlert[] }>("/mentor/alerts");
   return response.data.items;
+}
+
+export async function markStudentCaseComplete(studentId: string, payload?: { action_category?: string; completion_reason?: string; notes?: string; follow_up_outcome?: string }) {
+  const response = await api.post<{ student_id: string; case_id: string; status: string; resolved_alerts: number; alert_ids: string[]; completed_at: string; completion_category?: string; completion_reason?: string | null }>(`/interventions/student/${studentId}/complete`, payload ?? {});
+  return response.data;
 }
 
 export async function getRiskProfile(studentId: string) {

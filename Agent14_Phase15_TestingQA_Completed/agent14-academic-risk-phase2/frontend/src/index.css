@@ -347,6 +347,34 @@ label, th, td, p, h1, h2, h3, h4, button, a { min-width: 0; }
   .institutional-header-brand img { max-height: 52px; }
 }
 
+/* Keep the desktop header title and utility tools in separate grid tracks.
+   The utility area is also allowed to wrap rather than overlap the identity. */
+.institutional-header-tools {
+  max-width: 100%;
+  min-width: 0;
+  overflow: visible;
+  column-gap: 12px;
+  row-gap: 8px;
+}
+.institutional-header-tools > button:last-child {
+  flex: 0 0 auto;
+  margin-left: 4px;
+}
+.institutional-header-tools > div:not([id]) {
+  min-width: 0;
+}
+.institutional-header-title > div {
+  max-width: 100%;
+}
+@media (max-width: 767px) {
+  .institutional-header-tools {
+    width: 100%;
+    justify-content: flex-start !important;
+    flex-wrap: wrap;
+  }
+}
+
+
 @media (max-width: 1023px) {
   .ui-section-heading { gap: 12px; }
   .ui-action-group { justify-content: flex-start; }

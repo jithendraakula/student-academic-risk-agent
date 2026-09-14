@@ -256,21 +256,21 @@ export default function InstitutionalShell({ children, eyebrow, title, subtitle 
       <a href="#main-content" className="skip-link">Skip to main content</a>
       <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="institutional-header-inner mx-auto max-w-[1600px] px-4 py-3 sm:px-6 lg:px-8">
-          <div className="grid gap-3 md:grid-cols-[1fr_auto] lg:grid-cols-[270px_minmax(0,1fr)_360px] lg:items-center lg:gap-4">
+          <div className="grid gap-3 md:grid-cols-[1fr_auto] lg:grid-cols-[270px_minmax(0,1fr)_430px] lg:items-center lg:gap-4">
             <div className="institutional-header-brand flex min-w-0 items-center gap-3">
               <img src="/branding/vignan-brand.png" alt="Vignan's University" className="h-12 w-auto max-w-[220px] object-contain sm:h-14" />
             </div>
-            <div className="institutional-header-tools flex min-w-0 items-center justify-end gap-2">
+            <div className="institutional-header-tools flex min-w-0 flex-wrap items-center justify-end gap-3 lg:col-start-3 lg:row-start-1">
               <img src="/branding/accreditation-badges.png" alt="Institutional accreditation badges" className="hidden h-10 w-auto object-contain xl:block" />
               {role !== "admin" ? <NotificationBell /> : null}
-              <div className="hidden min-w-0 items-center gap-2 sm:flex">
+              <div className="hidden min-w-0 max-w-[180px] items-center gap-2 sm:flex">
                 <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#eaf2ff] text-xs font-extrabold text-brand-700">{initials}</div>
                 <div className="min-w-0">
-                  <p className="max-w-[150px] truncate text-xs font-bold text-ink-900">{user?.name ?? "Staff user"}</p>
-                  <p className="text-[11px] font-medium text-slate-500">{roleLabel}</p>
+                  <p className="max-w-[130px] truncate text-xs font-bold text-ink-900">{user?.name ?? "Staff user"}</p>
+                  <p className="max-w-[130px] truncate text-[11px] font-medium text-slate-500">{roleLabel}</p>
                 </div>
               </div>
-              <button type="button" onClick={logout} className="shrink-0 rounded-full border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700">Sign out</button>
+              <button type="button" onClick={logout} className="shrink-0 whitespace-nowrap rounded-full border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700">Sign out</button>
             </div>
             <div className="institutional-header-title hidden min-w-0 items-center justify-center border-x border-slate-100 px-5 lg:col-start-2 lg:row-start-1 lg:flex">
               <div className="min-w-0 text-center">

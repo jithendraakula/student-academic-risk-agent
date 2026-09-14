@@ -16,6 +16,7 @@ export interface MentorComparisonRow {
   actionable_risk_signals?: number;
   open_alerts: number;
   open_alert_students?: number;
+  completed_cases?: number;
   new_alerts: number;
   new_alert_students?: number;
   intervention_load: number;
@@ -74,6 +75,8 @@ export interface MentorStudent extends DepartmentStudent {
   critical: boolean;
   open_alerts: number;
   risk_types: string[];
+  actionable_risk_types?: string[];
+  risk_breakdown?: Array<{ risk_type: string; risk_label: string; risk_level: string; risk_score: number; priority_score: number; actionable: boolean; elevated: boolean; course_ids: string[] }>;
 }
 
 export async function getHodSummary() {

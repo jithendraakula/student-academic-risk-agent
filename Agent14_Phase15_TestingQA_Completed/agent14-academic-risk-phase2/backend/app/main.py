@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 import uuid
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
@@ -84,5 +84,5 @@ def health_check():
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
         return {"status": "ok", "service": "agent14-backend", "database": "connected"}
-    except Exception:
-        return {"status": "degraded", "service": "agent14-backend", "database": "unavailable"}
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail={"status": "degraded", "service": "agent14-backend", "database": "unavailable"}) from exc

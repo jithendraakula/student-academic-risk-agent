@@ -27,9 +27,9 @@ from app.services.risk_engine import RISK_TYPES
 from app.services.what_if import simulate_student
 from app.schemas.ai import CopilotIntent, CopilotRequest
 
-AI_PROVIDER = os.getenv("AI_PROVIDER", "gemini").strip().lower()
-AI_API_KEY = os.getenv("AI_API_KEY", "").strip()
-AI_MODEL = os.getenv("AI_MODEL", "gemini-3.8-flash").strip()
+AI_PROVIDER = os.getenv("AI_PROVIDER", "xai" if os.getenv("XAI_API_KEY") else "gemini").strip().lower()
+AI_API_KEY = (os.getenv("AI_API_KEY") or os.getenv("XAI_API_KEY") or "").strip()
+AI_MODEL = os.getenv("AI_MODEL", "").strip()
 AI_TIMEOUT_SECONDS = float(os.getenv("AI_TIMEOUT_SECONDS", "25"))
 
 PROVIDER_CONFIG = {

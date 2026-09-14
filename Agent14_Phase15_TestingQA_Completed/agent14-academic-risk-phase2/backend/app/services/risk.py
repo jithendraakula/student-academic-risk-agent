@@ -1,10 +1,11 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+from datetime import datetime
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from app.models.domain import AcademicObservation, CourseFeature, RiskPrediction, SemesterFeature, Student, SystemSetting, User
+from app.models.domain import AcademicObservation, AlertIntervention, CourseFeature, RiskPrediction, SemesterFeature, Student, SystemSetting, User
 from app.services.rbac import can_access_student, can_view_support_attention_risk
 from app.services.context_intelligence import summarize_observations
 from app.services.alerts import get_active_alerts, alert_item
@@ -223,10 +224,13 @@ def build_student_risk_profile(db: Session, student_id: str, user: User) -> dict
             "course_id": (alert.data or {}).get("course_id"),
         })
     case_items.sort(key=lambda row: (row["status"] == "FOLLOW_UP", row["priority_score"]), reverse=True)
+    from app.services.cases import case_summary
+    stable_case = case_summary(db, student_id)
     result["case_management"] = {
         "open_alerts": len(case_items),
         "items": case_items,
-        "source": "alert_interventions",
+        **stable_case,
+        "source": "student_cases",
     }
 
     # Reuse canonical aggregation so profile status matches Mentor/HOD/Dean KPIs.
@@ -240,7 +244,7 @@ def build_student_risk_profile(db: Session, student_id: str, user: User) -> dict
         "priority_score": float(summary.get("priority_score", 0.0)),
         "risk_level": summary.get("risk_level", "LOW"),
         "primary_risk": summary.get("primary_risk"),
-        "needs_action": bool(summary.get("needs_action", False)),
+        "needs_action": bool(summary.get("needs_action", False)) and bool(case_items),
         "source": "canonical_student_summary",
     }
     return result

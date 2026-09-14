@@ -275,6 +275,28 @@ def student_summary(db: Session, student_ids: list[str], *, include_support_atte
             for key in RISK_TYPES
             if include_support_attention or key != "discontinuation"
         }
+        # Expose a student-level risk breakdown so every queue row can show
+        # exactly which risk signal(s) the student belongs to. For course
+        # failure, keep the highest-scoring course and all affected course ids.
+        risk_breakdown = []
+        for key in RISK_TYPE_ORDER:
+            if not include_support_attention and key == "discontinuation":
+                continue
+            matching = [r for r in visible if r.risk_type == key]
+            if not matching:
+                continue
+            top = max(matching, key=lambda r: (float(r.priority_score or 0), float(r.risk_score or 0), r.id))
+            risk_breakdown.append({
+                "risk_type": key,
+                "risk_label": RISK_TYPES.get(key, key),
+                "risk_level": top.risk_level,
+                "risk_score": round(float(top.risk_score or 0), 1),
+                "priority_score": round(float(top.priority_score or 0), 1),
+                "actionable": any(should_create_alert(r.risk_score, r.risk_level, r.priority_score) for r in matching),
+                "elevated": any(float(r.risk_score or 0) >= ELEVATED_RISK_THRESHOLD for r in matching),
+                "course_ids": sorted({r.course_id for r in matching if r.course_id}),
+            })
+        risk_breakdown.sort(key=lambda item: (item["actionable"], item["priority_score"], item["risk_score"]), reverse=True)
         risk_level = primary.risk_level if primary else (highest_risk.risk_level if highest_risk else "LOW")
         result[sid] = {
             "student_id": sid,
@@ -301,6 +323,7 @@ def student_summary(db: Session, student_ids: list[str], *, include_support_atte
             "multiple_risks": len(elevated_types) >= 2,
             "risk_scores": risk_scores,
             "priority_scores": priorities,
+            "risk_breakdown": risk_breakdown,
         }
     return result
 
@@ -320,7 +343,8 @@ def scope_metrics(
     critical_students = {sid for sid, s in summaries.items() if s.get("critical")}
     high_risk_students = {sid for sid, s in summaries.items() if s.get("high_risk")}
     elevated_students = {sid for sid, s in summaries.items() if s.get("risk_types")}
-    action_students = {sid for sid, s in summaries.items() if s.get("needs_action")}
+    open_alert_students = {alert.student_id for alert in alerts}
+    action_students = {sid for sid, s in summaries.items() if s.get("needs_action") and sid in open_alert_students}
     multiple_risk_students = {sid for sid, s in summaries.items() if s.get("multiple_risks")}
 
     risk_distribution = []

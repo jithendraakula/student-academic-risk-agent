@@ -7,8 +7,10 @@ import RiskBadge from "../../components/RiskBadge";
 import Table, { type TableColumn } from "../../components/Table";
 import { ActionButton, Icon, MetricCard, SectionHeading } from "../../components/AcademicUI";
 import { useAuth } from "../../context/AuthContext";
-import { acknowledgeAlert, getMentorWorkspace, updateIntervention, type MentorAlert, type MentorStudentRow } from "../../features/mentor/api";
+import { acknowledgeAlert, getMentorWorkspace, markStudentCaseComplete, updateIntervention, type MentorAlert, type MentorStudentRow } from "../../features/mentor/api";
 import { readableRiskType } from "../../features/mentor/formatters";
+import { notifyCaseWorkUpdated, subscribeToCaseWorkUpdates, subscribeToLiveCaseWorkUpdates } from "../../features/caseWorkEvents";
+import CompleteCaseDialog, { type CompletionPayload } from "../../components/CompleteCaseDialog";
 
 function riskLevelLabel(level: string) {
   const normalized = level?.toUpperCase();
@@ -47,6 +49,10 @@ export default function MentorDashboard() {
   const [interventionNotes, setInterventionNotes] = useState("");
   const [followUpDate, setFollowUpDate] = useState("");
   const [savingIntervention, setSavingIntervention] = useState(false);
+  const [completingAlertId, setCompletingAlertId] = useState<string | null>(null);
+  const [completedStudents, setCompletedStudents] = useState<Set<string>>(new Set());
+  const [completionTarget, setCompletionTarget] = useState<MentorStudentRow | null>(null);
+  const [page, setPage] = useState(1);
 
   async function loadWorkspace() {
     setLoading(true);
@@ -56,6 +62,7 @@ export default function MentorDashboard() {
         risk_type: riskFilter === "all" ? undefined : riskFilter,
         severity: severityFilter === "all" ? undefined : severityFilter,
         needs_action: actionOnly ? true : undefined,
+        page, page_size: 25,
       });
       setWorkspace(data);
       setRows(data.items);
@@ -67,10 +74,19 @@ export default function MentorDashboard() {
     }
   }
 
+  useEffect(() => { setPage(1); }, [search, riskFilter, severityFilter, actionOnly]);
+
   useEffect(() => {
     const timer = window.setTimeout(() => void loadWorkspace(), 160);
     return () => window.clearTimeout(timer);
-  }, [search, riskFilter, severityFilter, actionOnly]);
+  }, [search, riskFilter, severityFilter, actionOnly, page]);
+
+  useEffect(() => {
+    const stop = subscribeToCaseWorkUpdates(() => void loadWorkspace());
+    const stopLive = subscribeToLiveCaseWorkUpdates(() => void loadWorkspace());
+    const timer = window.setInterval(() => void loadWorkspace(), 15000);
+    return () => { stop(); stopLive(); window.clearInterval(timer); };
+  }, [search, riskFilter, severityFilter, actionOnly, page]);
 
   async function handleAcknowledge(alertId: string) {
     try {
@@ -79,6 +95,23 @@ export default function MentorDashboard() {
       setSelectedAlert(null);
     } catch {
       setError("The alert could not be acknowledged. Please try again.");
+    }
+  }
+
+  async function handleMarkComplete(row: MentorStudentRow, payload: CompletionPayload) {
+    setCompletingAlertId(row.student_id);
+    setError(null);
+    try {
+      const result = await markStudentCaseComplete(row.student_id, payload);
+      setCompletedStudents((current) => new Set(current).add(row.student_id));
+      setCompletionTarget(null);
+      notifyCaseWorkUpdated();
+      await loadWorkspace();
+      if (selectedAlert?.student_id === row.student_id) setSelectedAlert(null);
+    } catch {
+      setError("The student case could not be marked as complete. Please try again.");
+    } finally {
+      setCompletingAlertId(null);
     }
   }
 
@@ -128,7 +161,14 @@ export default function MentorDashboard() {
       render: (row) => (
         <div className="min-w-0">
           <RiskBadge level={riskLevelLabel(row.risk_level) as any} />
-          <p className="mt-2 text-sm font-semibold text-slate-700">{row.primary_risk ? readableRiskType(row.primary_risk) : "No elevated risk"}</p>
+          <div className="mt-2 flex min-w-0 flex-wrap gap-1.5">
+            {(row.risk_breakdown ?? []).map((risk) => (
+              <span key={`${risk.risk_type}-${risk.course_ids.join("-")}`} title={`${risk.risk_label} · ${risk.risk_level} · ${Math.round(risk.risk_score)}/100`} className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-700">
+                {risk.risk_label}{risk.course_ids.length ? ` · ${risk.course_ids.join(", ")}` : ""}
+              </span>
+            ))}
+            {!row.risk_breakdown?.length ? <span className="text-sm font-semibold text-slate-500">No elevated risk</span> : null}
+          </div>
         </div>
       ),
     },
@@ -158,7 +198,10 @@ export default function MentorDashboard() {
       render: (row) => (
         <div className="flex flex-wrap items-center justify-end gap-2">
           <Link to={`/mentor/student/${row.student_id}`} className="ui-button ui-button-secondary !min-h-9 !px-3 !text-xs"><Icon name="open" />Open case</Link>
-          {row.needs_action && row.primary_alert ? <ActionButton variant="primary" className="!min-h-9 !px-3 !text-xs" onClick={() => setSelectedAlert(row.primary_alert!)}>Intervene</ActionButton> : null}
+          {row.primary_alert && row.needs_action ? <ActionButton variant="primary" className="!min-h-9 !px-3 !text-xs" onClick={() => setSelectedAlert(row.primary_alert!)}>Intervene</ActionButton> : null}
+          <ActionButton variant="secondary" className="!min-h-9 !px-3 !text-xs" disabled={completingAlertId === row.student_id || completedStudents.has(row.student_id) || Boolean(row.case_completed)} onClick={() => setCompletionTarget(row)}>
+            {completingAlertId === row.student_id ? "Completing…" : (completedStudents.has(row.student_id) || row.case_completed) ? "Completed ✓" : "Mark as complete"}
+          </ActionButton>
         </div>
       ),
     },
@@ -180,6 +223,7 @@ export default function MentorDashboard() {
             <MetricCard icon="attention" label="High-risk students" value={loading ? "" : workspace?.high_risk_students ?? 0} detail="Students at high or critical risk" tone="attention" loading={loading} />
             <MetricCard icon="alerts" label="Open case work" value={loading ? "" : workspace?.open_alerts ?? 0} detail={loading ? "Active work items" : `${workspace?.open_alert_students ?? 0} students represented`} tone="brand" loading={loading} />
             <MetricCard icon="students" label="Assigned students" value={loading ? "" : workspace?.assigned_students ?? 0} detail="Students in your assigned sections" loading={loading} />
+            <MetricCard icon="alerts" label="Completed cases" value={loading ? "" : workspace?.completed_cases ?? 0} detail="Cases resolved and saved" tone="brand" loading={loading} />
           </div>
         </section>
 
@@ -201,7 +245,10 @@ export default function MentorDashboard() {
                 {[1, 2, 3, 4, 5].map((item) => <div key={item} className="grid grid-cols-1 gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-4 md:grid-cols-[1.2fr_.9fr_.6fr_.6fr_.75fr_1.4fr_.8fr]"><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /><div className="h-12 animate-pulse rounded bg-white" /></div>)}
               </div>
             ) : (
-              <Table columns={columns} rows={rows} rowKey={(row) => row.student_id} caption="Mentor student attention queue" emptyMessage="No students match the current filters." />
+              <>
+                <Table columns={columns} rows={rows} rowKey={(row) => row.student_id} caption="Mentor student attention queue" emptyMessage="No students match the current filters." />
+                {!loading && (workspace?.total_pages ?? 1) > 1 ? <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500"><span>Page {workspace?.page ?? page} of {workspace?.total_pages ?? 1} · {workspace?.total_students ?? rows.length} students</span><div className="flex gap-2"><button type="button" className="rounded-lg border border-slate-200 px-3 py-1.5 font-semibold disabled:opacity-40" disabled={page <= 1} onClick={()=>setPage(p=>Math.max(1,p-1))}>Previous</button><button type="button" className="rounded-lg border border-slate-200 px-3 py-1.5 font-semibold disabled:opacity-40" disabled={page >= (workspace?.total_pages ?? 1)} onClick={()=>setPage(p=>p+1)}>Next</button></div></div> : null}
+              </>
             )}
           </div>
         </Card>
@@ -218,6 +265,7 @@ export default function MentorDashboard() {
           </Card>
         ) : null}
       </div>
+      <CompleteCaseDialog open={Boolean(completionTarget)} studentName={completionTarget?.student_name ?? "student"} saving={Boolean(completingAlertId)} onClose={() => setCompletionTarget(null)} onConfirm={(payload) => completionTarget && void handleMarkComplete(completionTarget, payload)} />
     </InstitutionalShell>
   );
 }

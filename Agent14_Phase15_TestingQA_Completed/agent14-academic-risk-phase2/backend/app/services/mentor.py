@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -29,6 +30,15 @@ def mentor_workspace(db: Session, user: User) -> dict:
         student.id: student
         for student in db.scalars(select(Student).where(Student.id.in_(student_ids))).all()
     }
+    from app.models.domain import StudentCase
+    completed_cases = db.scalars(select(StudentCase).where(StudentCase.student_id.in_(student_ids), StudentCase.status == "COMPLETED")) .all() if student_ids else []
+    completed_student_ids = {c.student_id for c in completed_cases}
+    latest_open_alert_by_student: dict[str, object] = {}
+    for alert in alerts:
+        current = latest_open_alert_by_student.get(alert.student_id)
+        if current is None or (alert.updated_at or datetime.min) > (current.updated_at or datetime.min):
+            latest_open_alert_by_student[alert.student_id] = alert
+    completed_student_ids = {sid for sid in completed_student_ids if sid not in latest_open_alert_by_student}
     rows = []
     for student_id in student_ids:
         summary = summaries.get(student_id, {})
@@ -41,7 +51,10 @@ def mentor_workspace(db: Session, user: User) -> dict:
             "new_alerts": len(new_alerts),
             "alerts": student_alerts,
             "primary_alert": max(student_alerts, key=lambda a: a["priority_score"], default=None),
+            "case_completed": student_id in completed_student_ids,
             "student_name": students[student_id].name if student_id in students else summary.get("student_name"),
+            "risk_breakdown": summary.get("risk_breakdown", []),
+            "actionable_risk_types": summary.get("actionable_risk_types", []),
             "roll_number": students[student_id].roll_number if student_id in students else summary.get("roll_number"),
         })
 
@@ -63,6 +76,7 @@ def mentor_workspace(db: Session, user: User) -> dict:
         "actionable_risk_signals": metrics["actionable_risk_signals"],
         "open_alerts": metrics["open_alerts"],
         "open_alert_students": metrics["open_alert_students"],
+        "completed_cases": len(completed_student_ids),
         "new_alerts": metrics["new_alerts"],
         "new_alert_students": metrics["new_alert_students"],
         "risk_distribution": metrics["risk_distribution"],
@@ -84,11 +98,15 @@ def filter_mentor_students(
     severity: str | None = None,
     status: str | None = None,
     needs_action: bool | None = None,
+    page: int = 1,
+    page_size: int = 25,
 ) -> dict:
     workspace = mentor_workspace(db, user)
     canonical_risk = normalize_risk_type(risk_type) if risk_type else None
     query_norm = query.strip().lower() if query else None
     severity_norm = severity.upper() if severity else None
+    if severity_norm == "MEDIUM":
+        severity_norm = "MODERATE"
     status_norm = status.upper() if status else None
 
     filtered = []
@@ -99,6 +117,8 @@ def filter_mentor_students(
             continue
         if severity_norm:
             row_level = str(row.get("risk_level", "LOW")).upper()
+            if row_level == "MEDIUM":
+                row_level = "MODERATE"
             if severity_norm == "HIGH" and row_level not in {"HIGH", "CRITICAL"}:
                 continue
             if severity_norm != "HIGH" and row_level != severity_norm:
@@ -111,7 +131,11 @@ def filter_mentor_students(
             continue
         filtered.append(row)
 
-    return {**workspace, "items": filtered, "returned_students": len(filtered)}
+    total = len(filtered)
+    page = max(1, int(page)); page_size = max(1, min(int(page_size), 100))
+    start = (page - 1) * page_size
+    paged = filtered[start:start + page_size]
+    return {**workspace, "items": paged, "returned_students": len(paged), "total_students": total, "page": page, "page_size": page_size, "total_pages": max(1, (total + page_size - 1) // page_size)}
 
 
 def mentor_student_detail(db: Session, user: User, student_id: str) -> dict:

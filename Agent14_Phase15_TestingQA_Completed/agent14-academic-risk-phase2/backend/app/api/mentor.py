@@ -7,7 +7,7 @@ from sqlalchemy import select
 from app.core.dependencies import require_roles
 from app.db.session import get_db
 from app.models.domain import AlertIntervention, User
-from app.services.alerts import alert_item, get_active_alerts
+from app.services.alerts import alert_item, get_active_alerts, sync_canonical_alerts
 from app.services.mentor import filter_mentor_students, mentor_student_detail, mentor_workspace
 from app.services.rbac import can_access_student, scoped_student_ids
 from app.services.risk_engine import normalize_risk_type
@@ -39,14 +39,28 @@ def get_mentor_students(
     severity: str | None = Query(default=None),
     status: str | None = Query(default=None),
     needs_action: bool | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=25, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(require_roles("mentor")),
 ):
     if risk_type and normalize_risk_type(risk_type) is None:
         raise HTTPException(status_code=400, detail="Unsupported risk type")
+
+    # The attention queue is the operational view. Synchronize its intervention
+    # records from the canonical current predictions before filtering so every
+    # actionable student can receive the same completion workflow. Existing
+    # manually-resolved alerts for the current prediction remain resolved.
+    student_ids = scoped_student_ids(db, user)
+    sync_canonical_alerts(
+        db,
+        student_ids,
+        include_support_attention=True,
+    )
+
     return filter_mentor_students(
         db, user, query=q, risk_type=risk_type, severity=severity,
-        status=status, needs_action=needs_action,
+        status=status, needs_action=needs_action, page=page, page_size=page_size,
     )
 
 

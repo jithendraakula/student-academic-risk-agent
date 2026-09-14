@@ -36,6 +36,8 @@ export interface DeanStudent {
   primary_risk: string | null;
   needs_action: boolean;
   risk_types: string[];
+  actionable_risk_types?: string[];
+  risk_breakdown?: Array<{ risk_type: string; risk_label: string; risk_level: string; risk_score: number; priority_score: number; actionable: boolean; elevated: boolean; course_ids: string[] }>;
 }
 
 export interface DeanSummary {
@@ -52,6 +54,7 @@ export interface DeanSummary {
   support_attention_students: number;
   open_alerts: number;
   open_alert_students?: number;
+  completed_cases?: number;
   new_alerts: number;
   new_alert_students?: number;
   intervention_load: number;
@@ -75,6 +78,8 @@ export interface PriorityQueueRow {
   risk_level: string;
   critical: boolean;
   risk_types: string[];
+  actionable_risk_types?: string[];
+  risk_breakdown?: Array<{ risk_type: string; risk_label: string; risk_level: string; risk_score: number; priority_score: number; actionable: boolean; elevated: boolean; course_ids: string[] }>;
 }
 
 export async function getDeanSummary() {

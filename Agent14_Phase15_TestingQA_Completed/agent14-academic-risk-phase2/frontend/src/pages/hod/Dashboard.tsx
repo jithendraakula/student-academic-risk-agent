@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../../components/Card";
 import MetricSkeleton from "../../components/MetricSkeleton";
@@ -9,6 +9,7 @@ import { useAuth } from "../../context/AuthContext";
 import InstitutionalAIPanel from "../../components/InstitutionalAIPanel";
 import { getHodSummary, getMentorComparison, getMentorStudents, getRiskOverview, type HodSummary, type MentorComparisonRow, type MentorStudent, type RiskOverviewRow } from "../../features/hod/api";
 import { readableRiskType } from "../../features/mentor/formatters";
+import { subscribeToCaseWorkUpdates, subscribeToLiveCaseWorkUpdates } from "../../features/caseWorkEvents";
 
 function Metric({ label, value, detail, tone = "text-ink-900", loading = false }: { label: string; value: number | string; detail: string; tone?: string; loading?: boolean }) {
   if (loading) return <Card><MetricSkeleton label={label} /></Card>;
@@ -36,15 +37,26 @@ export default function HodDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  async function loadDepartmentOverview() {
+    try {
+      const [summaryData, comparison, risks] = await Promise.all([getHodSummary(), getMentorComparison(), getRiskOverview()]);
+      setSummary(summaryData);
+      setMentors(comparison.items);
+      setRiskOverview(risks.items);
+      setError(null);
+    } catch {
+      setError("The department overview could not be loaded. Check that the backend is running.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    Promise.all([getHodSummary(), getMentorComparison(), getRiskOverview()])
-      .then(([summaryData, comparison, risks]) => {
-        setSummary(summaryData);
-        setMentors(comparison.items);
-        setRiskOverview(risks.items);
-      })
-      .catch(() => setError("The department overview could not be loaded. Check that the backend is running."))
-      .finally(() => setLoading(false));
+    void loadDepartmentOverview();
+    const stop = subscribeToCaseWorkUpdates(() => void loadDepartmentOverview());
+    const stopLive = subscribeToLiveCaseWorkUpdates(() => void loadDepartmentOverview());
+    const timer = window.setInterval(() => void loadDepartmentOverview(), 15000);
+    return () => { stop(); stopLive(); window.clearInterval(timer); };
   }, []);
 
   useEffect(() => {
@@ -62,9 +74,20 @@ export default function HodDashboard() {
   }, [selectedMentor, search, section, riskType, needsAction]);
 
   function selectMentor(mentorId: string) {
-    setSelectedMentor((current) => current === mentorId ? null : mentorId);
-    if (selectedMentor === mentorId) { setMentorStudents([]); setMentorSections([]); }
-    setSection("ALL"); setRiskType("ALL"); setNeedsAction("ALL"); setSearch("");
+    const isDeselecting = selectedMentor === mentorId;
+    setSelectedMentor(isDeselecting ? null : mentorId);
+    if (isDeselecting) {
+      setMentorStudents([]);
+      setMentorSections([]);
+      return;
+    }
+    setSection("ALL");
+    setRiskType("ALL");
+    setNeedsAction("ALL");
+    setSearch("");
+    window.requestAnimationFrame(() => {
+      document.getElementById("hod-mentor-students")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   const mentorColumns: TableColumn<MentorComparisonRow>[] = [
@@ -83,7 +106,7 @@ export default function HodDashboard() {
     { key: "batch", header: "Batch", render: (student) => student.batch },
     { key: "section", header: "Section", render: (student) => student.section },
     { key: "risk", header: "Risk", render: (student) => <span className={student.critical ? "font-semibold text-red-700" : student.high_risk ? "font-semibold text-orange-700" : "text-slate-500"}>{student.critical ? "Critical" : student.high_risk ? "High risk" : "Stable"}</span> },
-    { key: "primary", header: "Primary risk", render: (student) => student.primary_risk ? readableRiskType(student.primary_risk) : "—" },
+    { key: "primary", header: "Risk(s)", render: (student) => <div className="flex min-w-0 flex-wrap gap-1.5">{(student.risk_breakdown ?? []).map((risk) => <span key={`${risk.risk_type}-${risk.course_ids.join("-")}`} title={`${risk.risk_label} · ${risk.risk_level}`} className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-700">{risk.risk_label}{risk.course_ids.length ? ` · ${risk.course_ids.join(", ")}` : ""}</span>)}{!(student.risk_breakdown ?? []).length ? "—" : null}</div> },
     { key: "priority", header: "Priority", render: (student) => <span className="font-semibold text-brand-700">{Math.round(student.priority_score)} pts</span> },
     { key: "alerts", header: "Open case work", render: (student) => student.open_alerts },
     { key: "action", header: "Profile", render: (student) => <Link to={`/mentor/student/${student.student_id}`} className="font-semibold text-brand-600 hover:text-brand-700">Open</Link> },
@@ -100,6 +123,7 @@ export default function HodDashboard() {
         <Metric label="Critical students" value={summary?.critical_students ?? "—"} detail="Unique students" tone="text-red-700" />
         <Metric label="Needs action" value={summary?.students_needing_action ?? "—"} detail="Unique students" tone="text-orange-700" />
         <Metric label="Open case work" value={summary?.open_alerts ?? "—"} detail={`${summary?.open_alert_students ?? 0} students represented`} />
+        <Metric label="Completed cases" value={summary?.completed_cases ?? "—"} detail="Persisted case completions" tone="text-emerald-700" />
         <Metric label="Priority load" value={summary ? `${Math.round(summary.intervention_load)} pts` : "—"} detail="Priority across active case work" tone="text-brand-700" />
       </section>
 
@@ -111,6 +135,7 @@ export default function HodDashboard() {
         <div className="p-3 md:p-5">{loading ? <p className="px-2 py-8 text-sm text-slate-500">Loading mentor support overview...</p> : <Table columns={mentorColumns} rows={mentors} rowKey={(mentor) => mentor.mentor_id} caption="Department mentor comparison" emptyMessage="No mentors found in this department." />}</div>
       </Card>
 
+      <section id="hod-mentor-students" className="scroll-mt-28">
       <Card as="section" className="min-w-0 p-0">
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-100 px-5 py-4">
           <div><p className="ui-eyebrow">Student review</p><h2 className="mt-1 text-lg font-bold text-ink-900">{selectedMentor ? `Students assigned to ${selectedMentorName}` : "Select a mentor to review students"}</h2><p className="mt-1 text-xs text-slate-500">Use the filters to move from department oversight to one student case.</p></div>
@@ -118,6 +143,7 @@ export default function HodDashboard() {
         </div>
         <div className="p-3 md:p-5">{studentsLoading ? <p className="px-2 py-8 text-sm text-slate-500">Loading assigned students...</p> : <Table columns={studentColumns} rows={mentorStudents} rowKey={(student) => student.student_id} caption="Mentor assigned student drill-down" emptyMessage={selectedMentor ? "No students match the current filters." : "Choose a mentor above to open their students."} />}</div>
       </Card>
+      </section>
 
       {!loading && riskOverview.length ? <RiskOverview items={riskOverview} /> : null}
 

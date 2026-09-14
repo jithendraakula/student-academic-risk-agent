@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, Index, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -175,6 +175,51 @@ class RiskPrediction(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 
 
+class StudentCase(Base):
+    """Stable lifecycle record for one student support case.
+
+    Risk predictions are snapshots; a case is the operational unit that mentors
+    act on. A student can have many historical cases, with at most one active
+    case enforced by a partial unique index.
+    """
+    __tablename__ = "student_cases"
+    __table_args__ = (
+        Index("ix_student_cases_student_updated", "student_id", "updated_at"),
+        Index("uq_student_cases_active_student", "student_id", unique=True,
+              sqlite_where=text("status = 'OPEN'"),
+              postgresql_where=text("status = 'OPEN'")),
+    )
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"), index=True)
+    status: Mapped[str] = mapped_column(String(16), default="OPEN", index=True)
+    opened_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, index=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)
+    completed_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    completion_category: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    completion_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    completion_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    follow_up_outcome: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    completion_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    last_risk_snapshot_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)
+
+
+class CaseEvent(Base):
+    """Structured lifecycle history for case review and audit screens."""
+    __tablename__ = "case_events"
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    case_id: Mapped[str] = mapped_column(ForeignKey("student_cases.id"), index=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"), index=True)
+    actor_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    event_type: Mapped[str] = mapped_column(String(64), index=True)
+    from_status: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    to_status: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    event_metadata: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+
 class InterventionRecord(Base):
     __tablename__ = "intervention_records"
 
@@ -214,6 +259,7 @@ class AlertIntervention(Base):
     __tablename__ = "alerts_interventions"
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
     student_id: Mapped[str] = mapped_column(ForeignKey("students.id"), index=True)
+    case_id: Mapped[str | None] = mapped_column(ForeignKey("student_cases.id"), nullable=True, index=True)
     teacher_id: Mapped[str] = mapped_column(ForeignKey("teachers.id"), index=True)
     risk_type: Mapped[str] = mapped_column(String(64), index=True)
     risk_score: Mapped[float] = mapped_column(Float)

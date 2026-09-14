@@ -2,7 +2,7 @@ import csv
 import os
 from pathlib import Path
 
-from sqlalchemy import create_engine, inspect, text
+from sqlalchemy import Index, create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 
 from app.models.domain import (
@@ -121,10 +121,58 @@ def seed_database(db) -> None:
     db.commit()
 
 
-def init_db() -> None:
+def run_migrations() -> None:
+    try:
+        from alembic import command
+        from alembic.config import Config
+        cfg = Config(str(PROJECT_DIR / "alembic.ini"))
+        cfg.set_main_option("sqlalchemy.url", DATABASE_URL.replace("%", "%%"))
+        # Fresh installs bootstrap the complete model first and stamp the current
+        # migration head. Existing databases are upgraded through Alembic.
+        if not inspect(engine).has_table("students"):
+            Base.metadata.create_all(bind=engine)
+            command.stamp(cfg, "head")
+        else:
+            command.upgrade(cfg, "head")
+    except Exception:
+        if not inspect(engine).has_table("students"):
+            Base.metadata.create_all(bind=engine)
+
+
+def _ensure_case_schema() -> None:
+    """Reconcile case tables for databases stamped before case support existed."""
     Base.metadata.create_all(bind=engine)
+    inspector = inspect(engine)
+    if not inspector.has_table("alerts_interventions"):
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("alerts_interventions")}
+    if "case_id" not in columns:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE alerts_interventions ADD COLUMN case_id VARCHAR(40)"))
+
+    Index("ix_alerts_interventions_case_id", AlertIntervention.case_id).create(
+        bind=engine,
+        checkfirst=True,
+    )
+
+
+def init_db() -> None:
+    if inspect(engine).has_table("alembic_version") or inspect(engine).has_table("students"):
+        run_migrations()
+    else:
+        Base.metadata.create_all(bind=engine)
+        try:
+            from alembic import command
+            from alembic.config import Config
+            cfg = Config(str(PROJECT_DIR / "alembic.ini")); cfg.set_main_option("sqlalchemy.url", DATABASE_URL.replace("%", "%%")); command.stamp(cfg, "head")
+        except Exception:
+            pass
+    _ensure_case_schema()
     with SessionLocal() as db:
         seed_database(db)
+        from app.services.cases import backfill_student_cases
+        backfill_student_cases(db)
         # Precompute the current-risk snapshot once at startup so dashboards and
         # student profiles do not trigger ML generation during the first page load.
         try:

@@ -5,7 +5,7 @@ from collections import defaultdict
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.domain import Assignment, Student, Teacher, User
+from app.models.domain import AlertIntervention, Assignment, Student, Teacher, User
 from app.services.aggregation import scope_metrics, student_summary
 from app.services.alerts import get_active_alerts
 from app.services.risk_engine import RISK_TYPE_ORDER, RISK_TYPES, normalize_risk_type
@@ -47,7 +47,8 @@ def _mentor_rows(db: Session, user: User) -> list[dict]:
         mentor_sections = sorted({row[0] for row in db.query(Student.section).where(Student.id.in_(student_ids)).distinct().all()}) if student_ids else []
         summaries = student_summary(db, student_ids, include_support_attention=True)
         alerts = get_active_alerts(db, student_ids, user)
-        action_students = sum(1 for sid in student_ids if summaries.get(sid, {}).get("needs_action"))
+        open_student_ids = {alert.student_id for alert in alerts}
+        action_students = sum(1 for sid in student_ids if summaries.get(sid, {}).get("needs_action") and sid in open_student_ids)
         high_students = sum(1 for sid in student_ids if summaries.get(sid, {}).get("high_risk"))
         critical_students = sum(1 for sid in student_ids if summaries.get(sid, {}).get("critical"))
         metrics = _intervention_metrics(db, student_ids)
@@ -99,6 +100,9 @@ def department_summary(db: Session, user: User) -> dict:
     metrics = scope_metrics(db, student_ids, include_support_attention=True, user=user)
     mentor_rows = _mentor_rows(db, user)
     intervention_metrics = _intervention_metrics(db, student_ids)
+    from app.models.domain import StudentCase
+    completed_cases = len({c.student_id for c in db.scalars(select(StudentCase).where(StudentCase.student_id.in_(student_ids), StudentCase.status == "COMPLETED")).all()}) if student_ids else 0
+
     return {
         "department": user.department,
         "total_students": metrics["monitored_students"],
@@ -113,6 +117,7 @@ def department_summary(db: Session, user: User) -> dict:
         "actionable_risk_signals": metrics["actionable_risk_signals"],
         "open_alerts": metrics["open_alerts"],
         "open_alert_students": metrics["open_alert_students"],
+        "completed_cases": completed_cases,
         "new_alerts": metrics["new_alerts"],
         "new_alert_students": metrics["new_alert_students"],
         "intervention_load": metrics["intervention_load"],
@@ -177,7 +182,7 @@ def mentor_students(
             continue
         if section and student.section != section:
             continue
-        if canonical_risk and canonical_risk not in summary.get("risk_types", []):
+        if canonical_risk and canonical_risk not in set(summary.get("risk_types", [])) | set(summary.get("actionable_risk_types", [])):
             continue
         if needs_action is not None and bool(summary.get("needs_action")) != needs_action:
             continue

@@ -6,6 +6,7 @@ import InstitutionalShell from "../../components/InstitutionalShell";
 import WorkspaceIntro from "../../components/WorkspaceIntro";
 import Table, { type TableColumn } from "../../components/Table";
 import { useAuth } from "../../context/AuthContext";
+import { subscribeToCaseWorkUpdates, subscribeToLiveCaseWorkUpdates } from "../../features/caseWorkEvents";
 import InstitutionalAIPanel from "../../components/InstitutionalAIPanel";
 import {
   getDeanSummary,
@@ -57,16 +58,27 @@ export default function DeanDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  async function loadInstitutionOverview() {
+    try {
+      const [institution, comparison, riskRows, priorityRows] = await Promise.all([getDeanSummary(), getDepartmentComparison(), getRiskHeatmap(), getPriorityQueue()]);
+      setSummary(institution);
+      setDepartments(comparison);
+      setHeatmap(riskRows);
+      setQueue(priorityRows.items);
+      setError(null);
+    } catch {
+      setError("The institution overview could not be loaded. Check that the backend is running.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    Promise.all([getDeanSummary(), getDepartmentComparison(), getRiskHeatmap(), getPriorityQueue()])
-      .then(([institution, comparison, riskRows, priorityRows]) => {
-        setSummary(institution);
-        setDepartments(comparison);
-        setHeatmap(riskRows);
-        setQueue(priorityRows.items);
-      })
-      .catch(() => setError("The institution overview could not be loaded. Check that the backend is running."))
-      .finally(() => setLoading(false));
+    void loadInstitutionOverview();
+    const stop = subscribeToCaseWorkUpdates(() => void loadInstitutionOverview());
+    const stopLive = subscribeToLiveCaseWorkUpdates(() => void loadInstitutionOverview());
+    const timer = window.setInterval(() => void loadInstitutionOverview(), 15000);
+    return () => { stop(); stopLive(); window.clearInterval(timer); };
   }, []);
 
   useEffect(() => {
@@ -113,7 +125,7 @@ export default function DeanDashboard() {
   const studentColumns: TableColumn<DeanStudent>[] = [
     { key: "student", header: "Student", render: (student) => <Link to={`/mentor/student/${student.student_id}`} className="font-semibold text-ink-900 hover:text-brand-600">{student.student_name}<span className="mt-0.5 block text-xs font-normal text-slate-400">{student.roll_number ?? student.student_id}</span></Link> },
     { key: "section", header: "Section", render: (student) => student.section },
-    { key: "risk", header: "Risk", render: (student) => <span>{student.risk_level} · {riskLabel(student.primary_risk)}</span> },
+    { key: "risk", header: "Risk(s)", render: (student) => <div className="flex min-w-0 flex-wrap gap-1.5">{(student.risk_breakdown ?? []).map((risk) => <span key={`${risk.risk_type}-${risk.course_ids.join("-")}`} title={`${risk.risk_label} · ${risk.risk_level}`} className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-700">{risk.risk_label}{risk.course_ids.length ? ` · ${risk.course_ids.join(", ")}` : ""}</span>)}{!(student.risk_breakdown ?? []).length ? <span>{student.risk_level} · {riskLabel(student.primary_risk)}</span> : null}</div> },
     { key: "priority", header: "Priority", render: (student) => <span className="font-semibold">{Math.round(student.priority_score)}</span> },
     { key: "action", header: "Status", render: (student) => student.needs_action ? <span className="font-semibold text-orange-700">Needs action</span> : <span className="text-slate-500">Monitor</span> },
   ];
@@ -128,6 +140,7 @@ export default function DeanDashboard() {
         <Metric label="Critical students" value={summary?.critical_students ?? "—"} detail="Unique students" tone="text-red-700" />
         <Metric label="Needs action" value={summary?.students_needing_action ?? "—"} detail="Unique students" tone="text-orange-700" />
         <Metric label="Open case work" value={summary?.open_alerts ?? "—"} detail={`${summary?.open_alert_students ?? 0} students represented`} tone="text-brand-700" />
+        <Metric label="Completed cases" value={summary?.completed_cases ?? "—"} detail="Persisted case completions" tone="text-emerald-700" />
         <Metric label="Avg priority" value={summary ? Math.round(summary.average_priority) : "—"} detail="Average current priority / 100" />
       </section>
 

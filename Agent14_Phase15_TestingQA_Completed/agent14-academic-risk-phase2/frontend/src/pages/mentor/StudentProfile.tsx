@@ -3,10 +3,12 @@ import { Link, useParams } from "react-router-dom";
 import Card from "../../components/Card";
 import InstitutionalShell from "../../components/InstitutionalShell";
 import { ActionButton, Icon, KeyValue, SectionHeading, StatusChip } from "../../components/AcademicUI";
-import { getRiskProfile, runWhatIf, type RiskProfileResponse, type RiskResult, type WhatIfResponse } from "../../features/mentor/api";
+import { getRiskProfile, markStudentCaseComplete, runWhatIf, updateIntervention, type RiskProfileResponse, type RiskResult, type WhatIfResponse } from "../../features/mentor/api";
 import { runMentorCopilot, type CopilotIntent, type CopilotResponse } from "../../features/mentor/ai";
 import { readableRiskType } from "../../features/mentor/formatters";
 import { useAuth } from "../../context/AuthContext";
+import { notifyCaseWorkUpdated, subscribeToLiveCaseWorkUpdates } from "../../features/caseWorkEvents";
+import CompleteCaseDialog, { type CompletionPayload } from "../../components/CompleteCaseDialog";
 
 const RISK_META: Record<string, { label: string; description: string }> = {
   backlog: { label: "Backlog accumulation", description: "Risk of carrying additional unresolved courses." },
@@ -111,6 +113,8 @@ export default function StudentProfile() {
   const [copilot, setCopilot] = useState<CopilotResponse | null>(null);
   const [copilotLoading, setCopilotLoading] = useState(false);
   const [copilotError, setCopilotError] = useState<string | null>(null);
+  const [completingAlertId, setCompletingAlertId] = useState<string | null>(null);
+  const [caseCompleted, setCaseCompleted] = useState(false);
 
   useEffect(() => {
     if (!studentId) return;
@@ -121,6 +125,7 @@ export default function StudentProfile() {
       .then((result) => {
         if (!active) return;
         setProfile(result);
+        setCaseCompleted(Boolean(result.case_management?.case_completed));
         setWhatIfValue(String(Math.min(90, Math.max(result.student_metrics.attendance + 10, result.thresholds.attendance_threshold))));
       })
       .catch(() => { if (active) setError("This student case could not be loaded. The record may be outside your authorized scope."); })
@@ -128,6 +133,39 @@ export default function StudentProfile() {
     return () => { active = false; };
   }, [studentId]);
 
+  const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
+
+  async function handleMarkComplete(payload: CompletionPayload) {
+    if (user?.role !== "mentor" || !studentId) return;
+    setCompletingAlertId(studentId);
+    setError(null);
+    try {
+      await markStudentCaseComplete(studentId, payload);
+      setCaseCompleted(true);
+      setCompletionDialogOpen(false);
+      notifyCaseWorkUpdated();
+      const refreshed = await getRiskProfile(studentId);
+      setProfile(refreshed);
+    } catch {
+      setError("The student case could not be marked as complete. Please try again.");
+    } finally {
+      setCompletingAlertId(null);
+    }
+  }
+
+
+  useEffect(() => {
+    const stop = subscribeToLiveCaseWorkUpdates(() => {
+      if (!studentId) return;
+      void getRiskProfile(studentId)
+        .then((result) => {
+          setProfile(result);
+          setCaseCompleted(Boolean(result.case_management?.case_completed));
+        })
+        .catch(() => undefined);
+    });
+    return stop;
+  }, [studentId]);
   const courseRisks = profile?.risks.course_failure ?? [];
   const highestCourseRisk = useMemo(() => courseRisks.reduce((best, item) => !best || (item.priority_score ?? item.risk_score ?? item.risk_probability * 100) > (best.priority_score ?? best.risk_score ?? best.risk_probability * 100) ? item : best, null as (typeof courseRisks[number]) | null), [courseRisks]);
 
@@ -329,8 +367,12 @@ export default function StudentProfile() {
         <section aria-labelledby="active-work">
           <SectionHeading eyebrow="Case work" title="Open support work" description="Active alerts and intervention work for this student" action={<span className="ui-status-chip border-slate-200 bg-white text-slate-600">{profile.case_management?.open_alerts ?? 0} open work item{(profile.case_management?.open_alerts ?? 0) === 1 ? "" : "s"}</span>} />
           <h2 id="active-work" className="sr-only">Active support actions</h2>
+          {caseCompleted ? <div role="status" className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Case completed and saved to the academic support record{profile.case_management?.completed_at ? ` · ${new Date(profile.case_management.completed_at).toLocaleString()}` : ""}.</div> : null}
+          <div className="mt-3 flex justify-end">
+            {user?.role === "mentor" ? <ActionButton variant="secondary" className="!min-h-9 !text-xs" disabled={completingAlertId === studentId || caseCompleted} onClick={() => setCompletionDialogOpen(true)}>{completingAlertId === studentId ? "Completing…" : caseCompleted ? "Case completed ✓" : "Mark case as complete"}</ActionButton> : null}
+          </div>
           <div className="mt-3 space-y-3">
-            {(profile.case_management?.items ?? []).length === 0 ? <div className="ui-case-panel p-5 text-sm text-slate-500">No active support work is recorded for this case.</div> : (profile.case_management?.items ?? []).map((item) => <article key={item.alert_id} className="ui-case-panel grid min-w-0 gap-4 p-4 md:grid-cols-[minmax(0,1.4fr)_140px_160px_auto] md:items-center"><div className="min-w-0"><p className="text-sm font-extrabold text-ink-900">{item.risk_label || readableRiskType(item.risk_type)}</p><p className="mt-1 text-xs leading-5 text-slate-500">{item.suggested_action || "Review the case and decide the appropriate support action."}</p></div><KeyValue label="Status" value={item.status === "NEW" ? "Open" : item.status.replaceAll("_", " ")} /><KeyValue label="Follow-up" value={item.follow_up_date || "Not scheduled"} /><Link to={backPath} className="ui-button ui-button-secondary !min-h-9 !text-xs">Return to queue</Link></article>)}
+            {(profile.case_management?.items ?? []).length === 0 ? <div className="ui-case-panel p-5 text-sm text-slate-500">No active support work is recorded for this case.</div> : (profile.case_management?.items ?? []).map((item) => <article key={item.alert_id} className="ui-case-panel grid min-w-0 gap-4 p-4 md:grid-cols-[minmax(0,1.4fr)_140px_160px_auto] md:items-center"><div className="min-w-0"><p className="text-sm font-extrabold text-ink-900">{item.risk_label || readableRiskType(item.risk_type)}</p><p className="mt-1 text-xs leading-5 text-slate-500">{item.suggested_action || "Review the case and decide the appropriate support action."}</p></div><KeyValue label="Status" value={item.status === "NEW" ? "Open" : item.status.replaceAll("_", " ")} /><KeyValue label="Follow-up" value={item.follow_up_date || "Not scheduled"} /><div className="flex flex-wrap justify-end gap-2"><Link to={backPath} className="ui-button ui-button-secondary !min-h-9 !text-xs">Return to queue</Link>{user?.role === "mentor" && item.status !== "RESOLVED" ? <ActionButton variant="primary" className="!min-h-9 !text-xs" disabled={completingAlertId === studentId || caseCompleted} onClick={() => setCompletionDialogOpen(true)}>{completingAlertId === studentId ? "Completing…" : caseCompleted ? "Completed ✓" : "Mark as complete"}</ActionButton> : null}</div></article>)}
           </div>
         </section>
 

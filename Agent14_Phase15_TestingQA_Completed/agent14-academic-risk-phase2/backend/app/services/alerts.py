@@ -100,6 +100,13 @@ def _upsert_alert(db: Session, prediction: RiskPrediction, existing: AlertInterv
         )
         db.add(existing)
 
+    from app.services.cases import get_active_case
+    case = get_active_case(db, prediction.student_id)
+    if case is None and should_create_alert(prediction.risk_score, prediction.risk_level, prediction.priority_score):
+        from app.services.cases import get_or_create_case
+        case = get_or_create_case(db, prediction.student_id, risk_snapshot_at=prediction.created_at)
+    if case is not None:
+        existing.case_id = case.id
     existing.teacher_id = teacher_id or existing.teacher_id
     existing.risk_type = prediction.risk_type
     existing.risk_score = prediction.risk_score
@@ -131,10 +138,26 @@ def _upsert_alert(db: Session, prediction: RiskPrediction, existing: AlertInterv
         "is_active": True,
         "last_synced_at": datetime.utcnow().isoformat(timespec="seconds"),
     }
-    if existing.status == "RESOLVED" and previous_data.get("auto_resolved"):
-        existing.status = "NEW"
-        existing.data["auto_resolved"] = False
-        existing.intervention_notes = None
+    # Re-open a manually completed case when a newer canonical prediction
+    # snapshot exists. Completion is tied to the snapshot that was handled,
+    # not permanently to the student.
+    if existing.status == "RESOLVED":
+        completed_at_raw = previous_data.get("completed_at")
+        completed_at = None
+        if completed_at_raw:
+            try:
+                completed_at = datetime.fromisoformat(str(completed_at_raw))
+            except ValueError:
+                completed_at = None
+        if previous_data.get("auto_resolved") or (completed_at and prediction.created_at and prediction.created_at > completed_at):
+            from app.services.cases import get_or_create_case
+            case = get_or_create_case(db, prediction.student_id, risk_snapshot_at=prediction.created_at)
+            existing.case_id = case.id
+            existing.status = "NEW"
+            existing.data["auto_resolved"] = False
+            existing.data["case_completed"] = False
+            existing.data["is_active"] = True
+            existing.intervention_notes = None
     return existing
 
 

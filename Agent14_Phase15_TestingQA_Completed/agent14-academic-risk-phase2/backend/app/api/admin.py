@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi import Depends
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import select, func, or_
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -18,15 +18,27 @@ class ThresholdConfig(BaseModel):
 
 
 @router.get("/students")
-def list_students(db: Session = Depends(get_db), user: User = Depends(require_roles("admin"))):
-    students = db.scalars(select(Student)).all()
-    return {"items": [{"student_id": student.id, "roll_number": student.roll_number, "student_name": student.name, "department": student.department, "batch": student.batch, "section": student.section} for student in students]}
+def list_students(q: str | None = None, page: int = 1, page_size: int = 50, db: Session = Depends(get_db), user: User = Depends(require_roles("admin"))):
+    query = select(Student).order_by(Student.name.asc())
+    if q:
+        needle = f"%{q.strip().lower()}%"
+        query = query.where(__import__('sqlalchemy').or_(Student.id.ilike(needle), Student.name.ilike(needle), Student.department.ilike(needle), Student.roll_number.ilike(needle)))
+    total = db.scalar(select(__import__('sqlalchemy').func.count()).select_from(query.subquery())) or 0
+    page = max(1, page); page_size = max(1, min(page_size, 100))
+    rows = db.scalars(query.offset((page-1)*page_size).limit(page_size)).all()
+    return {"items": [{"student_id": s.id, "roll_number": s.roll_number, "student_name": s.name, "department": s.department, "batch": s.batch, "section": s.section} for s in rows], "page": page, "page_size": page_size, "total": total, "total_pages": max(1,(total+page_size-1)//page_size)}
 
 
 @router.get("/teachers")
-def list_teachers(db: Session = Depends(get_db), user: User = Depends(require_roles("admin"))):
-    teachers = db.scalars(select(Teacher)).all()
-    return {"items": [{"teacher_id": teacher.id, "teacher_name": teacher.name, "role": teacher.role, "department": teacher.department, "email": teacher.email} for teacher in teachers]}
+def list_teachers(q: str | None = None, page: int = 1, page_size: int = 50, db: Session = Depends(get_db), user: User = Depends(require_roles("admin"))):
+    query = select(Teacher).order_by(Teacher.name.asc())
+    if q:
+        needle=f"%{q.strip().lower()}%"
+        query=query.where(__import__('sqlalchemy').or_(Teacher.id.ilike(needle), Teacher.name.ilike(needle), Teacher.department.ilike(needle), Teacher.role.ilike(needle)))
+    total=db.scalar(select(__import__('sqlalchemy').func.count()).select_from(query.subquery())) or 0
+    page=max(1,page); page_size=max(1,min(page_size,100))
+    rows=db.scalars(query.offset((page-1)*page_size).limit(page_size)).all()
+    return {"items":[{"teacher_id":t.id,"teacher_name":t.name,"role":t.role,"department":t.department,"email":t.email} for t in rows],"page":page,"page_size":page_size,"total":total,"total_pages":max(1,(total+page_size-1)//page_size)}
 
 
 @router.get("/config")
@@ -49,17 +61,29 @@ def update_config(payload: ThresholdConfig, db: Session = Depends(get_db), user:
     return values
 
 @router.get("/audit-logs")
-def audit_logs(
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    user: User = Depends(require_roles("admin")),
-):
+def audit_logs(q: str | None = None, page: int = 1, page_size: int = 25, db: Session = Depends(get_db), user: User = Depends(require_roles("admin"))):
     from app.models.domain import AuditLog
-    limit = max(1, min(int(limit), 250))
-    rows = db.scalars(select(AuditLog).order_by(AuditLog.created_at.desc()).limit(limit)).all()
-    return {"items": [{
-        "id": row.id, "actor_id": row.actor_id, "action": row.action,
-        "resource_type": row.resource_type, "resource_id": row.resource_id,
-        "ip_address": row.ip_address, "details": row.details or {},
-        "created_at": row.created_at.isoformat() if row.created_at else None,
-    } for row in rows]}
+    query = select(AuditLog).order_by(AuditLog.created_at.desc())
+    if q:
+        needle = f"%{q.strip().lower()}%"
+        query = query.where(or_(AuditLog.action.ilike(needle), AuditLog.resource_type.ilike(needle), AuditLog.resource_id.ilike(needle), AuditLog.actor_id.ilike(needle)))
+    total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
+    page=max(1,page); page_size=max(1,min(page_size,100))
+    rows = db.scalars(query.offset((page-1)*page_size).limit(page_size)).all()
+    return {"items":[{"id":r.id,"actor_id":r.actor_id,"action":r.action,"resource_type":r.resource_type,"resource_id":r.resource_id,"ip_address":r.ip_address,"details":r.details or {},"created_at":r.created_at.isoformat() if r.created_at else None} for r in rows],"total":total,"page":page,"page_size":page_size,"total_pages":max(1,(total+page_size-1)//page_size)}
+
+@router.get("/case-summary")
+def case_summary(db: Session = Depends(get_db), user: User = Depends(require_roles("admin"))):
+    from app.models.domain import AlertIntervention, StudentCase
+    from app.services.alerts import OPEN_STATUSES
+    alerts = db.scalars(select(AlertIntervention)).all()
+    cases = db.scalars(select(StudentCase)).all()
+    open_cases = {c.student_id for c in cases if c.status == "OPEN"}
+    completed_cases = {c.student_id for c in cases if c.status == "COMPLETED"}
+    open_work_items = sum(a.status in {"NEW","ACKNOWLEDGED","ACTION_TAKEN","FOLLOW_UP"} for a in alerts)
+    return {
+        "open_cases": len(open_cases),
+        "open_work_items": open_work_items,
+        "completed_cases": len(completed_cases),
+        "resolution_rate": round(len(completed_cases) / max(1, len(completed_cases) + len(open_cases)) * 100, 1),
+    }
