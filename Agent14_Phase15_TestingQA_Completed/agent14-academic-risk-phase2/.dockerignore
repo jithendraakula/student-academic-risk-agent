@@ -1,0 +1,17 @@
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+backend/venv
+backend/__pycache__
+backend/*.db
+backend/*.sqlite*
+frontend/node_modules
+frontend/dist
+frontend/.vite
+**/__pycache__
+**/*.py[cod]
+**/*.log
+test_artifacts
+coverage

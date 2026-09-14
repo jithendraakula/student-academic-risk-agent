@@ -75,3 +75,38 @@ Before a production frontend build, configure `VITE_API_BASE_URL`.
 7. Serve the frontend over HTTPS.
 8. Verify Mentor/HOD/Dean/Admin workflows and role boundaries.
 9. Configure external AI/SMTP only when approved credentials and privacy requirements are satisfied.
+
+## Render Docker deployment
+
+The repository includes a `render.yaml` blueprint with two Docker web services:
+
+- `agent14-backend`: FastAPI/Uvicorn, health check `/api/health`
+- `agent14-frontend`: Vite build served by Nginx, health check `/health`
+
+Deploy the backend first. In the backend Render service, set:
+
+```text
+ENVIRONMENT=production
+DATABASE_URL=postgresql+psycopg://postgres:<PASSWORD>@<SUPABASE_HOST>:5432/postgres
+JWT_SECRET=<generated-or-long-random-secret>
+JWT_ALGORITHM=HS256
+JWT_EXPIRE_MINUTES=60
+ALLOWED_ORIGINS=https://<frontend-service>.onrender.com
+TRUSTED_HOSTS=<backend-service>.onrender.com
+ENABLE_DOCS=false
+AI_PROVIDER=xai
+XAI_API_KEY=<rotated-xai-key>
+```
+
+After the backend service has a public URL, set the frontend service build
+variable to the complete API prefix:
+
+```text
+VITE_API_BASE_URL=https://<backend-service>.onrender.com/api
+```
+
+The Supabase URL, publishable key, and JWKS URL are not required by this
+backend because it authenticates through the application's JWT login flow.
+The Supabase secret key must never be placed in the frontend or committed to
+the repository. Rotate any credentials that were shared outside the secret
+manager before deployment.

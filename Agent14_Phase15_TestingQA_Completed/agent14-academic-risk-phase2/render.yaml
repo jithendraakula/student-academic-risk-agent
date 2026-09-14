@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: agent14-backend
+    runtime: docker
+    rootDir: .
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRE_MINUTES
+        value: "60"
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: TRUSTED_HOSTS
+        fromService:
+          type: web
+          name: agent14-backend
+          property: host
+      - key: ENABLE_DOCS
+        value: "false"
+      - key: AI_PROVIDER
+        value: xai
+      - key: XAI_API_KEY
+        sync: false
+      - key: AI_INCLUDE_STUDENT_IDENTIFIERS
+        value: "false"
+      - key: AI_ALLOWED_EXTERNAL_DATA
+        value: "false"
+
+  - type: web
+    name: agent14-frontend
+    runtime: docker
+    rootDir: .
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
