@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import Card from "../../components/Card";
 import InstitutionalShell from "../../components/InstitutionalShell";
 import { ActionButton, Icon, KeyValue, SectionHeading, StatusChip } from "../../components/AcademicUI";
-import { getRiskProfile, markStudentCaseComplete, runWhatIf, updateIntervention, type RiskProfileResponse, type RiskResult, type WhatIfResponse } from "../../features/mentor/api";
+import { getRiskProfile, markStudentCaseComplete, runWhatIf, type RiskProfileResponse, type RiskResult, type WhatIfResponse } from "../../features/mentor/api";
 import { runMentorCopilot, type CopilotIntent, type CopilotResponse } from "../../features/mentor/ai";
 import { readableRiskType } from "../../features/mentor/formatters";
 import { useAuth } from "../../context/AuthContext";
@@ -417,6 +417,7 @@ export default function StudentProfile() {
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{profile.academic_context.intent_distribution.map((item) => <div key={item.intent} className="rounded-xl border border-slate-200 bg-white p-4"><p className="text-sm font-bold capitalize text-ink-900">{item.intent.replaceAll("_", " ")}</p><p className="mt-1 text-xs text-slate-500">{item.count} observation{item.count === 1 ? "" : "s"}</p></div>)}</div>
           {profile.academic_context.intent_distribution.length === 0 ? <SectionNote>No context categories are recorded yet.</SectionNote> : null}
         </section>
+        {user?.role === "mentor" ? <CompleteCaseDialog open={completionDialogOpen} studentName={profile.student.student_name} saving={completingAlertId === studentId} onClose={() => setCompletionDialogOpen(false)} onConfirm={(payload) => void handleMarkComplete(payload)} /> : null}
       </div>
     </InstitutionalShell>
   );

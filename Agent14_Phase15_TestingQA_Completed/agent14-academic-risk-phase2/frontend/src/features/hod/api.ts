@@ -45,6 +45,7 @@ export interface HodSummary {
   actionable_risk_signals?: number;
   open_alerts: number;
   open_alert_students?: number;
+  completed_cases?: number;
   new_alerts: number;
   new_alert_students?: number;
   intervention_load: number;

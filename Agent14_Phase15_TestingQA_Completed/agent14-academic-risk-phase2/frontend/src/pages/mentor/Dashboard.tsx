@@ -102,7 +102,7 @@ export default function MentorDashboard() {
     setCompletingAlertId(row.student_id);
     setError(null);
     try {
-      const result = await markStudentCaseComplete(row.student_id, payload);
+      await markStudentCaseComplete(row.student_id, payload);
       setCompletedStudents((current) => new Set(current).add(row.student_id));
       setCompletionTarget(null);
       notifyCaseWorkUpdated();

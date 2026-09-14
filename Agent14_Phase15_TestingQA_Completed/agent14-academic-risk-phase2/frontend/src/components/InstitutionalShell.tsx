@@ -75,7 +75,6 @@ const CATEGORY_META = {
 } as const;
 
 function NotificationBell() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);

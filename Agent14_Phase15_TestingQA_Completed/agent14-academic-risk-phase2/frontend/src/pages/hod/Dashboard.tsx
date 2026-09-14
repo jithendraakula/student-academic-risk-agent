@@ -8,7 +8,6 @@ import Table, { type TableColumn } from "../../components/Table";
 import { useAuth } from "../../context/AuthContext";
 import InstitutionalAIPanel from "../../components/InstitutionalAIPanel";
 import { getHodSummary, getMentorComparison, getMentorStudents, getRiskOverview, type HodSummary, type MentorComparisonRow, type MentorStudent, type RiskOverviewRow } from "../../features/hod/api";
-import { readableRiskType } from "../../features/mentor/formatters";
 import { subscribeToCaseWorkUpdates, subscribeToLiveCaseWorkUpdates } from "../../features/caseWorkEvents";
 
 function Metric({ label, value, detail, tone = "text-ink-900", loading = false }: { label: string; value: number | string; detail: string; tone?: string; loading?: boolean }) {
