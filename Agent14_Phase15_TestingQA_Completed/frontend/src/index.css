@@ -1,0 +1,408 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dceaff;
+  --color-brand-200: #c5daf6;
+  --color-brand-300: #9fc3ed;
+  --color-brand-400: #6da5e5;
+  --color-brand-500: #397bd6;
+  --color-brand-600: #2767bf;
+  --color-brand-700: #1f4f98;
+  --color-brand-800: #183d75;
+  --color-brand-900: #132f5a;
+
+  --color-ink-900: #18283f;
+  --color-ink-700: #33465f;
+  --color-ink-500: #63738a;
+  --color-ink-300: #c7d1dd;
+
+  --color-risk-critical: #c83b3b;
+  --color-risk-high: #ce6c2c;
+  --color-risk-medium: #b88722;
+  --color-risk-low: #2b8a59;
+
+  --color-surface: #ffffff;
+  --color-canvas: #f4f7fb;
+  --color-line: #e1e8f1;
+  --color-line-strong: #cbd6e3;
+  --color-focus: #2e6fc4;
+  --font-display: "Aptos Display", "Segoe UI", Arial, sans-serif;
+  --font-body: "Aptos", "Segoe UI", Arial, sans-serif;
+
+  --color-status-active: #2b8a59;
+  --color-status-idle: #8c99aa;
+  --color-status-alert: #c83b3b;
+
+  --radius-card: 14px;
+  --shadow-card: 0 2px 8px rgba(24, 40, 63, 0.04), 0 12px 32px rgba(24, 40, 63, 0.055);
+}
+
+* { box-sizing: border-box; }
+
+html { min-width: 320px; background: #f4f7fb; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(218, 233, 249, 0.65), transparent 34%),
+    linear-gradient(180deg, #f6f9fc 0%, #f3f6fa 100%);
+  color: var(--color-ink-900);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, a, input, select, textarea { font: inherit; }
+
+button, a { -webkit-tap-highlight-color: transparent; }
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-focus) 25%, transparent);
+  outline-offset: 2px;
+}
+
+input::placeholder, textarea::placeholder { color: #9aa7b7; }
+
+::selection { background: #dceaff; color: #1f4f98; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #c8d3df; border-radius: 999px; border: 2px solid #f4f7fb; }
+::-webkit-scrollbar-track { background: #f4f7fb; }
+
+.institutional-grid {
+  background-image: linear-gradient(rgba(70, 108, 149, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(70, 108, 149, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.skip-link {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  z-index: 100;
+  transform: translateY(-180%);
+  border: 1px solid #cbd6e3;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px 14px;
+  color: #183d75;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 8px 24px rgba(24, 40, 63, 0.12);
+}
+
+.skip-link:focus { transform: translateY(0); }
+
+.institutional-nav {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd6e3 transparent;
+}
+
+.institutional-nav::-webkit-scrollbar { height: 6px; }
+.institutional-nav::-webkit-scrollbar-thumb { background: #cbd6e3; border: 0; }
+
+.text-wrap-anywhere { overflow-wrap: anywhere; }
+
+@media (max-width: 639px) {
+  .institutional-grid { background-size: 32px 32px; }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* U2 institutional design system: intentionally aligned to the supplied Vignan
+   reference — white surfaces, academic navy/blue, pale blue support surfaces,
+   restrained semantic risk colors. */
+:root {
+  --institution-navy: #18345f;
+  --institution-blue: #2767bf;
+  --institution-blue-dark: #1f4f98;
+  --institution-blue-soft: #edf4ff;
+  --institution-canvas: #f4f7fb;
+  --institution-line: #dfe7f0;
+  --institution-muted: #64748b;
+  --institution-radius: 14px;
+  --institution-control-height: 42px;
+  --institution-focus: #2e6fc4;
+}
+
+.ui-eyebrow {
+  margin: 0;
+  color: #527096;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.ui-section-title {
+  margin: 4px 0 0;
+  color: var(--institution-navy);
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -.01em;
+}
+
+.ui-section-description {
+  margin: 4px 0 0;
+  max-width: 60rem;
+  color: var(--institution-muted);
+  font-size: .82rem;
+  line-height: 1.55;
+}
+
+.ui-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ui-button {
+  display: inline-flex;
+  min-height: var(--institution-control-height);
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+.ui-button:disabled { cursor: not-allowed; opacity: .55; }
+.ui-button-primary { border: 1px solid var(--institution-blue); background: var(--institution-blue); color: white; }
+.ui-button-primary:hover:not(:disabled) { background: var(--institution-blue-dark); }
+.ui-button-secondary { border: 1px solid #ccd9e8; background: white; color: #29476d; }
+.ui-button-secondary:hover:not(:disabled) { border-color: #aac4e4; background: var(--institution-blue-soft); }
+.ui-button-ghost { border: 1px solid transparent; background: transparent; color: var(--institution-blue-dark); }
+.ui-button-ghost:hover:not(:disabled) { background: var(--institution-blue-soft); }
+.ui-button-danger { border: 1px solid #efb8b8; background: #fff7f7; color: #b42323; }
+.ui-button-danger:hover:not(:disabled) { background: #feecec; }
+
+.ui-status-chip {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  justify-content: center;
+  border-width: 1px;
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ui-metric-card {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  gap: 12px;
+  min-width: 0;
+  min-height: 132px;
+  align-items: start;
+  border: 1px solid var(--institution-line);
+  border-radius: var(--institution-radius);
+  background: white;
+  padding: 17px;
+  box-shadow: 0 2px 8px rgba(24,40,63,.035), 0 10px 24px rgba(24,40,63,.035);
+}
+
+.ui-metric-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-width: 1px;
+  border-radius: 10px;
+}
+
+.ui-metric-label { margin: 0; color: #667a94; font-size: 10px; font-weight: 800; letter-spacing: .11em; line-height: 1.25; text-transform: uppercase; }
+.ui-metric-value { margin: 6px 0 0; color: var(--institution-navy); font-size: 2rem; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+.ui-metric-detail { margin: 7px 0 0; color: #75849a; font-size: 12px; line-height: 1.4; }
+
+.ui-key-value { min-width: 0; }
+.ui-key-label { margin: 0; color: #71829a; font-size: 10px; font-weight: 800; line-height: 1.2; letter-spacing: .1em; text-transform: uppercase; }
+.ui-key-value-text { margin: 5px 0 0; color: #213b61; font-size: 12px; font-weight: 700; line-height: 1.45; overflow-wrap: anywhere; }
+
+.ui-data-note {
+  border-left: 3px solid #9fbbe0;
+  background: #f7fbff;
+  color: #5e718b;
+  padding: 9px 12px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.ui-case-panel {
+  min-width: 0;
+  border: 1px solid var(--institution-line);
+  border-radius: var(--institution-radius);
+  background: white;
+  box-shadow: 0 2px 8px rgba(24,40,63,.035), 0 10px 24px rgba(24,40,63,.035);
+}
+
+.ui-control {
+  min-width: 0;
+  min-height: var(--institution-control-height);
+  border: 1px solid #cfdbe8;
+  border-radius: 9px;
+  background: white;
+  padding: 0 12px;
+  color: #203a60;
+  font-size: 13px;
+}
+
+.ui-control:focus-visible { outline: 3px solid color-mix(in srgb, var(--institution-focus) 22%, transparent); outline-offset: 1px; border-color: var(--institution-focus); }
+
+@media (max-width: 1023px) {
+  .ui-section-heading { align-items: flex-start; }
+}
+
+@media (max-width: 639px) {
+  .ui-metric-card { min-height: 116px; padding: 14px; }
+  .ui-metric-value { font-size: 1.7rem; }
+  .ui-section-description { font-size: .78rem; }
+}
+
+/* U8 responsive interaction system: keeps institutional surfaces stable across
+   desktop, tablet and mobile without changing the Vignan visual language. */
+html, body, #root { width: 100%; max-width: 100%; }
+body { overflow-x: clip; }
+
+.ui-action-group {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ui-action-group > * { min-width: 0; }
+.ui-button svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.ui-button { white-space: nowrap; }
+.ui-button > span, .ui-button > svg { flex: 0 0 auto; }
+
+.ui-control { width: 100%; }
+textarea.ui-control { min-height: 90px; padding-top: 10px; padding-bottom: 10px; }
+
+.ui-section-heading > div:first-child { min-width: 0; }
+.ui-section-heading .ui-section-title { overflow-wrap: anywhere; }
+.ui-section-heading .ui-section-description { overflow-wrap: anywhere; }
+
+.ui-key-value-text { max-width: 100%; }
+
+.ui-card-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.ui-table-shell {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.ui-table-shell .overflow-x-auto {
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+}
+
+.ui-table-shell table { width: 100%; }
+.ui-table-shell th,
+.ui-table-shell td { vertical-align: middle; }
+
+/* Don't let long labels push filters/buttons outside their grid tracks. */
+label, th, td, p, h1, h2, h3, h4, button, a { min-width: 0; }
+
+/* Header rhythm: preserve the centered institutional identity while making
+   controls wrap safely at intermediate widths. */
+.institutional-header-inner { min-width: 0; }
+.institutional-header-brand,
+.institutional-header-title,
+.institutional-header-tools { min-width: 0; }
+
+@media (max-width: 1279px) {
+  .institutional-header-tools { justify-content: flex-start !important; }
+  .institutional-header-brand img { max-height: 52px; }
+}
+
+/* Keep the desktop header title and utility tools in separate grid tracks.
+   The utility area is also allowed to wrap rather than overlap the identity. */
+.institutional-header-tools {
+  max-width: 100%;
+  min-width: 0;
+  overflow: visible;
+  column-gap: 12px;
+  row-gap: 8px;
+}
+.institutional-header-tools > button:last-child {
+  flex: 0 0 auto;
+  margin-left: 4px;
+}
+.institutional-header-tools > div:not([id]) {
+  min-width: 0;
+}
+.institutional-header-title > div {
+  max-width: 100%;
+}
+@media (max-width: 767px) {
+  .institutional-header-tools {
+    width: 100%;
+    justify-content: flex-start !important;
+    flex-wrap: wrap;
+  }
+}
+
+
+@media (max-width: 1023px) {
+  .ui-section-heading { gap: 12px; }
+  .ui-action-group { justify-content: flex-start; }
+}
+
+@media (max-width: 767px) {
+  .ui-section-heading { display: grid; grid-template-columns: minmax(0,1fr); align-items: start; }
+  .ui-section-heading > div:last-child { justify-self: start; }
+  .ui-button { min-height: 40px; }
+  .ui-metric-card { grid-template-columns: 34px minmax(0,1fr); gap: 10px; }
+  .ui-metric-icon { width: 34px; height: 34px; }
+  .ui-table-shell { border-radius: 12px; }
+  .ui-table-shell .overflow-x-auto { padding-bottom: 2px; }
+}
+
+@media (max-width: 639px) {
+  .ui-action-group { width: 100%; }
+  .ui-action-group > .ui-button,
+  .ui-action-group > a.ui-button { flex: 1 1 auto; }
+  .ui-control { min-height: 42px; }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  /* Intermediate desktop/tablet widths get safer filter layouts instead of
+     forcing four narrow controls into one row. */
+  .u8-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .u8-filter-grid > :first-child { grid-column: 1 / -1; }
+}
+
+.u8-no-overflow { min-width: 0; max-width: 100%; overflow-x: clip; }
+.u8-center-control { display: inline-flex; align-items: center; justify-content: center; }

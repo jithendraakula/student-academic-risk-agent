@@ -1,0 +1,124 @@
+observation_id,student_id,observed_on,category,observation_text,source_role,follow_up_required,status
+OBS00001,S0001,2026-08-11,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00002,S0002,2026-08-17,attendance,Recent first-hour attendance was affected by recurring transport delays; mentor is reviewing a practical attendance plan.,mentor,True,OPEN
+OBS00003,S0003,2026-08-27,support,Student reported a short-term family responsibility affecting attendance and study time; mentor scheduled a follow-up.,mentor,True,OPEN
+OBS00004,S0004,2026-08-07,attendance,Recent first-hour attendance was affected by recurring transport delays; mentor is reviewing a practical attendance plan.,mentor,True,OPEN
+OBS00005,S0005,2026-08-06,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00006,S0006,2026-08-12,attendance,Recent first-hour attendance was affected by recurring transport delays; mentor is reviewing a practical attendance plan.,mentor,True,OPEN
+OBS00007,S0008,2026-08-19,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00008,S0009,2026-08-04,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00009,S0010,2026-08-29,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00010,S0011,2026-08-28,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00011,S0014,2026-08-22,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00012,S0019,2026-08-06,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00013,S0021,2026-08-26,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00014,S0031,2026-08-03,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00015,S0033,2026-08-06,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00016,S0051,2026-08-15,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00017,S0052,2026-08-26,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00018,S0053,2026-08-11,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00019,S0054,2026-08-22,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00020,S0055,2026-08-14,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00021,S0056,2026-08-26,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00022,S0058,2026-08-21,academic_performance,Student is finding Computer Networks difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00023,S0060,2026-08-18,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00024,S0061,2026-08-09,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00025,S0073,2026-08-16,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00026,S0077,2026-08-22,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00027,S0078,2026-08-20,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00028,S0101,2026-08-05,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00029,S0102,2026-08-08,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00030,S0103,2026-08-09,support,Student reported a short-term family responsibility affecting attendance and study time; mentor scheduled a follow-up.,mentor,True,OPEN
+OBS00031,S0104,2026-08-08,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00032,S0105,2026-08-13,attendance,Recent first-hour attendance was affected by recurring transport delays; mentor is reviewing a practical attendance plan.,mentor,True,OPEN
+OBS00033,S0106,2026-08-03,health_related,Absent for three consecutive days due to fever; mentor requested a check-in after return.,mentor,True,OPEN
+OBS00034,S0108,2026-08-28,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00035,S0111,2026-08-11,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00036,S0123,2026-08-28,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00037,S0129,2026-08-28,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00038,S0136,2026-08-29,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00039,S0151,2026-08-24,health_related,Absent for three consecutive days due to fever; mentor requested a check-in after return.,mentor,True,OPEN
+OBS00040,S0152,2026-08-25,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00041,S0153,2026-08-15,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00042,S0154,2026-08-21,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00043,S0155,2026-08-11,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00044,S0156,2026-08-16,academic_performance,Student is finding Computer Networks difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00045,S0157,2026-08-05,academic_performance,Student is finding Computer Networks difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00046,S0159,2026-08-25,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00047,S0162,2026-08-03,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00048,S0201,2026-08-25,support,Student reported a short-term family responsibility affecting attendance and study time; mentor scheduled a follow-up.,mentor,True,OPEN
+OBS00049,S0202,2026-08-12,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00050,S0203,2026-08-18,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00051,S0204,2026-08-23,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00052,S0205,2026-08-19,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00053,S0206,2026-08-05,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00054,S0207,2026-08-12,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00055,S0208,2026-08-20,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00056,S0209,2026-08-23,academic_performance,Student is finding Computer Networks difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00057,S0210,2026-08-28,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00058,S0211,2026-08-07,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00059,S0212,2026-08-17,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00060,S0223,2026-08-09,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00061,S0233,2026-09-01,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00062,S0251,2026-08-18,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00063,S0252,2026-08-20,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00064,S0253,2026-08-06,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00065,S0254,2026-08-09,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00066,S0255,2026-08-30,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00067,S0256,2026-08-13,attendance,Recent first-hour attendance was affected by recurring transport delays; mentor is reviewing a practical attendance plan.,mentor,True,OPEN
+OBS00068,S0257,2026-08-05,attendance,Recent first-hour attendance was affected by recurring transport delays; mentor is reviewing a practical attendance plan.,mentor,True,OPEN
+OBS00069,S0258,2026-08-14,attendance,Recent first-hour attendance was affected by recurring transport delays; mentor is reviewing a practical attendance plan.,mentor,True,OPEN
+OBS00070,S0260,2026-08-23,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00071,S0268,2026-09-01,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00072,S0272,2026-08-25,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00073,S0280,2026-08-11,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00074,S0281,2026-08-12,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00075,S0285,2026-08-13,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00076,S0288,2026-08-07,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00077,S0291,2026-08-04,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00078,S0297,2026-08-04,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00079,S0301,2026-08-27,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00080,S0302,2026-08-19,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00081,S0303,2026-08-09,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00082,S0304,2026-08-12,support,Student reported a short-term family responsibility affecting attendance and study time; mentor scheduled a follow-up.,mentor,True,OPEN
+OBS00083,S0305,2026-08-10,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00084,S0306,2026-08-20,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00085,S0307,2026-08-14,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00086,S0308,2026-08-25,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00087,S0310,2026-08-07,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00088,S0322,2026-08-21,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00089,S0351,2026-08-13,academic_performance,Student is finding Computer Networks difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00090,S0352,2026-08-24,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00091,S0353,2026-08-18,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00092,S0354,2026-08-22,support,Student reported a short-term family responsibility affecting attendance and study time; mentor scheduled a follow-up.,mentor,True,OPEN
+OBS00093,S0355,2026-08-15,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00094,S0356,2026-08-14,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00095,S0357,2026-08-07,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00096,S0358,2026-08-24,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00097,S0359,2026-08-09,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00098,S0362,2026-08-31,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00099,S0363,2026-08-15,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00100,S0369,2026-08-20,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00101,S0398,2026-08-06,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00102,S0401,2026-08-12,health_related,Absent for three consecutive days due to fever; mentor requested a check-in after return.,mentor,True,OPEN
+OBS00103,S0402,2026-08-24,support,Student reported a short-term family responsibility affecting attendance and study time; mentor scheduled a follow-up.,mentor,True,OPEN
+OBS00104,S0403,2026-08-25,health_related,Absent for three consecutive days due to fever; mentor requested a check-in after return.,mentor,True,OPEN
+OBS00105,S0404,2026-08-19,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00106,S0405,2026-08-24,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00107,S0406,2026-08-08,health_related,Absent for three consecutive days due to fever; mentor requested a check-in after return.,mentor,True,OPEN
+OBS00108,S0432,2026-08-09,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00109,S0437,2026-08-03,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00110,S0441,2026-08-23,improvement,Attendance and assignment completion improved after the previous mentor follow-up.,mentor,False,CLOSED
+OBS00111,S0451,2026-08-08,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00112,S0452,2026-08-05,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00113,S0453,2026-08-10,health_related,Absent for three consecutive days due to fever; mentor requested a check-in after return.,mentor,True,OPEN
+OBS00114,S0454,2026-08-31,assessment,Missed one internal assessment and two quiz attempts; subject support is being considered before the next checkpoint.,mentor,True,OPEN
+OBS00115,S0455,2026-09-01,attendance,Recent first-hour attendance was affected by recurring transport delays; mentor is reviewing a practical attendance plan.,mentor,True,OPEN
+OBS00116,S0456,2026-08-15,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00117,S0457,2026-08-07,health_related,Absent for three consecutive days due to fever; mentor requested a check-in after return.,mentor,True,OPEN
+OBS00118,S0458,2026-08-30,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00119,S0459,2026-08-19,attendance,Repeated late arrival to first-hour classes observed over the last two weeks; attendance recovery target discussed.,mentor,True,OPEN
+OBS00120,S0460,2026-08-13,academic_performance,Student is finding Database Management Systems difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00121,S0462,2026-08-14,academic_performance,Student is finding Computer Networks difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00122,S0463,2026-08-18,academic_performance,Student is finding Computer Networks difficult and has requested additional problem-solving support.,mentor,True,OPEN
+OBS00123,S0464,2026-08-07,academic_performance,Student is finding Design and Analysis of Algorithms difficult and has requested additional problem-solving support.,mentor,True,OPEN

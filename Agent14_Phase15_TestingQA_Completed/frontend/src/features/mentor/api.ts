@@ -1,0 +1,277 @@
+import api from "../../services/api";
+
+export type MentorAlertStatus = "NEW" | "ACKNOWLEDGED" | "ACTION_TAKEN" | "FOLLOW_UP" | "RESOLVED";
+
+export interface MentorAlert {
+  alert_id: string;
+  student_id: string;
+  student_name: string;
+  teacher_id: string;
+  risk_type: string;
+  risk_label?: string;
+  risk_score: number;
+  priority_score: number;
+  status: MentorAlertStatus;
+  risk_level?: string;
+  confidence?: string;
+  intervenability_score?: number;
+  course_id?: string | null;
+  suggested_action?: string;
+  created_at?: string;
+  follow_up_date?: string;
+}
+
+export interface MentorStudentRow {
+  student_id: string;
+  student_name: string;
+  roll_number?: string | null;
+  department: string;
+  batch: string;
+  section: string;
+  risk_score: number;
+  priority_score: number;
+  risk_level: string;
+  critical: boolean;
+  high_risk: boolean;
+  needs_action: boolean;
+  primary_risk: string | null;
+  risk_types: string[];
+  risk_scores: Record<string, number>;
+  priority_scores: Record<string, number>;
+  risk_breakdown: Array<{
+    risk_type: string;
+    risk_label: string;
+    risk_level: string;
+    risk_score: number;
+    priority_score: number;
+    actionable: boolean;
+    elevated: boolean;
+    course_ids: string[];
+  }>;
+  open_alerts: number;
+  new_alerts: number;
+  alerts: MentorAlert[];
+  primary_alert: MentorAlert | null;
+  case_completed?: boolean;
+  case_id?: string | null;
+  completion_category?: string | null;
+}
+
+export interface MentorWorkspaceResponse {
+  mentor_id: string;
+  mentor_name: string;
+  department?: string;
+  assigned_students: number;
+  critical_students: number;
+  high_risk_students: number;
+  high_only_students?: number;
+  elevated_risk_students?: number;
+  students_needing_action: number;
+  students_with_multiple_risks?: number;
+  risk_signals?: number;
+  actionable_risk_signals?: number;
+  open_alerts: number;
+  open_alert_students?: number;
+  new_alerts: number;
+  new_alert_students?: number;
+  completed_cases?: number;
+  risk_distribution?: Array<{ risk_type: string; risk_label: string; affected_students: number; affected_rate: number; actionable_students: number; average_priority: number }>;
+  metric_semantics?: Record<string, { meaning: string; unit: string }>;
+  risk_thresholds?: { elevated: number; critical: number };
+  alert_source?: string;
+  items: MentorStudentRow[];
+  returned_students?: number;
+  total_students?: number;
+  page?: number;
+  page_size?: number;
+  total_pages?: number;
+  risk_source: string;
+  alert_policy: { priority_threshold: number; critical_override: boolean };
+}
+
+export interface RiskResult {
+  risk_probability: number;
+  course_metrics?: {
+    internal_marks: number;
+    midterm_marks: number;
+    quiz_average: number;
+    assignment_average: number;
+    practical_marks: number;
+    course_attendance_percentage: number;
+    assignment_completion_rate: number;
+  };
+  risk_score?: number;
+  risk_level: "LOW" | "MODERATE" | "MEDIUM" | "HIGH" | "CRITICAL";
+  confidence: "LOW" | "MEDIUM" | "HIGH";
+  intervenability_score?: number;
+  priority_score?: number;
+  top_factors: Array<{ feature: string; value: string | number | boolean | null; importance?: number }>;
+}
+
+export interface RiskProfileResponse {
+  student: {
+    student_id: string;
+    roll_number?: string | null;
+    student_name: string;
+    department: string;
+    batch: string;
+    section: string;
+  };
+  student_id: string;
+  thresholds: {
+    gpa_threshold: number;
+    attendance_threshold: number;
+    current_gpa_below_threshold: boolean;
+    projected_attendance_below_threshold: boolean;
+    source: string;
+  };
+  student_metrics: {
+    current_gpa: number;
+    current_cgpa: number;
+    attendance: number;
+    backlogs: number;
+    internal_marks: number;
+    assignment_completion: number;
+    absence_rate: number;
+    semester: number;
+    academic_year: string;
+    checkpoint_week: number;
+  };
+  risks: {
+    course_failure: Array<RiskResult & { course_id: string; course_name: string }>;
+    backlog: RiskResult;
+    gpa_threshold: RiskResult;
+    attendance_shortage: RiskResult;
+    discontinuation: RiskResult;
+  };
+  case_management?: {
+    open_alerts: number;
+    items: Array<{ alert_id: string; risk_type: string; risk_label?: string; risk_level?: string; priority_score: number; status: string; suggested_action?: string; follow_up_date?: string | null; course_id?: string | null }>;
+    case_completed?: boolean;
+    completed_at?: string | null;
+    completed_by?: string | null;
+    source: string;
+  };
+  current_status: {
+    risk_score: number;
+    highest_risk_score?: number;
+    priority_score: number;
+    risk_level: string;
+    primary_risk: string | null;
+    needs_action: boolean;
+    source: string;
+  };
+  academic_context: {
+    observation_count: number;
+    active_follow_up_count: number;
+    primary_context_intent: string | null;
+    primary_action_path: { intent: string; intent_label: string; recommended_action: string; count: number } | null;
+    intent_distribution: Array<{ intent: string; count: number }>;
+    observations: Array<{
+      observation_id: string;
+      observed_on: string;
+      category: string;
+      observation_text: string;
+      source_role: string;
+      follow_up_required: boolean;
+      status: string;
+      intent: string;
+      intent_label: string;
+      impact_area: string;
+      urgency: string;
+      action_type: string;
+      recommended_action: string;
+      support_only: boolean;
+      confidence: number;
+      classifier: string;
+      evidence_basis: string[];
+    }>;
+    method: string;
+  };
+}
+
+export async function getMentorWorkspace(params?: {
+  q?: string;
+  risk_type?: string;
+  severity?: string;
+  status?: string;
+  needs_action?: boolean;
+  page?: number;
+  page_size?: number;
+}) {
+  const response = await api.get<MentorWorkspaceResponse>("/mentor/students", { params });
+  return response.data;
+}
+
+export async function getMentorSummary() {
+  const response = await api.get<Omit<MentorWorkspaceResponse, "items">>("/mentor/summary");
+  return response.data;
+}
+
+export async function getWatchlist() {
+  const response = await api.get<{ items: MentorAlert[]; assigned_students: number; open_alerts: number }>("/mentor/watchlist");
+  return response.data;
+}
+
+export async function getAlerts() {
+  const response = await api.get<{ items: MentorAlert[] }>("/mentor/alerts");
+  return response.data.items;
+}
+
+export async function markStudentCaseComplete(studentId: string, payload?: { action_category?: string; completion_reason?: string; notes?: string; follow_up_outcome?: string }) {
+  const response = await api.post<{ student_id: string; case_id: string; status: string; resolved_alerts: number; alert_ids: string[]; completed_at: string; completion_category?: string; completion_reason?: string | null }>(`/interventions/student/${studentId}/complete`, payload ?? {});
+  return response.data;
+}
+
+export async function getRiskProfile(studentId: string) {
+  const response = await api.get<RiskProfileResponse>(`/predictions/student/${studentId}`);
+  return response.data;
+}
+
+export async function acknowledgeAlert(alertId: string) {
+  const response = await api.post<MentorAlert>(`/mentor/alerts/${alertId}/acknowledge`);
+  return response.data;
+}
+
+export async function updateIntervention(alertId: string, status: Exclude<MentorAlertStatus, "NEW">, notes: string, followUpDate?: string) {
+  const response = await api.patch(`/interventions/${alertId}`, { status, notes, follow_up_date: followUpDate || null });
+  return response.data as MentorAlert;
+}
+
+export interface WhatIfRequest {
+  attendance_percentage?: number;
+  gpa?: number;
+  backlog_count?: number;
+  assignment_completion_rate?: number;
+  course?: {
+    course_id: string;
+    internal_marks?: number;
+    midterm_marks?: number;
+    quiz_average?: number;
+    assignment_average?: number;
+    practical_marks?: number;
+    course_attendance_percentage?: number;
+    assignment_completion_rate?: number;
+  };
+}
+
+export interface WhatIfResponse {
+  simulation: {
+    persistent: boolean;
+    source: string;
+    semester: number;
+    checkpoint_week: number;
+    changes: Record<string, unknown>;
+    scenario_summary?: { factors: string[]; factor_count: number; mode: string };
+  };
+  student: RiskProfileResponse["student"];
+  baseline: { summary: { risk_score: number; priority_score: number; primary_risk: string | null; risk_level: string }; risks: RiskProfileResponse["risks"] };
+  simulated: { summary: { risk_score: number; priority_score: number; primary_risk: string | null; risk_level: string }; risks: RiskProfileResponse["risks"] };
+  changes: Record<string, { risk_score_delta: number; priority_score_delta: number; risk_level_changed: boolean }>;
+  interpretation: { overall_priority_delta: number; improved: boolean; warning: string };
+}
+
+export async function runWhatIf(studentId: string, payload: WhatIfRequest) {
+  const response = await api.post<WhatIfResponse>(`/what-if/student/${studentId}`, payload);
+  return response.data;
+}

@@ -1,0 +1,26 @@
+department_id,department_name,course_id,course_name,semester,course_credits,passing_marks,attendance_threshold,gpa_threshold
+DEPT_CSE,Computer Science and Engineering,CSE101,Programming Fundamentals,1,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE102,Engineering Mathematics I,1,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE103,Engineering Physics,1,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE104,Engineering Drawing,1,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE105,Communication Skills,1,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE201,Data Structures,2,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE202,Engineering Mathematics II,2,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE203,Digital Logic Design,2,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE204,Object Oriented Programming,2,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE205,Environmental Science,2,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE301,Database Systems,3,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE302,Computer Organization,3,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE303,Discrete Mathematics,3,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE304,Operating Systems Fundamentals,3,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE305,Web Technologies,3,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE401,Design and Analysis of Algorithms,4,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE402,Computer Networks,4,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE403,Theory of Computation,4,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE404,Software Engineering,4,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE405,Probability and Statistics,4,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE501,Operating Systems,5,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE502,Database Management Systems,5,4,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE503,Design and Analysis of Algorithms,5,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE504,Computer Networks,5,3,40,75.0,7.0
+DEPT_CSE,Computer Science and Engineering,CSE505,Software Engineering,5,3,40,75.0,7.0

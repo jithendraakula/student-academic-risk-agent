@@ -1,0 +1,8 @@
+teacher_id,teacher_name,role,department,email
+T001,Mentor One,mentor,DEPT_CSE,mentor.one.cse@vignan.ac.in
+T002,Mentor Two,mentor,DEPT_CSE,mentor.two.cse@vignan.ac.in
+T003,Mentor Three,mentor,DEPT_CSE,mentor.three.cse@vignan.ac.in
+T004,Mentor Four,mentor,DEPT_CSE,mentor.four.cse@vignan.ac.in
+T005,Mentor Five,mentor,DEPT_CSE,mentor.five.cse@vignan.ac.in
+H001,CSE HOD,hod,DEPT_CSE,hod.cse@vignan.ac.in
+D001,Dean,dean,,dean@vignan.ac.in

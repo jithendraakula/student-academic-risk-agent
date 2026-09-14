@@ -1,0 +1,118 @@
+{
+  "model_key": "backlog",
+  "model": "Calibrated RandomForestClassifier",
+  "base_model": "RandomForestClassifier",
+  "calibration_method": "sigmoid",
+  "calibration_cv": 3,
+  "target": "End-of-semester new backlog",
+  "target_column": "new_backlog",
+  "train_semesters": [
+    1,
+    2,
+    3
+  ],
+  "held_out_semester": 4,
+  "train_samples": 1500,
+  "test_samples": 500,
+  "positive_train": 118,
+  "negative_train": 1382,
+  "positive_test": 44,
+  "negative_test": 456,
+  "feature_columns": [
+    "department",
+    "batch",
+    "section",
+    "current_gpa",
+    "current_cgpa",
+    "previous_gpa",
+    "previous_cgpa",
+    "gpa_change",
+    "internal_marks_average",
+    "midterm_marks_average",
+    "quiz_average",
+    "assignment_average",
+    "practical_marks_average",
+    "assessment_trend",
+    "assignment_completion_rate",
+    "current_attendance_percentage",
+    "attendance_last_30_days",
+    "attendance_trend",
+    "consecutive_absence_days",
+    "total_absent_days",
+    "recent_absence_rate",
+    "projected_final_attendance",
+    "current_backlog_count",
+    "previous_backlog_count",
+    "total_historical_backlogs",
+    "new_backlogs_last_semester",
+    "repeated_backlog_subject_count",
+    "backlog_growth_rate",
+    "assessment_participation_rate",
+    "recent_engagement_score",
+    "engagement_trend",
+    "fee_status",
+    "fee_arrears_amount",
+    "payment_delay_days",
+    "installment_pending",
+    "prolonged_absence_flag",
+    "prolonged_absence_days",
+    "academic_decline_flag",
+    "repeated_backlog_flag",
+    "engagement_decline_flag"
+  ],
+  "transformed_feature_count": 54,
+  "decision_threshold": 0.12000000000000001,
+  "threshold_selection": "20% training-only validation split optimized for F1 after probability calibration",
+  "top_global_features": [
+    {
+      "feature": "numeric__current_backlog_count",
+      "importance": 0.0647
+    },
+    {
+      "feature": "numeric__new_backlogs_last_semester",
+      "importance": 0.062368
+    },
+    {
+      "feature": "numeric__backlog_growth_rate",
+      "importance": 0.053531
+    },
+    {
+      "feature": "numeric__gpa_change",
+      "importance": 0.050429
+    },
+    {
+      "feature": "numeric__assignment_average",
+      "importance": 0.04873
+    },
+    {
+      "feature": "numeric__current_gpa",
+      "importance": 0.046558
+    },
+    {
+      "feature": "numeric__practical_marks_average",
+      "importance": 0.045333
+    },
+    {
+      "feature": "numeric__quiz_average",
+      "importance": 0.044835
+    },
+    {
+      "feature": "numeric__midterm_marks_average",
+      "importance": 0.044385
+    },
+    {
+      "feature": "numeric__previous_gpa",
+      "importance": 0.042112
+    }
+  ],
+  "trained_at": "2026-09-13T10:01:17.783007+00:00",
+  "accuracy": 0.852,
+  "balanced_accuracy": 0.6519,
+  "precision": 0.2727,
+  "recall": 0.4091,
+  "f1": 0.3273,
+  "roc_auc": 0.698,
+  "brier_score": 0.0732,
+  "holdout_positive_rate": 0.088,
+  "holdout_mean_predicted_probability": 0.0836
+}
