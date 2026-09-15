@@ -21,11 +21,17 @@ api.interceptors.response.use(
     const isAuthLifecycleRequest = url.includes("/auth/login") || url.includes("/auth/logout");
 
     if (status === 401 && !isAuthLifecycleRequest && typeof window !== "undefined") {
+      const authRedirectKey = "agent14_auth_redirected";
+      const alreadyRedirecting = sessionStorage.getItem(authRedirectKey) === "1";
       sessionStorage.removeItem("agent14_token");
       sessionStorage.removeItem("agent14_user");
-      const next = `${window.location.pathname}${window.location.search}`;
-      const loginUrl = next === "/login" ? "/login" : `/login?reason=session_expired&next=${encodeURIComponent(next)}`;
-      if (window.location.pathname !== "/login") window.location.assign(loginUrl);
+
+      if (!alreadyRedirecting && window.location.pathname !== "/login") {
+        sessionStorage.setItem(authRedirectKey, "1");
+        const next = `${window.location.pathname}${window.location.search}`;
+        const loginUrl = next === "/login" ? "/login" : `/login?reason=session_expired&next=${encodeURIComponent(next)}`;
+        window.location.assign(loginUrl);
+      }
     }
 
     return Promise.reject(error);

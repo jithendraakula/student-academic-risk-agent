@@ -17,14 +17,13 @@ Backend `.env` values:
 ```env
 AI_PROVIDER=gemini
 AI_API_KEY=your_provider_key
-AI_MODEL=gemini-3.8-flash
+AI_MODEL=gemini-3.6-flash
 AI_TIMEOUT_SECONDS=25
 ```
 
-Supported providers in this phase:
+Supported provider in this phase:
 
 - `gemini` — Gemini OpenAI-compatible REST endpoint.
-- `xai` — xAI/Grok OpenAI-compatible chat-completions endpoint.
 
 The implementation uses Python's standard-library HTTP client, so the core backend does not require an additional LLM SDK.
 

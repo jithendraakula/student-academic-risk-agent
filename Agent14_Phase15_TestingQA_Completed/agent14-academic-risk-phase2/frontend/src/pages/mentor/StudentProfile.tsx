@@ -19,6 +19,38 @@ const RISK_META: Record<string, { label: string; description: string }> = {
   course_failure: { label: "Course failure", description: "Course-specific risk of failing a current subject." },
 };
 
+function describeCopilotError(requestError: any) {
+  const status = requestError?.response?.status;
+  const detail = String(requestError?.response?.data?.detail ?? "").toLowerCase();
+
+  if (requestError?.code === "ERR_NETWORK") {
+    return "Unable to reach the AI service. Please try again.";
+  }
+  if (status === 401 || status === 403 || /authentication failed|unauthorized/i.test(detail)) {
+    return "AI provider authentication failed. Please contact the administrator.";
+  }
+  if (status === 429 || /rate[- ]limited|quota|too many requests/i.test(detail)) {
+    return "AI assistance is temporarily rate-limited. Please try again shortly.";
+  }
+  if (/not configured/i.test(detail)) {
+    return "AI assistance is not configured. Please contact the administrator.";
+  }
+  if (/unsupported (ai )?provider|provider configuration is invalid/i.test(detail)) {
+    return "AI provider configuration is invalid. Please contact the administrator.";
+  }
+  if (status === 504 || /timed out|did not respond|connection timed out|unable to reach the ai service/i.test(detail)) {
+    return "The AI response timed out or could not be reached. Please try again.";
+  }
+  if (status === 502 || /unexpected response|non-json|invalid copilot payload/i.test(detail)) {
+    return "The AI returned an unexpected response. Please try again.";
+  }
+  if (status === 503 || /temporarily unavailable/i.test(detail)) {
+    return "AI service is temporarily unavailable. Please try again.";
+  }
+
+  return "AI service is temporarily unavailable. Please try again.";
+}
+
 function riskLabel(level: string) {
   const normalized = level?.toUpperCase();
   return normalized === "MEDIUM" ? "MODERATE" : normalized || "LOW";
@@ -280,7 +312,7 @@ export default function StudentProfile() {
       const result = await runMentorCopilot(studentId, intent, intent === "what_if_explanation" && lastWhatIfPayload ? { what_if: lastWhatIfPayload } : undefined);
       setCopilot(result);
     } catch (requestError: any) {
-      setCopilotError(requestError?.response?.data?.detail || "Mentor AI is unavailable. Configure the backend AI provider when you are ready.");
+      setCopilotError(describeCopilotError(requestError));
     } finally { setCopilotLoading(false); }
   }
 

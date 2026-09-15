@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(newToken);
     sessionStorage.setItem("agent14_user", JSON.stringify(newUser));
     sessionStorage.setItem("agent14_token", newToken);
+    sessionStorage.removeItem("agent14_auth_redirected");
   }
 
   function logout() {
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     sessionStorage.removeItem("agent14_user");
     sessionStorage.removeItem("agent14_token");
+    sessionStorage.removeItem("agent14_auth_redirected");
   }
 
   return (

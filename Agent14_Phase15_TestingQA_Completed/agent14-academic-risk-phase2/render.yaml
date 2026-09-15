@@ -27,9 +27,13 @@ services:
       - key: ENABLE_DOCS
         value: "false"
       - key: AI_PROVIDER
-        value: xai
-      - key: XAI_API_KEY
+        value: gemini
+      - key: AI_API_KEY
         sync: false
+      - key: AI_MODEL
+        value: gemini-3.6-flash
+      - key: AI_TIMEOUT_SECONDS
+        value: "25"
       - key: AI_INCLUDE_STUDENT_IDENTIFIERS
         value: "false"
       - key: AI_ALLOWED_EXTERNAL_DATA

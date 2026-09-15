@@ -45,11 +45,11 @@ The mentor student profile includes an intent-based AI Copilot for current-risk 
 ```env
 AI_PROVIDER=gemini
 AI_API_KEY=your_provider_key
-AI_MODEL=gemini-3.8-flash
+AI_MODEL=gemini-3.6-flash
 AI_TIMEOUT_SECONDS=25
 ```
 
-`xai` is also supported with `AI_MODEL=grok-4.6`. The LLM is grounded in canonical `RiskPrediction` and priority-engine outputs; it does not calculate risk. See `docs/PHASE_10_MENTOR_AI.md`.
+The LLM is grounded in canonical `RiskPrediction` and priority-engine outputs; it does not calculate risk. See `docs/PHASE_10_MENTOR_AI.md`.
 
 
 ## Phase 12 — Notifications

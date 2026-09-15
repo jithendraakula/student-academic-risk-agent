@@ -84,8 +84,7 @@ export default function MentorDashboard() {
   useEffect(() => {
     const stop = subscribeToCaseWorkUpdates(() => void loadWorkspace());
     const stopLive = subscribeToLiveCaseWorkUpdates(() => void loadWorkspace());
-    const timer = window.setInterval(() => void loadWorkspace(), 15000);
-    return () => { stop(); stopLive(); window.clearInterval(timer); };
+    return () => { stop(); stopLive(); };
   }, [search, riskFilter, severityFilter, actionOnly, page]);
 
   async function handleAcknowledge(alertId: string) {
