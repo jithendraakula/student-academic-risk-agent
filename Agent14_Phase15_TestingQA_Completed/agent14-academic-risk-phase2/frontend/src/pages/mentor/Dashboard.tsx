@@ -54,8 +54,8 @@ export default function MentorDashboard() {
   const [completionTarget, setCompletionTarget] = useState<MentorStudentRow | null>(null);
   const [page, setPage] = useState(1);
 
-  async function loadWorkspace() {
-    setLoading(true);
+  async function loadWorkspace(showLoading = false) {
+    if (showLoading) setLoading(true);
     try {
       const data = await getMentorWorkspace({
         q: search || undefined,
@@ -70,14 +70,14 @@ export default function MentorDashboard() {
     } catch {
       setError("The mentor workspace could not be loaded. Check that the backend is running.");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }
 
   useEffect(() => { setPage(1); }, [search, riskFilter, severityFilter, actionOnly]);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => void loadWorkspace(), 160);
+    const timer = window.setTimeout(() => void loadWorkspace(true), 160);
     return () => window.clearTimeout(timer);
   }, [search, riskFilter, severityFilter, actionOnly, page]);
 
